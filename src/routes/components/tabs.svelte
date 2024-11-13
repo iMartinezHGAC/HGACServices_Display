@@ -7,12 +7,12 @@
 </script>
 
 {#if color==="gray"}
-  <button
+  <a
     class={`flex items-start justify-center px-5 h-16 py-3 mx-2 rounded-md font-staatliches bg-hgac-gray`}
-    onclick={()=> tab.setTab(tabText)}
+    href="/overview"
   >
     {tabText}
-  </button>
+  </a>
 {:else if color==="green"}
   <button
     class={`flex items-start justify-center px-5 h-16 py-3 mx-2 rounded-md font-staatliches bg-hgac-green`}
