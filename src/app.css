@@ -1,3 +1,21 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .flexy {
+    @apply flex items-center justify-center
+  }
+}
+
+@layer utilities {
+  .small-caps {
+    font-variant: small-caps;
+  }
+  .all-small-caps {
+    font-variant: all-small-caps;
+  }
+  .titling-caps {
+    font-variant: titling-caps;
+  }
+}
