@@ -11,8 +11,9 @@ let human_readable = $derived(jurisdiction
 
 </script>
 
-<div class="fixed flexy h-28 w-screen top-0 bg-gradient-to-l from-hgac-red from-10% via-amber-300 via-25% to-amber-100 shadow-lg shadow-slate-500">
-  <p class="fixed left-36 text-2xl font-semibold font-yeseva small-caps text-slate-700">{human_readable}</p>
+<div class="fixed flexy h-28 w-screen top-0 bg-hgac-slate shadow-lg shadow-slate-500">
+  <p class="fixed left-36 text-2xl font-medium font-metropolis small-caps text-slate-200 select-none">{human_readable}</p>
+
   <img src={county_logo} alt="harris" class="fixed h-24 left-4">
   <img src={logo} alt="HGAC" class="fixed h-24 right-4">
 <div class="fixed flexy top-16">

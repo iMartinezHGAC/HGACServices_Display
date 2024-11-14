@@ -5,8 +5,8 @@ let {header}: {header: string} = $props()
 </script>
 
 
-<div class="flexy flex-col w-1/4 h-full bg-gradient-to-b from-slate-600 to-hgac-slate">
-  <p class="font-staatliches text-lg text-slate-200">
+<div class="flexy flex-col w-1/4 h-full bg-slate-600 ">
+  <p class="font-staatliches text-lg text-slate-200 mb-4">
   {header}
   </p>
   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">

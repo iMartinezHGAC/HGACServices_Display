@@ -19,6 +19,7 @@
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
+		"@types/d3": "^7.4.3",
 		"@types/eslint": "^9.6.0",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.7.0",
@@ -38,9 +39,11 @@
 	},
 	"dependencies": {
 		"@fontsource-variable/fraunces": "^5.1.0",
+		"@fontsource/metropolis": "^5.1.0",
 		"@fontsource/patua-one": "^5.1.0",
 		"@fontsource/poppins": "^5.1.0",
 		"@fontsource/staatliches": "^5.1.0",
-		"@fontsource/yeseva-one": "^5.1.0"
+		"@fontsource/yeseva-one": "^5.1.0",
+		"d3": "^7.9.0"
 	}
 }

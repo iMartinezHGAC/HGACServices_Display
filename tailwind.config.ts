@@ -13,6 +13,7 @@ export default {
         yeseva: ['Yeseva One', 'system-ui'],
         fraunces: ['Fraunces Variable', 'serif'],
         patua: ['Patua One', 'system-ui'],
+        metropolis: ['Metropolis', 'sans-serif'],
       },
       colors: {
         'hgac-red': '#C6093B',
