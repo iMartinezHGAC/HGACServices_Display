@@ -9,15 +9,21 @@ import StatDisplay from "../components/statDisplay.svelte";
 
 const donut_data = [{name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
 const donut_data2 = [{name: 'Harris', value: 200}, {name: 'Fort Bend', value: 300}, {name: 'Waller', value: 350}]
+const donut_data3 = [
+    {name: 'Harris', value: 270}, 
+    {name: 'Fort Bend', value: 127}, 
+    {name: 'Waller', value: 188},
+    {name: 'Montgomery', value: 72}
+  ]
 const bar_data = [
-    { letter: 'A', frequency: 25 },
-    { letter: 'Montgomery', frequency: 30 },
-    { letter: 'Waller', frequency: 55 },
-    { letter: 'Fort Bend', frequency: 65 },
-    { letter: 'C', frequency: 15 },
-    { letter: 'Galveston', frequency: 40 },
-    { letter: 'B', frequency: 20 },
-    { letter: 'Harris', frequency: 90 }
+    { juris: 'A', frequency: 25 },
+    { juris: 'Montgomery', frequency: 30 },
+    { juris: 'Waller', frequency: 55 },
+    { juris: 'Fort Bend', frequency: 65 },
+    { juris: 'C', frequency: 15 },
+    { juris: 'Galveston', frequency: 40 },
+    { juris: 'B', frequency: 20 },
+    { juris: 'Harris', frequency: 90 }
   ];
 
 const area_data  = [
@@ -50,13 +56,9 @@ const stackbar_data = [
   ];
 </script>
 
-{#snippet graphDisplay(text: string)}
-  <div class="flex items-center justify-center w-1/2 h-full px-12 border-2 border-slate-200">
-    {text}
-  </div>
-{/snippet}
+<BarChart data={bar_data}/>
 
-
+<!--
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-5/6">
   <div class="w-5/6 h-1/6 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
     <p class="font-poppins font-medium py-4 w-3/4">
@@ -66,7 +68,7 @@ const stackbar_data = [
   <div class="w-5/6 h-2/6 flexy flex-row">
     <StatDisplay header="Total Funds Received" data={donut_data}/>
     <StatDisplay header="Services Received" data={donut_data2}/>
-    <StatDisplay header="Total Participation" data={donut_data}/>
+    <StatDisplay header="Total Participation" data={donut_data3}/>
     <StatDisplay header="Transportation Projects" data={donut_data}/>
   </div>
   <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 flexy">
@@ -74,3 +76,4 @@ const stackbar_data = [
     <StackedBarChart data={stackbar_data} yLabel="Population"/>
   </div>
 </div>
+-->

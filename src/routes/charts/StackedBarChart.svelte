@@ -153,7 +153,7 @@
 <style>
   svg {
     @apply
-    w-1/2 h-auto
+    w-full h-auto
   }
 
   .tooltip {

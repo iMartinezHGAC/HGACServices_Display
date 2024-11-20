@@ -1,89 +1,74 @@
 <script>
-  import { onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  let {data = []} = $props(); // Data passed as a prop
-
-  // Chart dimensions
-  let width = 928;
-  let height = 500;
+  // Props
+  let {data = [], width = 928, height = 500} = $props();
   const marginTop = 20;
   const marginRight = 0;
   const marginBottom = 30;
-  const marginLeft = 40;
+  const marginLeft = 50;
 
-  onMount(() => {
-    // Create the horizontal scale and axis
-    const x = d3.scaleBand()
-      .domain(d3.sort(data, d => -d.frequency).map(d => d.letter))
+  // Reactive variables
+
+  // Set up the scales and axis on mount
+    // Horizontal scale (band scale)
+  let x = $derived(d3.scaleBand()
+      .domain(data.map(d => d.juris))
       .range([marginLeft, width - marginRight])
-      .padding(0.1);
+      .padding(0.1));
 
-    const xAxis = d3.axisBottom(x).tickSizeOuter(0);
-
-    // Create the vertical scale
-    const y = d3.scaleLinear()
+    // Vertical scale (linear scale)
+  let y = $derived(d3.scaleLinear()
       .domain([0, d3.max(data, d => d.frequency)]).nice()
-      .range([height - marginBottom, marginTop]);
+      .range([height - marginBottom, marginTop]));
 
-    // Select the SVG container
-    const svg = d3.select('#zoomable-bar-chart')
-      .attr('viewBox', [0, 0, width, height])
-      .attr('width', width)
-      .attr('height', height)
-      .attr('style', 'max-width: 100%; height: auto;')
-      .call(zoom);
+    // Axis for x
+  let xAxis = $derived(d3.axisBottom(x).tickSizeOuter(0));
 
-    // Append bars
-    svg.append('g')
-      .attr('class', 'bars')
-      .attr('fill', 'steelblue')
-      .selectAll('rect')
-      .data(data)
-      .join('rect')
-      .attr('x', d => x(d.letter))
-      .attr('y', d => y(d.frequency))
-      .attr('height', d => y(0) - y(d.frequency))
-      .attr('width', x.bandwidth());
+    // Axis for y
+  let yAxis = $derived(d3.axisLeft(y).ticks(5));
 
-    // Append axes
-    svg.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0,${height - marginBottom})`)
-      .call(xAxis);
-
-    svg.append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', `translate(${marginLeft},0)`)
-      .call(d3.axisLeft(y))
-      .call(g => g.select('.domain').remove());
-
-    // Zoom function
-    function zoom(svg) {
-      const extent = [
-        [marginLeft, marginTop], 
-        [width - marginRight, height - marginTop]
-      ];
-
-      svg.call(d3.zoom()
-        .scaleExtent([1, 8])
-        .translateExtent(extent)
-        .extent(extent)
-        .on('zoom', zoomed));
-
-      function zoomed(event) {
-        x.range([marginLeft, width - marginRight].map(d => event.transform.applyX(d)));
-        svg.selectAll('.bars rect')
-          .attr('x', d => x(d.letter))
-          .attr('width', x.bandwidth());
-        svg.selectAll('.x-axis')
-          .call(xAxis);
-      }
-    }
-  });
+  // Zoom function for handling the zooming behavior
+  function zoomed(event) {
+    x.range([marginLeft, width - marginRight].map(d => event.transform.applyX(d)));
+  }
 </script>
 
-<svg id="zoomable-bar-chart"></svg>
+<svg id="zoomable-bar-chart" 
+     width={width} 
+     height={height} 
+     viewBox={`0 0 ${width} ${height}`} 
+     style="max-width: 100%; height: auto;" 
+     on:wheel|passive={zoomed}>
+
+  <!-- x-axis -->
+  <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
+    {#each x.domain() as d}
+      <g transform={`translate(${x(d)},0)`}>
+        <text dy="0.71em" text-anchor="middle" y="10">{d}</text>
+      </g>
+    {/each}
+  </g>
+
+ <!-- Y-axis group -->
+  <g transform={`translate(${marginLeft},0)`} class="y-axis">
+    {#each y.ticks(5) as tick}
+      <g transform={`translate(0,${y(tick)})`}>
+        <line x2={width - marginRight} stroke="black" />
+        <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
+      </g>
+    {/each}
+  </g>
+
+  <!-- Bars -->
+  {#each data as d}
+    <rect x={x(d.juris)} 
+          y={y(d.frequency)} 
+          width={x.bandwidth()} 
+          height={y(0) - y(d.frequency)} 
+          fill="steelblue" />
+  {/each}
+</svg>
 
 <style>
   svg {
