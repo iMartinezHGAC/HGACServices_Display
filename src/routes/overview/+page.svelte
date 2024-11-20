@@ -33,15 +33,18 @@ const area_data  = [
   ];
 
 const stackbar_data = [
-    { state: 'California', age: '18-24', population: 1000 },
-    { state: 'California', age: '25-34', population: 1500 },
-    { state: 'California', age: '35-44', population: 1700 },
-    { state: 'Texas', age: '18-24', population: 800 },
-    { state: 'Texas', age: '25-34', population: 1200 },
-    { state: 'Texas', age: '35-44', population: 1700 },
-    { state: 'New York', age: '18-24', population: 1100 },
-    { state: 'New York', age: '25-34', population: 1300 },
-    { state: 'New York', age: '35-44', population: 1700 },
+    { state: 'Harris', age: '18-24', population: 1000 },
+    { state: 'Harris', age: '25-34', population: 1500 },
+    { state: 'Harris', age: '35-44', population: 2700 },
+    { state: 'Harris', age: '45-54', population: 1200 },
+    { state: 'Fort Bend', age: '18-24', population: 800 },
+    { state: 'Fort Bend', age: '25-34', population: 1200 },
+    { state: 'Fort Bend', age: '35-44', population: 1700 },
+    { state: 'Fort Bend', age: '45-54', population: 1000 },
+    { state: 'Waller', age: '18-24', population: 1100 },
+    { state: 'Waller', age: '25-34', population: 1500 },
+    { state: 'Waller', age: '35-44', population: 1300 },
+    { state: 'Waller', age: '45-54', population: 1100 },
     // More data entries...
   ];
 </script>
@@ -53,7 +56,7 @@ const stackbar_data = [
 {/snippet}
 
 
-<StackedBarChart data={stackbar_data}/>
+<StackedBarChart data={stackbar_data} yLabel="Population"/>
 
 <!--
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-24 h-screen w-5/6">

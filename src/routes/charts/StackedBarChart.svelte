@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  let {data = []} = $props(); // Data passed as a prop
+  let {data = [], yLabel = ""} = $props(); // Data passed as a prop
 
   // Chart dimensions
   let width = 928;
@@ -10,9 +10,11 @@
   const marginTop = 10;
   const marginRight = 20;
   const marginBottom = 20;
-  const marginLeft = 40;
+  const marginLeft = 50;
   const legendMargin = 50;
+  const legendItemHeight = 20;
 
+  let tooltip
  onMount(() => {
     // Group the data by 'state' and extract the unique 'age' categories
     const groups = d3.groups(data, d => d.state);
@@ -60,8 +62,10 @@
       .attr('viewBox', [0, 0, width, height])
       .attr('style', 'max-width: 100%; height: auto;');
 
+
+
     // Append a group for each series, and a rect for each element in the series
-    svg.append('g')
+     svg.append('g')
       .selectAll()
       .data(series)
       .join('g')
@@ -73,8 +77,18 @@
       .attr('y', d => y(d[1]))
       .attr('height', d => y(d[0]) - y(d[1]))
       .attr('width', x.bandwidth())
+      .on('mouseenter', function(event, d) {
+        const mousePos = d3.pointer(event);
+        tooltip
+          .style('visibility', 'visible')
+          .style('top', `${mousePos[1] + 10}px`)  // Position below the bar
+          .style('left', `${mousePos[0] + 10}px`) // Position to the right of the bar
+      })
+      .on('mouseleave', function() {
+        tooltip.style('visibility', 'hidden');
+      })
       .append('title')
-      .text(d => `${d.data[0]} ${d.key}\n${formatValue(d.data[1].get(d.key).population)}`);
+      .text(d => `Age: ${d.key}\nPopulation: ${formatValue(d.data[1].get(d.key).population)}`);
 
     // Append the horizontal axis
     svg.append('g')
@@ -88,11 +102,21 @@
       .call(d3.axisLeft(y).ticks(null, "s"))
       .call(g => g.selectAll('.domain').remove());
 
+    // Y-LABEL
+    svg.append('text')
+      .attr('x', -(height / 2)) // Rotate and place the label
+      .attr('y', marginLeft - 35) // Vertical position
+      .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '0.8rem')
+      .attr('font-weight', '600')
+      .attr('font-family', 'Metropolis')
+      .attr('fill', 'currentColor')
+      .text(yLabel);
+
      // Add the color legend
     const legend = svg.append('g')
       .attr('transform', `translate(${width - marginRight - legendMargin}, ${marginTop})`);
-
-    const legendItemHeight = 20;
 
     // Add color swatches and labels
     legend.selectAll('rect')
@@ -113,6 +137,12 @@
       .attr('font-size', 12)
       .text(d => d); // Use the age category name as the label
 
+    tooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('pointer-events', 'none');
     // Return the color scale as part of the chart's properties (for the legend).
     return { scales: { color } };
   });
@@ -124,6 +154,11 @@
   svg {
     @apply
     w-1/2 h-auto
+  }
+
+  .tooltip {
+    @apply
+    absolute invisible bg-black text-white px-2 py-1 rounded text-sm
   }
 </style>
 
