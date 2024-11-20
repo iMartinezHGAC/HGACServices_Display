@@ -7,7 +7,7 @@
 import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
 
-const test_data = [{name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
+const donut_data = [{name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
 const bar_data = [
     { letter: 'A', frequency: 25 },
     { letter: 'Montgomery', frequency: 30 },
@@ -35,11 +35,14 @@ const area_data  = [
 const stackbar_data = [
     { state: 'California', age: '18-24', population: 1000 },
     { state: 'California', age: '25-34', population: 1500 },
+    { state: 'California', age: '35-44', population: 1700 },
     { state: 'Texas', age: '18-24', population: 800 },
     { state: 'Texas', age: '25-34', population: 1200 },
+    { state: 'Texas', age: '35-44', population: 1700 },
     { state: 'New York', age: '18-24', population: 1100 },
     { state: 'New York', age: '25-34', population: 1300 },
-    // Add more data points...
+    { state: 'New York', age: '35-44', population: 1700 },
+    // More data entries...
   ];
 </script>
 
