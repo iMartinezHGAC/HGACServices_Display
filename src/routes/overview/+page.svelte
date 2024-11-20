@@ -1,8 +1,46 @@
 <script lang="ts">
+	import BarChart from "../charts/BarChart.svelte";
+	import DonutChart from "../charts/DonutChart.svelte";
+	import FilledAreaChart from "../charts/FilledAreaChart.svelte";
 	import StackedBarChart from "../charts/StackedBarChart.svelte";
 	import Indicator from "../components/indicator.svelte";
 import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
+
+const test_data = [{name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
+const bar_data = [
+    { letter: 'A', frequency: 25 },
+    { letter: 'Montgomery', frequency: 30 },
+    { letter: 'Waller', frequency: 55 },
+    { letter: 'Fort Bend', frequency: 65 },
+    { letter: 'C', frequency: 15 },
+    { letter: 'Galveston', frequency: 40 },
+    { letter: 'B', frequency: 20 },
+    { letter: 'Harris', frequency: 90 }
+  ];
+
+const area_data  = [
+    { date: new Date('2021-01-01'), industry: 'Industry A', unemployed: 500 },
+    { date: new Date('2021-01-01'), industry: 'Industry B', unemployed: 300 },
+    { date: new Date('2021-01-01'), industry: 'Industry C', unemployed: 700 },
+    { date: new Date('2021-02-01'), industry: 'Industry A', unemployed: 450 },
+    { date: new Date('2021-02-01'), industry: 'Industry B', unemployed: 350 },
+    { date: new Date('2021-02-01'), industry: 'Industry C', unemployed: 200 },
+    { date: new Date('2021-03-01'), industry: 'Industry A', unemployed: 600 },
+    { date: new Date('2021-03-01'), industry: 'Industry B', unemployed: 200 },
+    { date: new Date('2021-03-01'), industry: 'Industry C', unemployed: 500 },
+    // Add more data points...
+  ];
+
+const stackbar_data = [
+    { state: 'California', age: '18-24', population: 1000 },
+    { state: 'California', age: '25-34', population: 1500 },
+    { state: 'Texas', age: '18-24', population: 800 },
+    { state: 'Texas', age: '25-34', population: 1200 },
+    { state: 'New York', age: '18-24', population: 1100 },
+    { state: 'New York', age: '25-34', population: 1300 },
+    // Add more data points...
+  ];
 </script>
 
 {#snippet graphDisplay(text: string)}
@@ -12,7 +50,8 @@ import StatDisplay from "../components/statDisplay.svelte";
 {/snippet}
 
 
-<Indicator above={false} aboveText="Gain YTD" below={true} belowText={"YTD expenditure"} numericValue={15} symbol_pre="$" symbol_post="M"/>
+<StackedBarChart data={stackbar_data}/>
+
 <!--
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-24 h-screen w-5/6">
   <div class="w-5/6 h-1/6 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
