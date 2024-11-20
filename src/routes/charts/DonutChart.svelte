@@ -1,77 +1,83 @@
-<script lang="js">
-  import { onMount } from 'svelte';
+<script lang="ts">
   import * as d3 from 'd3';
 
-  let {data = [] } = $props() // Expecting the data to be passed in
+  type donutType = {
+    name: string,
+    value: number
+  }
 
-  // Chart dimensions
-  let width = 400;
-  let height = 400;
-  
+  interface Props {
+    data: donutType[]
+    width: number,
+    height: number
+  }
+
+  let {data = [], width=400, height=400}: Props = $props() // Expecting the data to be passed in
+
+  // total value
+  let total = $derived(d3.sum(data, (d: donutType) => d.value))
+
   // Donut chart parameters
   const radius = Math.min(width, height) / 2;
   
-  onMount(() => {
-    // Set up the arc and pie chart generator
-    const arc = d3.arc()
-      .innerRadius(radius * 0.67)
-      .outerRadius(radius - 1);
+  // Set up the arc and pie chart generator
+  const arc = d3.arc<d3.PieArcDatum<donutType>>()
+    .innerRadius(radius * 0.50)
+    .outerRadius(radius - 1);
 
-    const pie = d3.pie()
-      .padAngle(1 / radius)
-      .sort(null)
-      .value(d => d.value);
+  const pie = d3.pie<donutType>()
+    .padAngle(1 / radius)
+    .sort(null)
+    .value((d: donutType) => d.value);
 
-    // Set up color scale
-    const color = d3.scaleOrdinal()
-      .domain(data.map(d => d.name))
-      .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length).reverse());
+  // Set up color scale
+  const color = d3.scaleOrdinal()
+    .domain(data.map((d: donutType) => d.name))
+    .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length).reverse());
 
-    // Create SVG element
-    const svg = d3.select('#donut-chart')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [-width / 2, -height / 2, width, height])
-      .attr('style', 'max-width: 100%; height: auto;');
+  let arcs = $derived(pie(data))
+  let labels = $derived(arcs.map((d)=> arc.centroid(d)))
+  // Add labels
+ </script>
 
-    // Draw the paths
-    svg.append('g')
-      .selectAll()
-      .data(pie(data))
-      .join('path')
-      .attr('fill', d => color(d.data.name))
-      .attr('d', arc)
-      .append('title')
-      .text(d => `${d.data.name}: ${d.data.value.toLocaleString()}`);
+<svg width={width} height={height} viewBox={`-${width/2}, -${height/2}, ${width}, ${height}`} class="w-full h-auto">
+  <!-- Slices of the donut -->
+  <g>
+    {#each arcs as arcData}
+      <path
+        fill={color(arcData.data.name) as string}
+        d={arc(arcData)}
+      >
+        <title>{arcData.data.name}: {arcData.data.value.toLocaleString()}</title>
+      </path>
+    {/each}
+  </g>
 
-    // Add labels
-    svg.append('g')
-      .attr('font-family', 'Metropolis')
-      .attr('font-size', 12)
-      .attr('text-anchor', 'middle')
-      .selectAll()
-      .data(pie(data))
-      .join('text')
-      .attr('transform', d => `translate(${arc.centroid(d)})`)
-      .call(text => text.append('tspan')
-        .attr('y', '-0.4em')
-        .attr('font-weight', 'bold')
-        .text(d => d.data.name))
-      .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25)
-        .append('tspan')
-        .attr('x', 0)
-        .attr('y', '0.7em')
-        .attr('fill-opacity', 0.7)
-        .text(d => d.data.value.toLocaleString('en-US')));
-  });
-</script>
+  <!-- labels for the slices -->
+  <g class="font-metropolis text-sm" text-anchor="middle">
+    {#each arcs as arcData}
+      <text 
+        transform={`translate(${arc.centroid(arcData)})`}
+        class="text-black font-semibold text-3xl"
+      >
+        <tspan class="font-staatliches">{arcData.data.name}</tspan>
+        <tspan x="0" y="1em" class="text-4xl">
+          {arcData.data.value.toLocaleString()}
+        </tspan>
+      </text>
+    {/each}
+  </g>
 
-<svg id="donut-chart"></svg>
+  <!-- total value of the data -->
+  <text x="0" y="0" text-anchor="middle" class="font-metropolis text-7xl font-extrabold text-black transform translate-y-4" >
+    {total.toLocaleString()}
+  </text>
+</svg>
 
 <style>
   svg {
     @apply
-    w-1/4
+    w-full h-auto m-6
   }
 </style>
 
