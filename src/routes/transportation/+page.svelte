@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import {fly} from "svelte/transition"
-	import LinePlot from "../fragments/LinePlot.svelte";
+	import LinePlot from "../charts/LinePlot.svelte";
   let color="red"
 </script>
 

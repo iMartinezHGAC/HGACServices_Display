@@ -15,9 +15,9 @@
   onMount(() => {
     // Determine the series that need to be stacked.
     const series = d3.stack()
-      .keys(d3.union(data.map(d => d.industry))) // distinct series keys, in input order
+      .keys(d3.union(data.map(d => d.juris))) // distinct series keys, in input order
       .value(([, D], key) => D.get(key).unemployed) // get value for each series key and stack
-    (d3.index(data, d => d.date, d => d.industry)); // group by stack then series key
+    (d3.index(data, d => d.date, d => d.juris)); // group by stack then series key
 
     // Prepare the scales for positional and color encodings.
     const x = d3.scaleUtc()

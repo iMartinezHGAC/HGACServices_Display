@@ -27,38 +27,38 @@ const bar_data = [
   ];
 
 const area_data  = [
-    { date: new Date('2021-01-01'), industry: 'Industry A', unemployed: 500 },
-    { date: new Date('2021-01-01'), industry: 'Industry B', unemployed: 300 },
-    { date: new Date('2021-01-01'), industry: 'Industry C', unemployed: 700 },
-    { date: new Date('2021-02-01'), industry: 'Industry A', unemployed: 450 },
-    { date: new Date('2021-02-01'), industry: 'Industry B', unemployed: 350 },
-    { date: new Date('2021-02-01'), industry: 'Industry C', unemployed: 200 },
-    { date: new Date('2021-03-01'), industry: 'Industry A', unemployed: 600 },
-    { date: new Date('2021-03-01'), industry: 'Industry B', unemployed: 200 },
-    { date: new Date('2021-03-01'), industry: 'Industry C', unemployed: 500 },
+    { date: new Date('2021-01-01'), juris: 'Harris County', unemployed: 500 },
+    { date: new Date('2021-01-01'), juris: 'Fort Bend County', unemployed: 300 },
+    { date: new Date('2021-01-01'), juris: 'Tarrant County', unemployed: 700 },
+    { date: new Date('2021-02-01'), juris: 'Harris County', unemployed: 450 },
+    { date: new Date('2021-02-01'), juris: 'Fort Bend County', unemployed: 350 },
+    { date: new Date('2021-02-01'), juris: 'Tarrant County', unemployed: 200 },
+    { date: new Date('2021-03-01'), juris: 'Harris County', unemployed: 600 },
+    { date: new Date('2021-03-01'), juris: 'Fort Bend County', unemployed: 200 },
+    { date: new Date('2021-03-01'), juris: 'Tarrant County', unemployed: 500 },
     // Add more data points...
   ];
 
 const stackbar_data = [
-    { state: 'Harris', age: '18-24', population: 1000 },
-    { state: 'Harris', age: '25-34', population: 1500 },
-    { state: 'Harris', age: '35-44', population: 2700 },
-    { state: 'Harris', age: '45-54', population: 1200 },
-    { state: 'Fort Bend', age: '18-24', population: 800 },
-    { state: 'Fort Bend', age: '25-34', population: 1200 },
-    { state: 'Fort Bend', age: '35-44', population: 1700 },
-    { state: 'Fort Bend', age: '45-54', population: 1000 },
-    { state: 'Waller', age: '18-24', population: 1100 },
-    { state: 'Waller', age: '25-34', population: 1500 },
-    { state: 'Waller', age: '35-44', population: 1300 },
-    { state: 'Waller', age: '45-54', population: 1100 },
+    { juris: 'Harris', age: '18-24', population: 1000 },
+    { juris: 'Harris', age: '25-34', population: 1500 },
+    { juris: 'Harris', age: '35-44', population: 2700 },
+    { juris: 'Harris', age: '45-54', population: 1200 },
+    { juris: 'Fort Bend', age: '18-24', population: 800 },
+    { juris: 'Fort Bend', age: '25-34', population: 1200 },
+    { juris: 'Fort Bend', age: '35-44', population: 1700 },
+    { juris: 'Fort Bend', age: '45-54', population: 1000 },
+    { juris: 'Waller', age: '18-24', population: 1100 },
+    { juris: 'Waller', age: '25-34', population: 1500 },
+    { juris: 'Waller', age: '35-44', population: 1300 },
+    { juris: 'Waller', age: '45-54', population: 1100 },
     // More data entries...
   ];
 </script>
 
-<BarChart data={bar_data}/>
+<!-- <FilledAreaChart data={area_data}/> -->
 
-<!--
+
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-5/6">
   <div class="w-5/6 h-1/6 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
     <p class="font-poppins font-medium py-4 w-3/4">
@@ -72,8 +72,7 @@ const stackbar_data = [
     <StatDisplay header="Transportation Projects" data={donut_data}/>
   </div>
   <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 flexy">
-    <StackedBarChart data={stackbar_data} yLabel="Population"/>
+    <StackedBarChart data={stackbar_data} yLabel="Car Owners"/>
     <StackedBarChart data={stackbar_data} yLabel="Population"/>
   </div>
 </div>
--->

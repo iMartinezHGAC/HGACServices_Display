@@ -14,10 +14,11 @@
   const legendMargin = 50;
   const legendItemHeight = 20;
 
-  let tooltip
+  let vector;
+  let tooltip;
  onMount(() => {
-    // Group the data by 'state' and extract the unique 'age' categories
-    const groups = d3.groups(data, d => d.state);
+    // Group the data by 'juris' and extract the unique 'age' categories
+    const groups = d3.groups(data, d => d.juris);
 
     // Extract unique age categories using a Set (JavaScript native)
     const ageKeys = Array.from(new Set(data.map(d => d.age)));
@@ -32,11 +33,11 @@
     const series = d3.stack()
       .keys(ageKeys) // unique 'age' categories
       .value(([, D], key) => D.get(key).population) // get value for each key and stack
-    (d3.index(data, d => d.state, d => d.age)); // group by 'state' and 'age'
+    (d3.index(data, d => d.juris, d => d.age)); // group by 'juris' and 'age'
 
     // Prepare the scales for positional and color encodings
     const x = d3.scaleBand()
-      .domain(d3.groupSort(data, D => -d3.sum(D, d => d.population), d => d.state))
+      .domain(d3.groupSort(data, D => -d3.sum(D, d => d.population), d => d.juris))
       .range([marginLeft, width - marginRight - legendMargin])
       .padding(0.1);
 
@@ -55,17 +56,9 @@
     // A function to format the value in the tooltip.
     const formatValue = x => isNaN(x) ? "N/A" : x.toLocaleString("en");
 
-    // Create the SVG container
-    const svg = d3.select('#stacked-bar-chart')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [0, 0, width, height])
-      .attr('style', 'max-width: 100%; height: auto;');
-
-
-
     // Append a group for each series, and a rect for each element in the series
-     svg.append('g')
+     d3.select(vector)
+      .append('g')
       .selectAll()
       .data(series)
       .join('g')
@@ -91,31 +84,34 @@
       .text(d => `Age: ${d.key}\nPopulation: ${formatValue(d.data[1].get(d.key).population)}`);
 
     // Append the horizontal axis
-    svg.append('g')
+    d3.select(vector)
+      .append('g')
       .attr('transform', `translate(0,${height - marginBottom})`)
       .call(d3.axisBottom(x).tickSizeOuter(0))
       .call(g => g.selectAll('.domain').remove());
 
     // Append the vertical axis
-    svg.append('g')
+    d3.select(vector)
+      .append('g')
       .attr('transform', `translate(${marginLeft},0)`)
       .call(d3.axisLeft(y).ticks(null, "s"))
       .call(g => g.selectAll('.domain').remove());
 
     // Y-LABEL
-    svg.append('text')
+    d3.select(vector)
+      .append('text')
       .attr('x', -(height / 2)) // Rotate and place the label
       .attr('y', marginLeft - 35) // Vertical position
       .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
       .attr('text-anchor', 'middle')
-      .attr('font-size', '0.8rem')
-      .attr('font-weight', '600')
+      .attr('font-size', '0.9rem')
+      .attr('font-weight', '700')
       .attr('font-family', 'Metropolis')
       .attr('fill', 'currentColor')
       .text(yLabel);
 
      // Add the color legend
-    const legend = svg.append('g')
+    const legend = d3.select(vector).append('g')
       .attr('transform', `translate(${width - marginRight - legendMargin}, ${marginTop})`);
 
     // Add color swatches and labels
@@ -135,6 +131,7 @@
       .attr('y', (d, i) => i * (legendItemHeight + 5) + legendItemHeight / 2)
       .attr('dy', '0.35em')
       .attr('font-size', 12)
+      .attr('fill', 'white')
       .text(d => d); // Use the age category name as the label
 
     tooltip = d3.select('body')
@@ -148,14 +145,15 @@
   });
 </script>
 
-<svg id="stacked-bar-chart"></svg>
+<svg width={width}
+      height={height}
+      viewBox={`0, 0, ${width}, ${height}`}
+      style={'max-width: 100%; height: auto;'}
+      class={'mb-20'}
+      bind:this={vector}
+></svg>
 
 <style>
-  svg {
-    @apply
-    w-full h-auto
-  }
-
   .tooltip {
     @apply
     absolute invisible bg-black text-white px-2 py-1 rounded text-sm
