@@ -1,12 +1,18 @@
 <script>
   import * as d3 from 'd3';
+	import Tabs from '../components/tabs.svelte';
 
   // Props
-  let {data = [], width = 928, height = 500, yLabel = ""} = $props();
+  let {data = [],
+    width = 928, 
+    height = 500, 
+    yLabel = ""
+    } = $props();
   const marginTop = 20;
   const marginRight = 0;
   const marginBottom = 30;
   const marginLeft = 50;
+  const yLabelMargin = 80;
 
   // Reactive variables
 
@@ -44,22 +50,29 @@
   <!-- x-axis -->
   <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
     {#each x.domain() as d}
-      <g transform={`translate(${x(d)},0)`}>
-        <text dy="0.71em" text-anchor="middle" y="10">{d}</text>
+      <g transform={`translate(${x(d) -marginLeft/5},0)`}>
+        <text class="font-metropolis text-lg transform translate-y-6" text-anchor="middle">{d}</text>
       </g>
     {/each}
   </g>
 
  <!-- Y-axis group -->
   <g transform={`translate(${marginLeft},0)`} class="y-axis">
+    <text x={`-${height/2}`} 
+      y={`${marginLeft - yLabelMargin}`} 
+      transform="rotate(-90)"
+      text-anchor="middle"
+      class="text-2xl font-bold font-metropolis"
+    >
+      {yLabel}
+    </text>
     {#each y.ticks(5) as tick}
       <g transform={`translate(0,${y(tick)})`}>
         <line x2={width - marginRight} stroke="black" />
         <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
       </g>
     {/each}
-  </g>
-
+  </g> 
   <!-- Bars -->
   {#each data as d}
     <rect x={x(d.juris)} 
@@ -73,7 +86,7 @@
 <style>
   svg {
     @apply
-    w-1/2
+    w-full
   }
 </style>
 
