@@ -112,8 +112,8 @@ import CardHeader from "../fragments/cardHeader.svelte";
   }
 </style>
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
-  <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} {toggleTime}/>
+  <div class="flex flex-col bg-slate-500">
+    <CardHeader projectName={props.projectName} {toggleTime} color="light"/>
     <CardBlurb text={props.projectBlurb}/>
   </div>
   <div class="grid grid-cols-2 gap-4 items-center justify-center px-12">
@@ -123,7 +123,7 @@ import CardHeader from "../fragments/cardHeader.svelte";
     </div>
       <!-- bar: tires count-->
       <div class="card-style">
-        <props.chart2 data={[7,18,20,11,24]} yLabel={props.chartTitle2}/>
+        <props.chart2 data={[31,11,25,22,44]} yLabel={props.chartTitle2}/>
       </div>
     {:else} 
     <div class="card-style">
@@ -160,7 +160,7 @@ import CardHeader from "../fragments/cardHeader.svelte";
       </div>
     {/if}
   </div> 
-  <button class="h-12 w-full bg-slate-700 text-white" 
+  <button class="h-12 w-full bg-slate-500 text-white" 
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}
   </button>  
