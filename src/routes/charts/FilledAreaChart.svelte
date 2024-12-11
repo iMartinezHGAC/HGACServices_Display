@@ -11,7 +11,8 @@
   const marginRight = 10;
   const marginBottom = 20;
   const marginLeft = 40;
-
+    // Select the SVG container.
+    let svg
   onMount(() => {
     // Determine the series that need to be stacked.
     const series = d3.stack()
@@ -38,15 +39,12 @@
       .y0(d => y(d[0]))
       .y1(d => y(d[1]));
 
-    // Select the SVG container.
-    const svg = d3.select('#stacked-area-chart')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [0, 0, width, height])
-      .attr('style', 'max-width: 100%; height: auto;');
+
+
 
     // Add the y-axis, remove the domain line, add grid lines and a label.
-    svg.append('g')
+    d3.select(svg)
+			.append('g')
       .attr('transform', `translate(${marginLeft},0)`)
       .call(d3.axisLeft(y).ticks(height / 80))
       .call(g => g.select('.domain').remove())
@@ -61,7 +59,8 @@
         .text('↑ Unemployed persons'));
 
     // Append a path for each series.
-    svg.append('g')
+    d3.select(svg)
+			.append('g')
       .selectAll()
       .data(series)
       .join('path')
@@ -71,7 +70,8 @@
       .text(d => d.key);
 
     // Append the horizontal axis atop the area.
-    svg.append('g')
+    d3.select(svg)
+			.append('g')
       .attr('transform', `translate(0,${height - marginBottom})`)
       .call(d3.axisBottom(x).tickSizeOuter(0));
 
@@ -80,7 +80,12 @@
   });
 </script>
 
-<svg id="stacked-area-chart"></svg>
+<svg 
+  bind:this={svg}
+      width={width}
+      height={height}
+      viewBox={`0, 0, ${width}, ${height}`}
+></svg>
 
 <style>
   svg {

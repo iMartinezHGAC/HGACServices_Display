@@ -7,13 +7,20 @@
 import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
 
-const donut_data = [{name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
+const donut_data = [
+    {name: 'Harris', value: 100}, {name: 'Fort Bend', value: 200}, {name: 'Waller', value: 300}]
 const donut_data2 = [{name: 'Harris', value: 200}, {name: 'Fort Bend', value: 300}, {name: 'Waller', value: 350}]
 const donut_data3 = [
-    {name: 'Harris', value: 270}, 
     {name: 'Fort Bend', value: 127}, 
+    {name: 'Harris', value: 270}, 
     {name: 'Waller', value: 188},
     {name: 'Montgomery', value: 72}
+  ]
+const donut_data4 = [
+    {name: 'Waller', value: 198},
+    {name: 'Harris', value: 370}, 
+    {name: 'Fort Bend', value: 427}, 
+    {name: 'Montgomery', value: 272}
   ]
 const bar_data = [
     { juris: 'A', frequency: 25 },
@@ -56,9 +63,9 @@ const stackbar_data = [
   ];
 </script>
 
-<!-- <FilledAreaChart data={area_data}/> -->
+<FilledAreaChart data={area_data}/>
 
-
+<!--
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-5/6">
   <div class="w-5/6 h-1/6 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
     <p class="font-poppins font-medium py-4 w-3/4">
@@ -69,10 +76,11 @@ const stackbar_data = [
     <StatDisplay header="Total Funds Received" data={donut_data}/>
     <StatDisplay header="Services Received" data={donut_data2}/>
     <StatDisplay header="Total Participation" data={donut_data3}/>
-    <StatDisplay header="Transportation Projects" data={donut_data}/>
+    <StatDisplay header="Transportation Projects" data={donut_data4}/>
   </div>
   <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 flexy">
     <StackedBarChart data={stackbar_data} yLabel="Car Owners"/>
     <StackedBarChart data={stackbar_data} yLabel="Population"/>
   </div>
 </div>
+-->

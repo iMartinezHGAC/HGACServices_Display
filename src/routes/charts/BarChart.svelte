@@ -2,7 +2,7 @@
   import * as d3 from 'd3';
 
   // Props
-  let {data = [], width = 928, height = 500} = $props();
+  let {data = [], width = 928, height = 500, yLabel = ""} = $props();
   const marginTop = 20;
   const marginRight = 0;
   const marginBottom = 30;
@@ -38,7 +38,7 @@
      width={width} 
      height={height} 
      viewBox={`0 0 ${width} ${height}`} 
-     style="max-width: 100%; height: auto;" 
+      class="w-fill"
      on:wheel|passive={zoomed}>
 
   <!-- x-axis -->

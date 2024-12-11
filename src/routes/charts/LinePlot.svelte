@@ -8,6 +8,8 @@
     marginRight: number,
     marginBottom: number,
     marginLeft: number
+    yLabel: string,
+    yLabelMargin: number
   }
 
   let {
@@ -17,7 +19,9 @@
     marginTop = 20, 
     marginRight = 20,
     marginLeft = 20, 
-    marginBottom = 20
+    marginBottom = 20,
+    yLabel = "",
+    yLabelMargin = 20,
   }: lineProps = $props()
   let gy: any
   let gx: any
@@ -44,6 +48,17 @@
     // Y axis tick marks
     d3.select(gy)
       .call(d3.axisLeft(y))
+    d3.select(gy)
+      .append('text')
+      .attr('x', -(height / 2)) // Rotate and place the label
+      .attr('y', marginLeft - yLabelMargin) // Vertical position
+      .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '0.9rem')
+      .attr('font-weight', '700')
+      .attr('font-family', 'Metropolis')
+      .attr('fill', 'currentColor')
+      .text(yLabel);
   })
   $effect(()=> {
     d3.select(gx).call(d3.axisBottom(x))

@@ -148,8 +148,7 @@
 <svg width={width}
       height={height}
       viewBox={`0, 0, ${width}, ${height}`}
-      style={'max-width: 100%; height: auto;'}
-      class={'mb-20'}
+      class={'flex-initial mb-20 w-max-full'}
       bind:this={vector}
 ></svg>
 
