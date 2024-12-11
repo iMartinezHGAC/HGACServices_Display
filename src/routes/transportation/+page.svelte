@@ -10,7 +10,7 @@ import {fly} from "svelte/transition"
 {/snippet}
 
 {#snippet LineGraph(text: string, data:number[])}
-  <div class="w-1/2 flex items-center flex-col bg-slate-600">
+  <div class="w-1/2 flex items-center flex-col bg-slate-700">
     <div class="w-fit h-fit bg-white p-12 rounded-xl">
       <p class="font-staatliches text-2xl text-slate-700">{text}</p>
       <LinePlot data={data}/>
@@ -25,7 +25,7 @@ import {fly} from "svelte/transition"
   }
 </style>
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-screen">
-  <div class={`${color} flexy bg-slate-600 h-1/6`}>
+  <div class={`${color} flexy bg-slate-700 h-1/6`}>
     {@render infoBlurb("Possible text describing what kind of projects the specific tab focuses on, with possibly a list of programs they have received services for")}
     {@render infoBlurb("Blurb about Regional Transport Plan")}
     {@render infoBlurb("Optional additional blub from marketing for what Regional Transport Plan does the specific jurisdiction. Possibly hide these blurbs behind Program Information")}

@@ -1,6 +1,16 @@
 <script lang="ts">
-  let {tabText, color="gray"}: {tabText: string, color: string} = $props()
+type tabProps = {
+  tabText: string,
+  color: string,
+  setChosen: (tabName: string) => void
+}
+
+  let {tabText, color="gray", setChosen}: tabProps = $props()
   let route = $derived("/" + tabText.toLowerCase())
+
+function chooseEvent() {
+  setChosen(tabText)
+}
 </script>
 
 <style lang="postcss" scoped>
@@ -10,25 +20,16 @@ flex items-center justify-center px-5 h-12 py-3 mx-2 rounded-t-md font-staatlich
 
 .gray {
   @apply
-  base bg-slate-600 text-slate-200
+  base bg-slate-100 text-slate-700 hover:bg-slate-700 hover:text-slate-100
 }
-.red {
+.chosen {
   @apply
-  base bg-slate-100 hover:bg-hgac-red
+  base bg-slate-700 text-slate-200
 }
-.green {
-  @apply
-  base bg-slate-100
-}
-.blue {
-  @apply
-  base bg-slate-100
-}
-.orange {
-  @apply
-  base bg-slate-100
-}
+
 
 </style>
 
-<a class={color} href={route}>{tabText} </a>
+<button onclick={chooseEvent}>
+  <a class={color} href={route}>{tabText}</a>
+</button>
