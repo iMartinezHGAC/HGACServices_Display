@@ -63,12 +63,9 @@ const stackbar_data = [
   ];
 </script>
 
-<FilledAreaChart data={area_data}/>
-
-<!--
-<div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-5/6">
-  <div class="w-5/6 h-1/6 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
-    <p class="font-poppins font-medium py-4 w-3/4">
+<div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-16 h-screen w-full -z-10">
+  <div class="w-5/6 h-1/12 flexy  bg-slate-600 text-slate-200 flex rounded-t-lg">
+    <p class="font-poppins font-medium py-4 w-3/4 flexy">
       Blurb, if any, for jurisdiction form communications (will probably only be here for large jurisdictions)
     </p>
   </div>
@@ -78,9 +75,12 @@ const stackbar_data = [
     <StatDisplay header="Total Participation" data={donut_data3}/>
     <StatDisplay header="Transportation Projects" data={donut_data4}/>
   </div>
-  <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 flexy">
-    <StackedBarChart data={stackbar_data} yLabel="Car Owners"/>
-    <StackedBarChart data={stackbar_data} yLabel="Population"/>
+  <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 px-6 grid grid-cols-2">
+    <div class="transform scale-[70%] -translate-y-20">
+    <StackedBarChart data={stackbar_data} yLabel="Historic Funds Received"/>
+    </div>
+    <div class="transform scale-[70%] -translate-y-20">
+    <StackedBarChart data={stackbar_data} yLabel="Historic Services Received"/>
+    </div>
   </div>
 </div>
--->

@@ -10,8 +10,8 @@ import {fly} from "svelte/transition"
 {/snippet}
 
 {#snippet LineGraph(text: string, data:number[])}
-  <div class="w-1/2 h-full flexy flex-col bg-slate-600">
-    <div class="w-fit h-fit bg-white p-12 rounded-xl mt-28">
+  <div class="w-1/2 flex items-center flex-col bg-slate-600">
+    <div class="w-fit h-fit bg-white p-12 rounded-xl">
       <p class="font-staatliches text-2xl text-slate-700">{text}</p>
       <LinePlot data={data}/>
     </div>
@@ -24,16 +24,17 @@ import {fly} from "svelte/transition"
     w-5/6 h-1/6 rounded-t-lg
   }
 </style>
+<div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-screen w-screen">
+  <div class={`${color} flexy bg-slate-600 h-1/6`}>
+    {@render infoBlurb("Possible text describing what kind of projects the specific tab focuses on, with possibly a list of programs they have received services for")}
+    {@render infoBlurb("Blurb about Regional Transport Plan")}
+    {@render infoBlurb("Optional additional blub from marketing for what Regional Transport Plan does the specific jurisdiction. Possibly hide these blurbs behind Program Information")}
+    <!--
+    -->
+  </div>
 
-<div class={`${color} flexy fixed top-24`} in:fly={{ x:400}} out:fly={{x:-200}}>
-  {@render infoBlurb("Possible text describing what kind of projects the specific tab focuses on, with possibly a list of programs they have received services for")}
-  <!--
-  {@render infoBlurb("Blurb about Regional Transport Plan")}
-  {@render infoBlurb("Optional additional blub from marketing for what Regional Transport Plan does the specific jurisdiction. Possibly hide these blurbs behind Program Information")}
-  -->
-</div>
-
-<div class="flexy w-5/6 h-full" in:fly={{ x:200}} out:fly={{x:-200}}>
-  {@render LineGraph("Total Projects", [1,2,3,5,8,13,3,8,21])}
-  {@render LineGraph("Total Cost ($1000)", [21, 34, 50])}
+  <div class="flex w-5/6 h-5/6">
+    {@render LineGraph("Total Projects", [1,2,3,5,8,13,3,8,21])}
+    {@render LineGraph("Total Cost ($1000)", [21, 34, 50])}
+  </div>
 </div>

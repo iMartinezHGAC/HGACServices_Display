@@ -18,10 +18,10 @@
     height = 400, 
     marginTop = 20, 
     marginRight = 20,
-    marginLeft = 20, 
+    marginLeft = 60, 
     marginBottom = 20,
     yLabel = "",
-    yLabelMargin = 20,
+    yLabelMargin = 90,
   }: lineProps = $props()
   let gy: any
   let gx: any
@@ -54,7 +54,7 @@
       .attr('y', marginLeft - yLabelMargin) // Vertical position
       .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
       .attr('text-anchor', 'middle')
-      .attr('font-size', '0.9rem')
+      .attr('font-size', '1.3rem')
       .attr('font-weight', '700')
       .attr('font-family', 'Metropolis')
       .attr('fill', 'currentColor')

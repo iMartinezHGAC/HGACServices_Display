@@ -6,13 +6,19 @@
 
   // Chart dimensions
   let width = 928;
-  let height = 500;
+  let height = 600;
   const marginTop = 10;
   const marginRight = 20;
   const marginBottom = 20;
-  const marginLeft = 50;
-  const legendMargin = 50;
+  const marginLeft = 70;
+  const yLabelMargin = 50;
+  const legendMargin = 30;
   const legendItemHeight = 20;
+  const legendItemWidth = 20;
+
+  // get unique data categories
+  const uniqueCats = new Set(data.map((d) => d.age))
+  const intraLegendSpacing = width/(uniqueCats.size)-marginRight;
 
   let vector;
   let tooltip;
@@ -88,23 +94,31 @@
       .append('g')
       .attr('transform', `translate(0,${height - marginBottom})`)
       .call(d3.axisBottom(x).tickSizeOuter(0))
-      .call(g => g.selectAll('.domain').remove());
+      .call(g => g.selectAll('.domain').remove())
+      .selectAll('text')
+      .attr('font-weight', '500')
+      .attr('font-family', 'Metropolis')
+      .attr('font-size', '1.2rem');
+
 
     // Append the vertical axis
     d3.select(vector)
       .append('g')
       .attr('transform', `translate(${marginLeft},0)`)
       .call(d3.axisLeft(y).ticks(null, "s"))
-      .call(g => g.selectAll('.domain').remove());
+      .call(g => g.selectAll('.domain').remove())
+      .selectAll('text')
+      .attr('font-family', 'Metropolis')
+      .attr('font-size', '1rem');
 
     // Y-LABEL
     d3.select(vector)
       .append('text')
       .attr('x', -(height / 2)) // Rotate and place the label
-      .attr('y', marginLeft - 35) // Vertical position
+      .attr('y', marginLeft - yLabelMargin) // Vertical position
       .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
       .attr('text-anchor', 'middle')
-      .attr('font-size', '0.9rem')
+      .attr('font-size', '1.8rem')
       .attr('font-weight', '700')
       .attr('font-family', 'Metropolis')
       .attr('fill', 'currentColor')
@@ -112,26 +126,30 @@
 
      // Add the color legend
     const legend = d3.select(vector).append('g')
-      .attr('transform', `translate(${width - marginRight - legendMargin}, ${marginTop})`);
+      .attr('transform', `translate(${marginLeft}, ${height})`);
 
     // Add color swatches and labels
     legend.selectAll('rect')
       .data(ageKeys)
       .join('rect')
-      .attr('x', 0)
-      .attr('y', (d, i) => i * (legendItemHeight + 5)) // Vertical spacing between legend items
-      .attr('width', 20)
+      .attr('x', (d,i) => i * (legendItemHeight+intraLegendSpacing))
+      .attr('y', 20) // Vertical spacing between legend items
+      .attr('width', legendItemWidth)
       .attr('height', legendItemHeight)
-      .attr('fill', d => color(d));
+      .attr('fill', d => color(d))
+      .attr('transform', `translate(${legendMargin})`);
 
     legend.selectAll('text')
       .data(ageKeys)
       .join('text')
-      .attr('x', 30)
-      .attr('y', (d, i) => i * (legendItemHeight + 5) + legendItemHeight / 2)
+      .attr('transform', `translate(${legendMargin*2})`)
+      .attr('x', (d,i) => i * (legendItemWidth+intraLegendSpacing))
+      .attr('y', legendItemHeight * 1.56) // Vertical spacing between legend items
       .attr('dy', '0.35em')
-      .attr('font-size', 12)
-      .attr('fill', 'white')
+      .attr('font-size', '1rem')
+      .attr('font-weight', '600')
+      .attr('font-family', 'Metropolis')
+      .attr('fill', 'black')
       .text(d => d); // Use the age category name as the label
 
     tooltip = d3.select('body')
@@ -148,7 +166,7 @@
 <svg width={width}
       height={height}
       viewBox={`0, 0, ${width}, ${height}`}
-      class={'flex-initial mb-20 w-full'}
+      class={'my-4'}
       bind:this={vector}
 ></svg>
 

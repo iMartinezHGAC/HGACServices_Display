@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  let {data = []} = $props(); // Data passed as a prop
+  let {data = [], yLabel=""} = $props(); // Data passed as a prop
 
   // Chart dimensions
   let width = 928;
@@ -10,7 +10,8 @@
   const marginTop = 10;
   const marginRight = 10;
   const marginBottom = 20;
-  const marginLeft = 40;
+  const marginLeft = 60;
+  const yLabelMargin = 100;
     // Select the SVG container.
     let svg
   onMount(() => {
@@ -52,11 +53,15 @@
         .attr('x2', width - marginLeft - marginRight)
         .attr('stroke-opacity', 0.1))
       .call(g => g.append('text')
-        .attr('x', -marginLeft)
-        .attr('y', 10)
+        .attr('x', -(height / 2)) // Rotate and place the label
+        .attr('y', marginLeft - yLabelMargin) // Vertical position
+        .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '1.3rem')
+        .attr('font-weight', '700')
+        .attr('font-family', 'Metropolis')
         .attr('fill', 'currentColor')
-        .attr('text-anchor', 'start')
-        .text('↑ Unemployed persons'));
+        .text(yLabel));
 
     // Append a path for each series.
     d3.select(svg)
@@ -90,7 +95,8 @@
 <style>
   svg {
     @apply
-    w-1/2 h-auto
+     h-auto
+    p-4
   }
 </style>
 
