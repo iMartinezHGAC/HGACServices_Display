@@ -18,11 +18,11 @@
   let total = $derived(d3.sum(data, (d: donutType) => d.value))
 
   // Donut chart parameters
-  const radius = Math.min(width, height) / 2;
+  const radius = Math.min(width, height) /2;
   
   // Set up the arc and pie chart generator
   const arc = d3.arc<d3.PieArcDatum<donutType>>()
-    .innerRadius(radius * 0.50)
+    .innerRadius(radius * 0.45)
     .outerRadius(radius - 1);
 
   const pie = d3.pie<donutType>()
@@ -56,12 +56,13 @@
   <!-- labels for the slices -->
   <g class="font-metropolis text-sm" text-anchor="middle">
     {#each arcs as arcData}
-      <text 
-        transform={`translate(${arc.centroid(arcData)})`}
-        class="text-black font-semibold text-3xl"
-      >
-        <tspan class="font-staatliches">{arcData.data.name}</tspan>
-        <tspan x="0" y="1em" class="text-4xl">
+      <text transform={`translate(${arc.centroid(arcData)})`}>
+        <tspan x="0.15em" y="0.3rem" class="font-staatliches text-4xl">{arcData.data.name}</tspan>
+        <tspan x="0" y="0" class="font-staatliches text-4xl fill-white">{arcData.data.name}</tspan>
+        <tspan x="0.12em" y="1.1em" class="text-5xl font-semibold">
+          {arcData.data.value.toLocaleString()}
+        </tspan>
+        <tspan x="0" y="1em" class="text-5xl font-semibold fill-white">
           {arcData.data.value.toLocaleString()}
         </tspan>
       </text>
@@ -69,7 +70,7 @@
   </g>
 
   <!-- total value of the data -->
-  <text x="0" y="0" text-anchor="middle" class="font-metropolis text-7xl font-extrabold text-black transform translate-y-4" >
+  <text x="0" y="0" text-anchor="middle" class="font-metropolis text-7xl font-extrabold fill-slate-100 transform translate-y-4" >
     {total.toLocaleString()}
   </text>
 </svg>
