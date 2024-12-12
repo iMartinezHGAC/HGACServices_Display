@@ -1,26 +1,35 @@
 <script lang="ts">
-	import StackedBarChart from "../charts/StackedBarChart.svelte";
+	import { symbol } from "d3";
+import StackedBarChart from "../charts/StackedBarChart.svelte";
 import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
 
 const donut_data = [
-    {name: 'Justice', value: 100}, {name: 'Workforce', value: 200}, {name: 'Environment', value: 300}]
-const donut_data2 = [{name: 'Justice', value: 200}, {name: 'Workforce', value: 300}, {name: 'Environment', value: 350}]
+    {name: 'Justice', value: 100}, 
+    {name: 'Workforce', value: 200}, 
+    {name: 'Environment', value: 300}]
+
+const donut_data2 = [
+    {name: 'Justice', value: 200}, 
+    {name: 'Workforce', value: 300}, 
+    {name: 'Environment', value: 350}
+  ]
+
 const donut_data3 = [
-    {name: 'Workforce', value: 127}, 
     {name: 'Justice', value: 270}, 
+    {name: 'Workforce', value: 127}, 
     {name: 'Environment', value: 188},
-    {name: 'Transport', value: 72}
+    {name: 'Transportation', value: 72},
   ]
 const donut_data4 = [
-    {name: 'Environment', value: 198},
-    {name: 'Justice', value: 370}, 
-    {name: 'Workforce', value: 427}, 
-    {name: 'Transport', value: 272}
+    {name: 'Justice', value: 37000}, 
+    {name: 'Workforce', value: 42700}, 
+    {name: 'Environment', value: 19008},
+    {name: 'Transportation', value: 27200},
   ]
 const bar_data = [
     { juris: 'A', frequency: 25 },
-    { juris: 'Transport', frequency: 30 },
+    { juris: 'Transportation', frequency: 30 },
     { juris: 'Environment', frequency: 55 },
     { juris: 'Workforce', frequency: 65 },
     { juris: 'C', frequency: 15 },
@@ -66,10 +75,10 @@ const stackbar_data = [
     </p>
   </div>
   <div class="w-5/6 h-96 flexy flex-row">
-    <StatDisplay header="Total Funds Received" data={donut_data}/>
-    <StatDisplay header="Services Received" data={donut_data2}/>
-    <StatDisplay header="Total Participation" data={donut_data3}/>
-    <StatDisplay header="Transport Projects" data={donut_data4}/>
+    <StatDisplay header="Total Funds Received" data={donut_data} index={0} preSymbol="$" postSymbol="M"/>
+    <StatDisplay header="Services Received" data={donut_data2} index={1} postSymbol=""/>
+    <StatDisplay header="Total Participation" data={donut_data3} index={2} />
+    <StatDisplay header="Transportation Projects" data={donut_data4} index={3}/>
   </div>
   <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 px-6 grid grid-cols-2">
     <div class="transform scale-[70%] -translate-y-20">

@@ -1,8 +1,15 @@
 <script lang="ts">
 	import DonutChart from "../charts/DonutChart.svelte";
 
+  type donutDisplayType = {
+    header: string,
+    data: {name: string, value:number}[],
+    index: number,
+    preSymbol?: string,
+    postSymbol?: string,
+  }
 
-let {header, data}: {header: string, data: {name: string, value: number}[]} = $props()
+let {header, data, index, preSymbol="", postSymbol=""}: donutDisplayType = $props()
 
 </script>
 
@@ -11,5 +18,5 @@ let {header, data}: {header: string, data: {name: string, value: number}[]} = $p
   <p class="font-staatliches text-2xl text-slate-200 mb-4">
     {header}
   </p>
-  <DonutChart data={data} width={800} height={800}/>
+  <DonutChart data={data} width={800} height={800} index={index} preSymbol={preSymbol} postSymbol={postSymbol}/>
 </div>

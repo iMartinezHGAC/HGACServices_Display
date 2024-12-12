@@ -103,15 +103,15 @@ import CardHeader from "../fragments/cardHeader.svelte";
 <style>
   .card-style {
     @apply
-    flexy bg-white rounded-lg
+    flexy bg-white rounded-lg w-10/12 h-3/4
   }
 </style>
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
+<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} {toggleTime}/>
+    <CardHeader projectName={props.projectName} {toggleTime} color="dark"/>
     <CardBlurb text={props.projectBlurb}/>
   </div>
-  <div class="grid grid-cols-2 gap-4 items-center justify-center px-12">
+  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12">
     {#if timeFlag}
     <div class="card-style">
       <props.chart1 data={stackbar_data_hist} yLabel={props.chartTitle1}/>
