@@ -43,7 +43,7 @@
     .domain(data.map((d: donutType) => d.name))
     .range(d3.quantize(t => d3.interpolateSpectral(incrementedArray(t)), data.length).reverse());
   */
-  const color = d3.scaleQuantize([0,4], ["red", "green", "steelblue", "beige"])
+  const color = d3.scaleQuantize([0,4], ["#a6cee3","#b2df8a","#1f78b4", "#33a02c"])
 
   let arcs = $derived(pie(data))
   let labels = $derived(arcs.map((d)=> arc.centroid(d)))
