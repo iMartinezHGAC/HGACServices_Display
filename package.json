@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"type": "module",
   "engines": {
-    "node": ">= 21.1.0"
+    "node": "^21.1.0"
   },
 	"scripts": {
 		"dev": "vite dev",
