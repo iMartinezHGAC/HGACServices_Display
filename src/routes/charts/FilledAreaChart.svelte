@@ -52,12 +52,13 @@
       .call(g => g.selectAll('.tick line').clone()
         .attr('x2', width - marginLeft - marginRight)
         .attr('stroke-opacity', 0.1))
+      .selectAll('text').attr('font-size', '1.0rem')
       .call(g => g.append('text')
         .attr('x', -(height / 2)) // Rotate and place the label
         .attr('y', marginLeft - yLabelMargin) // Vertical position
         .attr('transform', 'rotate(-90)') // Rotate the label to align vertically
         .attr('text-anchor', 'middle')
-        .attr('font-size', '1.3rem')
+        .attr('font-size', '1.4rem')
         .attr('font-weight', '700')
         .attr('font-family', 'Metropolis')
         .attr('fill', 'currentColor')
@@ -72,7 +73,8 @@
       .attr('fill', d => color(d.key))
       .attr('d', area)
       .append('title')
-      .text(d => d.key);
+      .text(d => d.key)
+    .selectAll('text').attr('font-size', '1.0rem')
 
     // Append the horizontal axis atop the area.
     d3.select(svg)
