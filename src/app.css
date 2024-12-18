@@ -2,13 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .flexy {
-    @apply flex items-center justify-center
-  }
-}
-
 @layer utilities {
+  .flexy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .small-caps {
     font-variant: small-caps;
   }
