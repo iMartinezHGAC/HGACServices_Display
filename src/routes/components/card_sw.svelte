@@ -100,12 +100,6 @@ import CardHeader from "../fragments/cardHeader.svelte";
   }
 
 </script>
-<style>
-  .card-style {
-    @apply
-    flexy bg-white rounded-lg
-  }
-</style>
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
   <div class="flex flex-col bg-slate-500">
     <CardHeader projectName={props.projectName} {toggleTime} color="light"/>

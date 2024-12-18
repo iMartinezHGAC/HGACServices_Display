@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .card-style {
+    @apply
+    flexy bg-white rounded-lg w-10/12 h-3/4
+  }
+}
+
 @layer utilities {
   .flexy {
     display: flex;
