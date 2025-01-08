@@ -3,12 +3,18 @@
 @tailwind utilities;
 
 @layer components {
-  .flexy {
-    @apply flex items-center justify-center
+  .card-style {
+    @apply
+    flexy bg-white rounded-lg w-10/12 h-3/4
   }
 }
 
 @layer utilities {
+  .flexy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .small-caps {
     font-variant: small-caps;
   }

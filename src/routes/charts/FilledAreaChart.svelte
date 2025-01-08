@@ -8,8 +8,8 @@
   let width = 928;
   let height = 500;
   const marginTop = 10;
-  const marginRight = 10;
-  const marginBottom = 20;
+  const marginRight = 20;
+  const marginBottom = 25;
   const marginLeft = 60;
   const yLabelMargin = 100;
     // Select the SVG container.
@@ -74,13 +74,18 @@
       .attr('d', area)
       .append('title')
       .text(d => d.key)
-    .selectAll('text').attr('font-size', '1.0rem')
+    .selectAll('text')
+      .attr('font-size', '1.3rem')
+      .attr('font-family', 'Metropolis')
 
     // Append the horizontal axis atop the area.
     d3.select(svg)
 			.append('g')
       .attr('transform', `translate(0,${height - marginBottom})`)
-      .call(d3.axisBottom(x).tickSizeOuter(0));
+      .call(d3.axisBottom(x).tickSizeOuter(0))
+    .selectAll('text')
+      .attr('font-size', '1.2rem')
+      .attr('font-family', 'Metropolis')
 
     // Return the color scale as part of the chart's properties (for the legend).
     return { scales: { color } };
