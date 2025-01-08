@@ -32,10 +32,12 @@
       <h1 class={color}>
         {projectName}
         <div class="flex flex-grow"></div>
+  <!--
         <button class="flex items-center justify-center text-center px-14" onclick={toggleTimeline}>
           <img src={clock} alt="clock">
           <p class="text-xl font-metropolis pr-10 pl-2 w-12 text-white ">
             {timelineText}
           </p>
         </button>
+  -->
       </h1>

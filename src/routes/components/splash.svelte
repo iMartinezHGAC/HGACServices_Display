@@ -1,15 +1,18 @@
 <script lang="ts">
-let {jurisdiction}: {jurisdiction: string} = $props()
 import logo from "$lib/assets/HGAC_logo.svg"
 import county_logo from "$lib/assets/harris_county.svg"
 import Tabs from "./tabs.svelte";
+
+let {chosenTab, jurisdiction}: {chosenTab: string, jurisdiction: string} = $props()
+let humanChosenTab = $derived(chosenTab.slice(1))
+$inspect(humanChosenTab)
 
 let human_readable = $derived(jurisdiction
   .split("_")
   .map(word=> word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() )
   .join(" "))
 
-let chosenTab = $state("Overview")
+
 
 function handleSetChosen(tabName: string) {
   chosenTab = tabName
@@ -22,31 +25,31 @@ function handleSetChosen(tabName: string) {
   <img src={county_logo} alt="harris" class="fixed h-24 left-4">
   <img src={logo} alt="HGAC" class="fixed h-24 right-4">
   <div class="fixed flexy top-16">
-      {#if chosenTab === "Overview"}
+      {#if chosenTab === "/overview"}
         <Tabs tabText="Overview" color="chosen" setChosen={handleSetChosen}/>
       {:else}
         <Tabs tabText="Overview" color="gray" setChosen={handleSetChosen}/>
       {/if}
 
-      {#if chosenTab === "Transportation"}
+      {#if chosenTab === "/transportation"}
         <Tabs tabText="Transportation" color="chosen" setChosen={handleSetChosen}/>
       {:else}
         <Tabs tabText="Transportation" color="blue" setChosen={handleSetChosen}/>
       {/if}
 
-      {#if chosenTab === "Environmental"}
+      {#if chosenTab === "/environmental"}
         <Tabs tabText="Environmental" color="chosen" setChosen={handleSetChosen}/>
       {:else}
         <Tabs tabText="Environmental" color="green" setChosen={handleSetChosen}/>
       {/if}    
 
-      {#if chosenTab === "Workforce"}
+      {#if chosenTab === "/workforce"}
         <Tabs tabText="Workforce" color="chosen" setChosen={handleSetChosen}/>
       {:else}
         <Tabs tabText="Workforce" color="purple" setChosen={handleSetChosen}/>
       {/if}   
 
-      {#if chosenTab === "Crimjust"}
+      {#if chosenTab === "/crimjust"}
         <Tabs tabText="Criminal Justice" color="chosen" setChosen={handleSetChosen}/>
       {:else}
         <Tabs tabText="Criminal Justice" color="yellow" setChosen={handleSetChosen}/>

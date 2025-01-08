@@ -10,13 +10,20 @@
 	import CardRc from "../components/card_rc.svelte";
 	import CardSw from "../components/card_sw.svelte";
 
+	import type { PageData } from './$types';
+
+	let { data}: { data: PageData } = $props();
+  $inspect(data.post)
+
+  let tb = $derived(data.post[4])
+  let sw = $derived(data.post[0])
 </script>
 <div  in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
   <div class="flexy flex-col">
     <div class="flexy">
     <Card 
-      projectName={"Trash Bash"} 
-      projectBlurb={"Lorem ipso facto"} 
+      projectName={tb.program_name} 
+      projectBlurb={tb.expand.blurb.program_blurb} 
       chart1={StackedBarChart} 
       chartTitle1={"Trash & Recycyling tonnage"}
       chart2={BarChart}
@@ -28,6 +35,7 @@
       chart5={BarChart}
       chartTitle5={"Cleanup Sites"}
     />   
+      {tb.expand.links[0].url_string}
     <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
     <div class="flexy">
