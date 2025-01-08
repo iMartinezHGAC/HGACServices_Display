@@ -1,10 +1,45 @@
 <script lang="ts">
 	import CardBlurb from "../fragments/cardBlurb.svelte";
-import CardHeader from "../fragments/cardHeader.svelte";
+  import CardHeader from "../fragments/cardHeader.svelte";
+  import { page } from "$app/state";
+	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
+	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+
+  let tb_for_key: Trashbash
+  type tbKey = keyof typeof tb_for_key
+
+  function makeBarData(dataset: Trashbash[], key: tbKey) {
+    if(dataset) {
+    return dataset.map((item: Trashbash) => ({
+        juris: item.expand.collection_site_id.site_name,
+        value: item[key]
+      }))    }
+  }
+
+  function makeStackedBarData(dataset: Trashbash[], key1: tbKey, key2: tbKey) {
+    if(dataset) {
+    return dataset.map((item: Trashbash) => ({
+        juris: item.expand.collection_site_id.site_name,
+        recycled_pounds: item[key2],
+        trash_pounds: item[key1],
+      })).filter((item: any) => item.trash_pounds !== 0)
+    }
+  }
+
+  let stackedTrash = $derived(makeStackedBarData(page.data.trashbash, "trash_pounds" as tbKey, "recycled_pounds" as tbKey))
+  $inspect(stackedTrash)
+  let trash_pounds = $derived(makeBarData(page.data.trashbash, "trash_pounds" as tbKey))
+  let tires  = $derived(makeBarData(page.data.trashbash, "tires" as tbKey))
+  let recycled_pounds = $derived(makeBarData(page.data.trashbash, "recycled_pounds" as tbKey))
+  let tot_volunteer_count = $derived(makeBarData(page.data.trashbash, "tot_volunteer_count" as tbKey))
+  let vol_under_18= $derived(makeBarData(page.data.trashbash, "vol_under_18" as tbKey))
+  let vol_scouts= $derived(makeBarData(page.data.trashbash, "vol_scouts" as tbKey))
+  let miles_cleaned = $derived(makeBarData(page.data.trashbash, "miles_cleaned" as tbKey))
 
   interface cardProps {
     projectName: string,
     projectBlurb: string,
+    projectLinks: string[],
     chart1: any
     chartTitle1: string
     chart2?: any
@@ -19,6 +54,7 @@ import CardHeader from "../fragments/cardHeader.svelte";
 
   const props: cardProps = $props()
 
+
   let accordionFlag = $state(false);
   let accordionText = $derived.by(() => {
     if(accordionFlag === false)
@@ -26,6 +62,16 @@ import CardHeader from "../fragments/cardHeader.svelte";
     return "Show fewer metrics"
   })
   const bar_data = [
+      { juris: 'Travis', frequency: 55 },
+      { juris: 'Montgomery', frequency: 36 },
+      { juris: 'Waller', frequency: 25 },
+      { juris: 'Fort Bend', frequency: 75 },
+      { juris: 'Tarrant', frequency: 40 },
+      { juris: 'Galveston', frequency: 35 },
+      { juris: 'Bexar', frequency: 40 },
+      { juris: 'Harris', frequency: 90 }
+    ];
+  const bar_data_TB = [
       { juris: 'Travis', frequency: 55 },
       { juris: 'Montgomery', frequency: 36 },
       { juris: 'Waller', frequency: 25 },
@@ -99,42 +145,50 @@ import CardHeader from "../fragments/cardHeader.svelte";
     timeFlag = timeline
   }
 
+  $inspect(props.projectLinks)
+  let linkUrls = $derived(props.projectLinks.map(
+    (item: any) => item.url_string)
+  )
+
+  $inspect(linkUrls)
 </script>
 
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex flex-col bg-slate-700">
     <CardHeader projectName={props.projectName} {toggleTime} color="dark"/>
-    <CardBlurb text={props.projectBlurb}/>
+    <CardBlurbTb text={props.projectBlurb} links={linkUrls}/>
   </div>
   <div class="grid grid-cols-2 gap-2 items-center justify-center px-12">
-    {#if timeFlag}
-    <div class="card-style">
-      <props.chart1 data={stackbar_data_hist} yLabel={props.chartTitle1}/>
-    </div>
-      <!-- bar: tires count-->
+    {#if trash_pounds }
       <div class="card-style">
-        <props.chart2 data={bar_data_hist} width={800} height={580} yLabel={props.chartTitle2}/>
+        <StackedBarChartTb data={stackedTrash} yLabel={"Trash and Recycled Pounds"}/>
       </div>
-    {:else} 
-    <div class="card-style">
-      <props.chart1 data={stackbar_data} yLabel={props.chartTitle1}/>
-    </div>
-      <div class="card-style">
-        <props.chart2 data={bar_data} width={800} height={580} yLabel={props.chartTitle2}/>
-      </div>
+        <!-- bar: tires count-->
+        <div class="card-style">
+          <props.chart2 data={trash_pounds} width={800} height={580} yLabel={"Trash Pounds"}/>
+        </div>
     {/if}
     {#if accordionFlag}
       <!-- bar: volunteer count-->
       <div class="card-style">
-        <props.chart3 data={bar_data} yLabel={props.chartTitle3}/>
+        <props.chart3 data={tires} yLabel={"Tires"}/>
       </div>
       <!-- bar: shoreline miles-->
       <div class="card-style">
-        <props.chart4 data={bar_data} yLabel={props.chartTitle4}/>
+        <props.chart4 data={recycled_pounds} yLabel={"Recycled Pounds"}/>
       </div>
       <!-- bar: cleanup sites-->
       <div class="card-style">
-        <props.chart5 data={bar_data} yLabel={props.chartTitle5}/>
+        <props.chart5 data={tot_volunteer_count} yLabel={"Total Volunteer Count"}/>
+      </div>
+      <div class="card-style">
+        <props.chart5 data={miles_cleaned} yLabel={"Miles Cleaned"}/>
+      </div>
+      <div class="card-style">
+        <props.chart5 data={vol_scouts} yLabel={"Volunteer Scouts Count"}/>
+      </div>      
+      <div class="card-style">
+        <props.chart5 data={vol_under_18} yLabel={"Volunteer Under-18 Count"}/>
       </div>
     {/if}
   </div> 

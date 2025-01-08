@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
 	import BarChart from "../charts/BarChart.svelte";
+  import BarChartTB from "../charts/BarChartTB.svelte";
 	import FilledAreaChart from "../charts/FilledAreaChart.svelte";
 	import LinePlot from "../charts/LinePlot.svelte";
 	import StackedBarChart from "../charts/StackedBarChart.svelte";
+	import StackedBarChartTB from "../charts/StackedBarChart.svelte";
 	import AdditionalWork from "../components/additionalWork.svelte";
 	import Card from "../components/card.svelte";
 	import CardLc from "../components/card_lc.svelte";
@@ -13,7 +15,6 @@
 	import type { PageData } from './$types';
 
 	let { data}: { data: PageData } = $props();
-  $inspect(data.post)
 
   let tb = $derived(data.post[4])
   let sw = $derived(data.post[0])
@@ -23,19 +24,19 @@
     <div class="flexy">
     <Card 
       projectName={tb.program_name} 
-      projectBlurb={tb.expand.blurb.program_blurb} 
+      projectBlurb={tb.expand.blurb.program_blurb}
+      projectLinks={tb.expand.links}
       chart1={StackedBarChart} 
       chartTitle1={"Trash & Recycyling tonnage"}
-      chart2={BarChart}
+      chart2={BarChartTB}
       chartTitle2={"Tire Count"}
-      chart3={BarChart}
+      chart3={BarChartTB}
       chartTitle3={"Count"}
-      chart4={BarChart}
+      chart4={BarChartTB}
       chartTitle4={"Total Miles"}
-      chart5={BarChart}
+      chart5={BarChartTB}
       chartTitle5={"Cleanup Sites"}
     />   
-      {tb.expand.links[0].url_string}
     <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
     <div class="flexy">

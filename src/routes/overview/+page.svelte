@@ -64,6 +64,10 @@ const stackbar_data = [
     { juris: 'Environment', age: '25-34', population: 1500 },
     { juris: 'Environment', age: '35-44', population: 1300 },
     { juris: 'Environment', age: '45-54', population: 1100 },
+    { juris: 'Criminal Justice', age: '18-24', population: 800 },
+    { juris: 'Criminal Justice', age: '25-34', population: 1800 },
+    { juris: 'Criminal Justice', age: '35-44', population: 2200 },
+    { juris: 'Criminal Justice', age: '45-54', population: 900 },
     // More data entries...
   ];
 </script>

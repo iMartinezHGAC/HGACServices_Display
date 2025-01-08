@@ -6,6 +6,7 @@ const pb = new PocketBase('https://r319c7uoppfpk2dt.h-gac.com');
 
 export const load: PageServerLoad = async () => {
 	return {
-		post: await pb.collection('programs').getFullList({expand: 'blurb, links'})
+		post: await pb.collection('programs').getFullList({expand: 'blurb, links'}),
+    trashbash: await pb.collection('05_trash_bash').getFullList({expand: 'collection_site_id'})
   }
 }

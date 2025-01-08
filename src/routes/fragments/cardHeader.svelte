@@ -22,7 +22,7 @@
 <style>
 .dark {
   @apply
-  flex font-metropolis text-5xl font-[900] pt-8 pb-6 pl-2 bg-slate-700 text-white justify-start
+  flex font-metropolis text-5xl font-[900] pt-4 pb-6 pl-2 bg-slate-700 text-white justify-start
 }
 .light {
   @apply
