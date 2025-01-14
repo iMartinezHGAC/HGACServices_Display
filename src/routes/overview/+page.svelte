@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { symbol } from "d3";
-import StackedBarChart from "../charts/StackedBarChart.svelte";
-import StatDisplay from "../components/statDisplay.svelte";
+  import StackedBarChart from "../charts/StackedBarChart.svelte";
+  import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
 
 const donut_data = [

@@ -4,6 +4,7 @@
   import { page } from "$app/state";
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+	import AdditionalWork from "./additionalWork.svelte";
 
   let tb_for_key: Trashbash
   type tbKey = keyof typeof tb_for_key
@@ -163,10 +164,10 @@
       <div class="card-style">
         <StackedBarChartTb data={stackedTrash} yLabel={"Trash and Recycled Pounds"}/>
       </div>
-        <!-- bar: tires count-->
-        <div class="card-style">
-          <props.chart2 data={trash_pounds} width={800} height={580} yLabel={"Trash Pounds"}/>
-        </div>
+        <!-- bar: tires count -->
+      <div class="card-style">
+        <props.chart2 data={trash_pounds} width={800} height={580} yLabel={"Trash Pounds"}/>
+      </div>
     {/if}
     {#if accordionFlag}
       <!-- bar: volunteer count-->
@@ -192,6 +193,14 @@
       </div>
     {/if}
   </div> 
+  <div class="flexy">
+    <AdditionalWork 
+      bodyText={"Lorem Ipsum"} 
+      projectName={"Dog Poop Pickup"} 
+      funding={40} 
+      projectTimeframe={""} 
+    />
+  </div>
   <button class="h-12 w-full bg-slate-700 text-white" 
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}

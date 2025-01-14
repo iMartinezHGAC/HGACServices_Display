@@ -37,7 +37,6 @@
       chart5={BarChartTB}
       chartTitle5={"Cleanup Sites"}
     />   
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
     <div class="flexy">
     <CardLc 
@@ -60,7 +59,6 @@
       chart8={BarChart}
       chartTitle8={"VMT Reduction"}
     />   
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
   <!-- rc -->
     <div class="flexy">
@@ -82,7 +80,6 @@
       chart7={LinePlot}
       chartTitle7={"Funding Dollars lev"}
     />    
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
   <!-- sw -->
   <div class="flexy">
@@ -96,7 +93,6 @@
       chart3={LinePlot}
       chartTitle3={"Dollars"}
     />
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
   </div>
 
   </div>

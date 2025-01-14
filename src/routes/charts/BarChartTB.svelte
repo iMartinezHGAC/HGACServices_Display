@@ -2,6 +2,7 @@
   import * as d3 from 'd3';
 	import Tabs from '../components/tabs.svelte';
 
+
   // Props
   let {data = [],
     width = 928, 
@@ -15,6 +16,7 @@
   const yLabelMargin = 80;
 
   // Reactive variables
+  const barColors = ["#ffffff","#fff9d8"]
 
   // Set up the scales and axis on mount
     // Horizontal scale (band scale)
@@ -58,17 +60,18 @@
 
  <!-- Y-axis group -->
   <g transform={`translate(${marginLeft},0)`} class="y-axis">
-    <text x={`-${height/2}`} 
-      y={`${marginLeft - yLabelMargin-20}`} 
-      transform="rotate(-90)"
-      text-anchor="middle"
-      class="text-2xl font-bold font-metropolis"
+    <text 
+      x={`${(0)}`} 
+      y={`${0}`} 
+      text-anchor="left"
+      class="text-3xl font-bold font-metropolis text-start items-start fill-slate-700"
     >
       {yLabel}
     </text>
+
     {#each y.ticks(5) as tick}
       <g transform={`translate(0,${y(tick)})`}>
-        <line x2={width - marginRight} stroke="black" />
+        <line x2={width - marginRight - marginLeft} stroke="black" />
         <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
       </g>
     {/each}
