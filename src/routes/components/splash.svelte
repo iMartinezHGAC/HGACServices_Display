@@ -5,7 +5,7 @@ import Tabs from "./tabs.svelte";
 
 let {chosenTab, jurisdiction}: {chosenTab: string, jurisdiction: string} = $props()
 let humanChosenTab = $derived(chosenTab.slice(1))
-$inspect(humanChosenTab)
+//$inspect(humanChosenTab)
 
 let human_readable = $derived(jurisdiction
   .split("_")

@@ -27,8 +27,6 @@
     }
   }
 
-  let stackedTrash = $derived(makeStackedBarData(page.data.trashbash, "trash_pounds" as tbKey, "recycled_pounds" as tbKey))
-  $inspect(stackedTrash)
   let trash_pounds = $derived(makeBarData(page.data.trashbash, "trash_pounds" as tbKey))
   let tires  = $derived(makeBarData(page.data.trashbash, "tires" as tbKey))
   let recycled_pounds = $derived(makeBarData(page.data.trashbash, "recycled_pounds" as tbKey))
@@ -146,37 +144,33 @@
     timeFlag = timeline
   }
 
-  $inspect(props.projectLinks)
+  //$inspect(props.projectLinks)
   let linkUrls = $derived(props.projectLinks.map(
     (item: any) => item.url_string)
   )
 
-  $inspect(linkUrls)
+  //$inspect(linkUrls)
 </script>
 
+{#if trash_pounds }
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex flex-col bg-slate-700">
     <CardHeader projectName={props.projectName} {toggleTime} color="dark"/>
     <CardBlurbTb text={props.projectBlurb} links={linkUrls}/>
   </div>
   <div class="grid grid-cols-2 gap-2 items-center justify-center px-12">
-    {#if trash_pounds }
-      <div class="card-style">
-        <StackedBarChartTb data={stackedTrash} yLabel={"Trash and Recycled Pounds"}/>
-      </div>
         <!-- bar: tires count -->
       <div class="card-style">
         <props.chart2 data={trash_pounds} width={800} height={580} yLabel={"Trash Pounds"}/>
       </div>
-    {/if}
+      <!-- bar: shoreline miles-->
+      <div class="card-style">
+        <props.chart4 data={recycled_pounds} yLabel={"Recycled Pounds"}/>
+      </div>
     {#if accordionFlag}
       <!-- bar: volunteer count-->
       <div class="card-style">
         <props.chart3 data={tires} yLabel={"Tires"}/>
-      </div>
-      <!-- bar: shoreline miles-->
-      <div class="card-style">
-        <props.chart4 data={recycled_pounds} yLabel={"Recycled Pounds"}/>
       </div>
       <!-- bar: cleanup sites-->
       <div class="card-style">
@@ -206,4 +200,4 @@
     {accordionText}
   </button>  
 </div>
-
+{/if}

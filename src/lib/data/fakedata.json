@@ -136,7 +136,7 @@
         "Historical_Funds":400000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Regional Law Enforcement Training",
         "Current_Funds":40000,
         "Current_Services":1,
@@ -144,7 +144,7 @@
         "Historical_Funds":120000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Regional Criminal Justice Grants",
         "Current_Funds":100000,
         "Current_Services":1,
@@ -152,7 +152,7 @@
         "Historical_Funds":300000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Regional Elder Justice Program",
         "Current_Funds":30000,
         "Current_Services":1,
@@ -160,7 +160,7 @@
         "Historical_Funds":150000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Regional Juvenile Mental Health",
         "Current_Funds":50000,
         "Current_Services":1,
@@ -168,7 +168,7 @@
         "Historical_Funds":200000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"9-1-1 Emergency Communications District",
         "Current_Funds":150000,
         "Current_Services":1,
@@ -176,7 +176,7 @@
         "Historical_Funds":500000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Hazard Mitigation",
         "Current_Funds":80000,
         "Current_Services":1,
@@ -184,7 +184,7 @@
         "Historical_Funds":200000
     },
     {
-        "Group":"Public Safety",
+        "Group":"Public_Safety",
         "Program":"Emergency Preparedness Planning",
         "Current_Funds":120000,
         "Current_Services":1,

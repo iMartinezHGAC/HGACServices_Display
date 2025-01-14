@@ -11,7 +11,7 @@
   onMount(()=> {
     plainText = htmlToPlaintext(text)
   })
-  $inspect(links)
+  //$inspect(links)
 </script>
 <div>
   <p class="prose-md text-white font-metropolis font-semibold pb-4 px-6">
