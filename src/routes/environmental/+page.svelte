@@ -57,7 +57,6 @@
       chartTitle5={"Legacy Studies"}
     />   
   </div>
-  <!-- rc -->
     <div class="flexy">
     <CardRc 
       projectName={cr.program_name} 
@@ -78,7 +77,6 @@
       chartTitle7={"Funding Dollars lev"}
     />    
   </div>
-  <!-- sw -->
   <div class="flexy">
     <CardSw
       projectName={sw.program_name} 

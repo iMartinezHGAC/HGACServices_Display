@@ -54,19 +54,19 @@ type stackedTrash = {
 
   console.log(CurrentFunding)
 const stackbar_data: stackedTrash[] = [
-    { juris: 'Justice', historical_funds: 1000, current_funds: 1000 },
-    { juris: 'Transportation', historical_funds: 1000, current_funds: 1000 },
+    { juris: 'Justice', historical_funds: 1000, current_funds: 900 },
+    { juris: 'Transportation', historical_funds: 1000, current_funds: 1200 },
     { juris: 'Workforce', historical_funds: 1000, current_funds: 800 },
-    { juris: 'Environment', historical_funds: 400, current_funds: 1100 },
-    { juris: 'Public Safety', historical_funds: 400, current_funds: 900 },
+    { juris: 'Environment', historical_funds: 800, current_funds: 1100 },
+    { juris: 'Public Safety', historical_funds: 1000, current_funds: 1000 },
     // More data entries...
   ]
   ;const stackbar_services: stackedTrash[] = [
-    { juris: 'Justice', historical_funds: 7, current_funds: 10 },
-    { juris: 'Transportation', historical_funds: 11, current_funds: 10 },
-    { juris: 'Workforce', historical_funds: 10, current_funds: 8 },
-    { juris: 'Environment', historical_funds: 4, current_funds: 13 },
-    { juris: 'Public Safety', historical_funds: 4, current_funds: 4 },
+    { juris: 'Justice', historical_services: 7, current_services: 15 },
+    { juris: 'Transportation', historical_services: 11, current_services: 10 },
+    { juris: 'Workforce', historical_services: 10, current_services: 8 },
+    { juris: 'Environment', historical_services: 8, current_services: 13 },
+    { juris: 'Public Safety', historical_services: 12, current_services: 12 },
     // More data entries...
   ];
 
@@ -96,10 +96,10 @@ const stackbar_data: stackedTrash[] = [
   </div>
   <div class="w-11/12 bg-hgac-slate text-slate-200 px-6 flex items-center justify-start">
     <div class="transform scale-75 mb-96 w-1/2">
-      <StackedBarChartTb data={stackbar_data} yLabel="Historic Funds Received" colorSet={groupColors}/>
+      <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
     </div>
     <div class="transform scale-75 mb-96 w-1/2">
-      <StackedBarChartTb data={stackbar_services} yLabel="Historic Services Provided" colorSet={groupColors}/>
+      <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
     </div>
   </div>
 

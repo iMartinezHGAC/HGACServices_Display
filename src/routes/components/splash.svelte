@@ -20,40 +20,25 @@ function handleSetChosen(tabName: string) {
 
 </script>
 
+{#snippet tabSnippet(path: string, tabText: string, color: string)}
+      {#if chosenTab === path}
+        <Tabs tabText={tabText} color="chosen" setChosen={handleSetChosen}/>
+      {:else}
+        <Tabs tabText={tabText} color={color} setChosen={handleSetChosen}/>
+      {/if}
+{/snippet}
+
 <div class="fixed flexy h-28 w-screen top-0 bg-hgac-slate shadow-lg shadow-slate-500">
   <p class="fixed left-36 text-4xl font-extrabold font-metropolis small-caps text-slate-200 select-none">{human_readable}</p>
   <img src={county_logo} alt="harris" class="fixed h-24 left-4">
   <img src={logo} alt="HGAC" class="fixed h-24 right-4">
   <div class="fixed flexy top-16">
-      {#if chosenTab === "/overview"}
-        <Tabs tabText="Overview" color="chosen" setChosen={handleSetChosen}/>
-      {:else}
-        <Tabs tabText="Overview" color="gray" setChosen={handleSetChosen}/>
-      {/if}
-
-      {#if chosenTab === "/transportation"}
-        <Tabs tabText="Transportation" color="chosen" setChosen={handleSetChosen}/>
-      {:else}
-        <Tabs tabText="Transportation" color="blue" setChosen={handleSetChosen}/>
-      {/if}
-
-      {#if chosenTab === "/environmental"}
-        <Tabs tabText="Environmental" color="chosen" setChosen={handleSetChosen}/>
-      {:else}
-        <Tabs tabText="Environmental" color="green" setChosen={handleSetChosen}/>
-      {/if}    
-
-      {#if chosenTab === "/workforce"}
-        <Tabs tabText="Workforce" color="chosen" setChosen={handleSetChosen}/>
-      {:else}
-        <Tabs tabText="Workforce" color="purple" setChosen={handleSetChosen}/>
-      {/if}   
-
-      {#if chosenTab === "/crimjust"}
-        <Tabs tabText="Public Safety" color="chosen" setChosen={handleSetChosen}/>
-      {:else}
-        <Tabs tabText="Public Safety" color="yellow" setChosen={handleSetChosen}/>
-      {/if}
-        <Tabs tabText="Community" color="gray" setChosen={handleSetChosen}/>
+      {@render tabSnippet("/overview", "Overview", "gray")}
+      {@render tabSnippet("/transportation", "Transportation", "blue")}
+      {@render tabSnippet("/environmental", "Environmental", "green")}
+      {@render tabSnippet("/workforce", "Workforce", "purple")}
+      {@render tabSnippet("/crimjust", "Public Safety", "yellow")}
+      {@render tabSnippet("/community", "Community", "gray")}
+      {@render tabSnippet("/aging", "Aging", "gray")}
   </div>
 </div>
