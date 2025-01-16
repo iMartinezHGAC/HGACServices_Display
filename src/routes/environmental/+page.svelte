@@ -24,72 +24,20 @@
 <div  in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
   <div class="flexy flex-col">
     <div class="flexy">
-    <Card 
-      projectName={tb.program_name} 
-      projectBlurb={tb.expand.blurb.program_blurb}
-      projectLinks={tb.expand.links}
-      chart1={StackedBarChart} 
-      chartTitle1={"Trash & Recycyling tonnage"}
-      chart2={BarChartTB}
-      chartTitle2={"Tire Count"}
-      chart3={BarChartTB}
-      chartTitle3={"Count"}
-      chart4={BarChartTB}
-      chartTitle4={"Total Miles"}
-      chart5={BarChartTB}
-      chartTitle5={"Cleanup Sites"}
-    />   
-  </div>
-    <div class="flexy">
-    <CardLc 
-      projectName={wqmp.program_name} 
-      projectBlurb={wqmp.expand.blurb.program_blurb}
-      projectLinks={tb.expand.links}
-      chart1={BarChart} 
-      chartTitle1={"Projects Count"}
-      chart2={LinePlot}
-      chartTitle2={"Funding Dollars"}
-      chart3={FilledAreaChart}
-      chartTitle3={"Studies Adopted"}
-      chart4={FilledAreaChart}
-      chartTitle4={"Recommendations Implemented"}
-      chart5={FilledAreaChart}
-      chartTitle5={"Legacy Studies"}
-    />   
-  </div>
-    <div class="flexy">
-    <CardRc 
-      projectName={cr.program_name} 
-      projectBlurb={cr.expand.blurb.program_blurb} 
-      chart1={BarChart} 
-      chartTitle1={"Project Count"}
-      chart2={BarChart}
-      chartTitle2={"Assistance Given"}
-      chart3={BarChart}
-      chartTitle3={"# Meetings"}
-      chart4={BarChart}
-      chartTitle4={"Meeting Hours"}
-      chart5={LinePlot}
-      chartTitle5={"Funding Dollars"}
-      chart6={FilledAreaChart}
-      chartTitle6={"Data Request Hours"}
-      chart7={LinePlot}
-      chartTitle7={"Funding Dollars lev"}
-    />    
-  </div>
-  <div class="flexy">
-    <CardSw
-      projectName={sw.program_name} 
-      projectBlurb={sw.expand.blurb.program_blurb} 
-      chart1={BarChart} 
-      chartTitle1={"# Attendees"}
-      chart2={BarChart}
-      chartTitle2={"Assistance Given"}
-      chart3={LinePlot}
-      chartTitle3={"Dollars"}
-    />
-  </div>
-
+      <Card 
+        project={tb} 
+        chart1={StackedBarChart} 
+        chartTitle1={"Trash & Recycyling tonnage"}
+        chart2={BarChartTB}
+        chartTitle2={"Tire Count"}
+        chart3={BarChartTB}
+        chartTitle3={"Count"}
+        chart4={BarChartTB}
+        chartTitle4={"Total Miles"}
+        chart5={BarChartTB}
+        chartTitle5={"Cleanup Sites"}
+      />   
+    </div>
   </div>
 </div>
 

@@ -5,6 +5,7 @@
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
+	import type { RecordModel } from "pocketbase";
 
   let tb_for_key: Trashbash
   type tbKey = keyof typeof tb_for_key
@@ -36,9 +37,7 @@
   let miles_cleaned = $derived(makeBarData(page.data.trashbash, "miles_cleaned" as tbKey))
 
   interface cardProps {
-    projectName: string,
-    projectBlurb: string,
-    projectLinks: string[],
+    project: RecordModel,
     chart1: any
     chartTitle1: string
     chart2?: any
@@ -60,84 +59,6 @@
       return "Show more metrics.." 
     return "Show fewer metrics"
   })
-  const bar_data = [
-      { juris: 'Travis', frequency: 55 },
-      { juris: 'Montgomery', frequency: 36 },
-      { juris: 'Waller', frequency: 25 },
-      { juris: 'Fort Bend', frequency: 75 },
-      { juris: 'Tarrant', frequency: 40 },
-      { juris: 'Galveston', frequency: 35 },
-      { juris: 'Bexar', frequency: 40 },
-      { juris: 'Harris', frequency: 90 }
-    ];
-  const bar_data_TB = [
-      { juris: 'Travis', frequency: 55 },
-      { juris: 'Montgomery', frequency: 36 },
-      { juris: 'Waller', frequency: 25 },
-      { juris: 'Fort Bend', frequency: 75 },
-      { juris: 'Tarrant', frequency: 40 },
-      { juris: 'Galveston', frequency: 35 },
-      { juris: 'Bexar', frequency: 40 },
-      { juris: 'Harris', frequency: 90 }
-    ];
-  const bar_data_hist = [
-      { juris: 'Travis', frequency: 25 },
-      { juris: 'Montgomery', frequency: 30 },
-      { juris: 'Waller', frequency: 55 },
-      { juris: 'Fort Bend', frequency: 65 },
-      { juris: 'Tarrant', frequency: 15 },
-      { juris: 'Galveston', frequency: 40 },
-      { juris: 'Bexar', frequency: 20 },
-      { juris: 'Harris', frequency: 90 }
-    ];
-  const stackbar_data = [
-      { juris: 'Harris', age: '18-24', population: 2800 },
-      { juris: 'Harris', age: '25-34', population: 2200 },
-      { juris: 'Harris', age: '35-44', population: 1700 },
-      { juris: 'Harris', age: '45-54', population: 1300 },
-      { juris: 'Harris', age: '55-64', population: 1200 },
-      { juris: 'Fort Bend', age: '18-24', population: 1200 },
-      { juris: 'Fort Bend', age: '25-34', population: 1600 },
-      { juris: 'Fort Bend', age: '35-44', population: 1200 },
-      { juris: 'Fort Bend', age: '45-54', population: 700 },
-      { juris: 'Fort Bend', age: '55-64', population: 1100 },
-      { juris: 'Waller', age: '18-24', population: 2100 },
-      { juris: 'Waller', age: '25-34', population: 2500 },
-      { juris: 'Waller', age: '35-44', population: 1100 },
-      { juris: 'Waller', age: '45-54', population: 900 },
-      { juris: 'Waller', age: '55-64', population: 1400 },
-      // More data entries...
-    ];
-  const stackbar_data_hist = [
-      { juris: 'Harris', age: '18-24', population: 1000 },
-      { juris: 'Harris', age: '25-34', population: 1500 },
-      { juris: 'Harris', age: '35-44', population: 2700 },
-      { juris: 'Harris', age: '45-54', population: 1200 },
-      { juris: 'Harris', age: '55-64', population: 1800 },
-      { juris: 'Fort Bend', age: '18-24', population: 800 },
-      { juris: 'Fort Bend', age: '25-34', population: 1200 },
-      { juris: 'Fort Bend', age: '35-44', population: 1700 },
-      { juris: 'Fort Bend', age: '45-54', population: 1000 },
-      { juris: 'Fort Bend', age: '55-64', population: 1800 },
-      { juris: 'Waller', age: '18-24', population: 1100 },
-      { juris: 'Waller', age: '25-34', population: 1500 },
-      { juris: 'Waller', age: '35-44', population: 1300 },
-      { juris: 'Waller', age: '45-54', population: 1100 },
-      { juris: 'Waller', age: '55-64', population: 1800 },
-      // More data entries...
-    ];
-  const area_data  = [
-      { date: new Date('2021-01-01'), juris: 'Harris County', unemployed: 500 },
-      { date: new Date('2021-01-01'), juris: 'Fort Bend County', unemployed: 300 },
-      { date: new Date('2021-01-01'), juris: 'Tarrant County', unemployed: 700 },
-      { date: new Date('2021-02-01'), juris: 'Harris County', unemployed: 450 },
-      { date: new Date('2021-02-01'), juris: 'Fort Bend County', unemployed: 350 },
-      { date: new Date('2021-02-01'), juris: 'Tarrant County', unemployed: 200 },
-      { date: new Date('2021-03-01'), juris: 'Harris County', unemployed: 600 },
-      { date: new Date('2021-03-01'), juris: 'Fort Bend County', unemployed: 200 },
-      { date: new Date('2021-03-01'), juris: 'Tarrant County', unemployed: 500 },
-      // Add more data points...
-    ];
 
   let timeFlag = $state(false)
   function toggleTime(timeline: boolean) {
@@ -145,9 +66,11 @@
   }
 
   //$inspect(props.projectLinks)
-  let linkUrls = $derived(props.projectLinks.map(
+  let linkUrls = $derived(props.project.expand!.links.map(
     (item: any) => item.url_string)
   )
+
+  let blurb = $derived(props.project.expand!.blurb.program_blurb)
 
   //$inspect(linkUrls)
 </script>
@@ -155,8 +78,8 @@
 {#if trash_pounds }
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex bg-slate-700">
-    <CardHeader projectName={props.projectName}  links={linkUrls} color="dark"/>
-    <CardBlurbTb text={props.projectBlurb}/>
+    <CardHeader projectName={props.project.program_name}  links={linkUrls} color="dark"/>
+    <CardBlurbTb text={blurb}/>
   </div>
   <div class="grid grid-cols-2 gap-2 items-center justify-center px-12 mt-8">
         <!-- bar: tires count -->
