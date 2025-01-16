@@ -13,7 +13,7 @@ type collection_site_id = {
   collectionName?: string,
   date?: date,
   id?: string,
-  geometry?: Object,
+  geometry?: object,
   site_name: string,
 }
 
@@ -37,31 +37,24 @@ type Trashbash = {
   expand: expandTB
 }
 
-class IterableStackedTrash {
-  private data: stackedTrash[];
-
-  constructor(data: stackedTrash[]) {
-    this.data = data
-  }
-   
-  [Symbol.iterator]() {
-    let index = 0
-    const data = this.data
-
-    return {
-      next(): IteratorResult<stackedTrash> {
-        if (index < data.length) {
-          return {value: data[index++], done: false }
-        } else {
-          return {done: true, value: undefined };
-        }
-      }
-    }
-  }
-}
-
 type stackedTrash = {
   juris: string,
-  trash_pounds: number,
-  recycled_pounds: number,
+  historical_funds: number,
+  current_funds: number,
+}
+
+type serviceType = {
+  Group: string,
+  Program: string,
+  Current_Funds: number,
+  Current_Services: number,
+  Current_Total_Participation: number | null,
+  Historical_Funds: number,
+}
+
+type serviceKey = keyof serviceType
+
+type donutType = {
+  name: string,
+  value: number,
 }

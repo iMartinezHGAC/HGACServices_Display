@@ -2,7 +2,6 @@
   import * as d3 from 'd3';
 	import Tabs from '../components/tabs.svelte';
 
-
   // Props
   let {data = [],
     width = 928, 
@@ -71,7 +70,7 @@
 
     {#each y.ticks(5) as tick}
       <g transform={`translate(0,${y(tick)})`}>
-        <line x2={width - marginRight - marginLeft} stroke="black" />
+        <line x2={width - marginRight - marginLeft} stroke="black" transform="translate(20,0)"/>
         <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
       </g>
     {/each}
@@ -82,6 +81,7 @@
           y={y(d.value)} 
           width={x.bandwidth()} 
           height={y(0) - y(d.value)} 
+          transform="translate(20,0)"
           fill="forestgreen" />
   {/each}
 </svg>

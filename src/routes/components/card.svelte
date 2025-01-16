@@ -154,11 +154,11 @@
 
 {#if trash_pounds }
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
-  <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} {toggleTime} color="dark"/>
-    <CardBlurbTb text={props.projectBlurb} links={linkUrls}/>
+  <div class="flex bg-slate-700">
+    <CardHeader projectName={props.projectName}  links={linkUrls} color="dark"/>
+    <CardBlurbTb text={props.projectBlurb}/>
   </div>
-  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12">
+  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12 mt-8">
         <!-- bar: tires count -->
       <div class="card-style">
         <props.chart2 data={trash_pounds} width={800} height={580} yLabel={"Trash Pounds"}/>
@@ -186,7 +186,11 @@
         <props.chart5 data={vol_under_18} yLabel={"Volunteer Under-18 Count"}/>
       </div>
     {/if}
-  </div> 
+  </div>  
+  <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
+      onclick={()=> {accordionFlag = !accordionFlag}}>
+    {accordionText}
+  </button>  
   <div class="flexy">
     <AdditionalWork 
       bodyText={"Lorem Ipsum"} 
@@ -195,9 +199,6 @@
       projectTimeframe={""} 
     />
   </div>
-  <button class="h-12 w-full bg-slate-700 text-white" 
-      onclick={()=> {accordionFlag = !accordionFlag}}>
-    {accordionText}
-  </button>  
+
 </div>
-{/if}
+  {/if}

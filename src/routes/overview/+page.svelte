@@ -1,82 +1,78 @@
 <script lang="ts">
-	import type { PageData } from "../$types";
-  import StackedBarChart from "../charts/StackedBarChart.svelte";
+	import type { PageData} from "../$types";
+	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
   import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
-  const {data}: {data: PageData} = $props() 
+  const {data}: {data: PageData } = $props() 
 
-  type serviceType = {
-    Group: string,
-    Program: string,
-    Current_Funds: number,
-    Current_Services: number,
-    Current_Total_Participation: number | null,
-    Historical_Funds: number,
+  $inspect(data)
+
+
+
+  function doesGroupExist(objectArray: serviceType[], group: string) {
+    return objectArray.find(item => item.Group === group)
   }
 
-  $inspect(data.json)
+  function calculateCategoryTotal(objectArray: serviceType[], group: string, category: serviceKey) {
+    const total = objectArray
+      .filter((item: serviceType) => item.Group===group)
+      .reduce((totalValue: number, currentItem: serviceType) => {
+        return totalValue += currentItem[category] as number
+    }, 0)
+    return total
+  }
 
-  const donutGroups = data.json.reduce((acc, item)=> {
-    if(!acc[item.Group]) {
-      acc[item.Group] = []
+  function getGroupTotal(objectArray: serviceType[], group: string, category: serviceKey) {
+    if(!doesGroupExist(objectArray, group)) return -1;
+    return calculateCategoryTotal(objectArray, group, category)
+  }
+
+  function donutGetCurrentFunds(objectArray: serviceType[], group: string, category: serviceKey) {
+    return {
+      name: group,
+      value: getGroupTotal(objectArray, group, category)
     }
-    acc[item.Group].push(item)
-    return acc
-  })
+  }
 
-  const donutCommunity = donutGroups.Community.map((item: serviceType) => ({
-    name: item.Program,
-    value: item.Current_Funds
-  }))
+  function convertAllToDonut(objectArray: serviceType[], groups: string[], category: serviceKey) {
+    let newObjectArray: donutType[] = []
+    groups.forEach((group: string) => {
+      newObjectArray.push(donutGetCurrentFunds(objectArray, group, category))
+    })
+    return newObjectArray
+  }
 
-  const donutEnvironmental = donutGroups.Environmental.map((item: serviceType) => ({
-    name: item.Program,
-    value: item.Current_Funds
-  }))
-  const donutTransportation = donutGroups.Transportation.map((item: serviceType) => ({
-    name: item.Program,
-    value: item.Current_Funds
-  }))
-  const donutWorkforce = donutGroups.Workforce.map((item: serviceType) => ({
-    name: item.Program,
-    value: item.Current_Funds
-  }))  
-  const donutCriminal = donutGroups.Criminal_Justice.map((item: serviceType) => ({
-    name: item.Program,
-    value: item.Current_Funds
-  }))
+type stackedTrash = {
+  juris: string,
+  historical_funds: number,
+  current_funds: number,
+}
+  const CurrentFunding = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Community","Public_Safety"], "Current_Funds")
+  const Services = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Community","Public_Safety"], "Current_Services")
+  const Participation = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce","Community", "Public_Safety"], "Current_Total_Participation")
 
-  const currentStack = data.json.map((item: serviceType) => ({
-    juris: item.Program,
-    age: item.Group,
-    population: item.Current_Funds,
-  }))
-  $inspect(currentStack)
-  const historyStack = data.json.map((item: serviceType) => ({
-    juris: item.Program,
-    age: item.Group,
-    population: item.Current_Funds,
-  }))
-  $inspect(historyStack)
-const stackbar_data = [
-    { juris: 'Justice', age: 'geoma', population: 1000 },
-    { juris: 'Justice', age: '25-34', population: 1500 },
-    { juris: 'Justice', age: '35-44', population: 2700 },
-    { juris: 'Justice', age: '45-54', population: 1200 },
-    { juris: 'Workforce', age: 'geoma', population: 800 },
-    { juris: 'Workforce', age: '25-34', population: 1200 },
-    { juris: 'Workforce', age: '35-44', population: 1700 },
-    { juris: 'Workforce', age: '45-54', population: 1000 },
-    { juris: 'Environment', age: 'geoma', population: 1100 },
-    { juris: 'Environment', age: '25-34', population: 1500 },
-    { juris: 'Environment', age: '35-44', population: 1300 },
-    { juris: 'Environment', age: '45-54', population: 1100 },
-    { juris: 'Criminal Justice', age: 'geoma', population: 800 },
-    { juris: 'Criminal Justice', age: '25-34', population: 1800 },
-    { juris: 'Criminal Justice', age: '35-44', population: 2200 },
-    { juris: 'Criminal Justice', age: '45-54', population: 900 },
+  console.log(CurrentFunding)
+const stackbar_data: stackedTrash[] = [
+    { juris: 'Justice', historical_funds: 1000, current_funds: 1000 },
+    { juris: 'Justice', historical_funds: 2400, current_funds: 1500 },
+    { juris: 'Justice', historical_funds: 3700, current_funds: 2700 },
+    { juris: 'Justice', historical_funds: 4900, current_funds: 1200 },
+    { juris: 'Workforce', historical_funds: 1000, current_funds: 800 },
+    { juris: 'Workforce', historical_funds: 2000, current_funds: 1200 },
+    { juris: 'Workforce', historical_funds: 3000, current_funds: 1700 },
+    { juris: 'Workforce', historical_funds: 4000, current_funds: 1000 },
+    { juris: 'Environment', historical_funds: 100, current_funds: 1100 },
+    { juris: 'Environment', historical_funds: 200, current_funds: 1500 },
+    { juris: 'Environment', historical_funds: 300, current_funds: 1300 },
+    { juris: 'Environment', historical_funds: 400, current_funds: 1100 },
+    { juris: 'Criminal Justice', historical_funds: 100, current_funds: 800 },
+    { juris: 'Criminal Justice', historical_funds: 200, current_funds: 1800 },
+    { juris: 'Criminal Justice', historical_funds: 300, current_funds: 2200 },
+    { juris: 'Criminal Justice', historical_funds: 400, current_funds: 900 },
     // More data entries...
   ];
+
+  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#EF9021", "#25B5AF"]
 </script>
 
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-fit w-full z-10">
@@ -86,19 +82,30 @@ const stackbar_data = [
     </p>
   </div>
   <div class="w-11/12 h-96 flexy flex-row">
-    <StatDisplay header="Community" data={donutCommunity} index={0} preSymbol="$" postSymbol="M"/>
-    <StatDisplay header="Environmental" data={donutEnvironmental} index={1} postSymbol=""/>
-    <StatDisplay header="Transportation" data={donutTransportation} index={2} />
-    <StatDisplay header="Workforce" data={donutWorkforce} index={3}/>
-    <StatDisplay header="Criminal Justice" data={donutCriminal} index={3}/>
+    <StatDisplay 
+      header="Current Funding" 
+      data={CurrentFunding} 
+      index={0} 
+      preSymbol="$" 
+      postSymbol="K"
+      colors={groupColors}
+    />
+    <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
+    <StatDisplay header="Participation" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
   </div>
   <div class="w-11/12 h-3/6 bg-hgac-slate text-slate-200 px-6 grid grid-cols-2">
-
-    <div class="transform scale-[70%] -translate-y-20">
-    <StackedBarChart data={historyStack} yLabel="Historic Funds Received"/>
-    </div>
-    <div class="transform scale-[70%] -translate-y-20">
-    <StackedBarChart data={currentStack} yLabel="Historic Funds Received"/>
-    </div>
+    <StackedBarChartTb data={stackbar_data} yLabel="Historic Funds Received"/>
   </div>
+
+<!--
+  Current 2024
+  Historical 2023
+  One bar for each group
+  Color
+    Green for environmental
+      From saturated to desaturated
+        Current to Historical
+          Split historical funding by percenthistorical_funds to fake 2022, 2021, 2020 data
+  
+-->
 </div>
