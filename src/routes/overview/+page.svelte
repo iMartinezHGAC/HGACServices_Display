@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData} from "../$types";
 	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+	import Indicator from "../components/indicator.svelte";
   import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
   const {data}: {data: PageData } = $props() 
@@ -47,26 +48,35 @@ type stackedTrash = {
   historical_funds: number,
   current_funds: number,
 }
-  const CurrentFunding = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Community","Public_Safety"], "Current_Funds")
-  const Services = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Community","Public_Safety"], "Current_Services")
-  const Participation = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce","Community", "Public_Safety"], "Current_Total_Participation")
+  const CurrentFunding = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Public_Safety","Community"], "Current_Funds")
+  const Services = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Public_Safety","Community"], "Current_Services")
+  const Participation = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce","Public_Safety","Community"], "Current_Total_Participation")
 
   console.log(CurrentFunding)
 const stackbar_data: stackedTrash[] = [
     { juris: 'Justice', historical_funds: 1000, current_funds: 1000 },
+    { juris: 'Transportation', historical_funds: 1000, current_funds: 1000 },
     { juris: 'Workforce', historical_funds: 1000, current_funds: 800 },
     { juris: 'Environment', historical_funds: 400, current_funds: 1100 },
-    { juris: 'Criminal Justice', historical_funds: 400, current_funds: 900 },
+    { juris: 'Public Safety', historical_funds: 400, current_funds: 900 },
+    // More data entries...
+  ]
+  ;const stackbar_services: stackedTrash[] = [
+    { juris: 'Justice', historical_funds: 7, current_funds: 10 },
+    { juris: 'Transportation', historical_funds: 11, current_funds: 10 },
+    { juris: 'Workforce', historical_funds: 10, current_funds: 8 },
+    { juris: 'Environment', historical_funds: 4, current_funds: 13 },
+    { juris: 'Public Safety', historical_funds: 4, current_funds: 4 },
     // More data entries...
   ];
 
-  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#EF9021", "#25B5AF"]
+  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
 
 <div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-fit w-full z-10">
   <div class="w-11/12 h-12 flexy bg-slate-700 text-slate-200 flex rounded-t-lg">
     <p class="font-poppins font-medium py-4 w-3/4 flexy">
-      Blurb, if any, for jurisdiction form communications (will probably only be here for large jurisdictions)
+      Blurb, if any, for communications (will probably only be here for large jurisdictions)
     </p>
   </div>
   <div class="w-11/12 h-96 flexy flex-row">
@@ -80,9 +90,17 @@ const stackbar_data: stackedTrash[] = [
     />
     <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
     <StatDisplay header="Participation" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
+    <div class="bg-slate-700 flexy h-full w-1/4 pr-10">
+      <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
+    </div>
   </div>
-  <div class="w-11/12 h-3/6 bg-hgac-slate text-slate-200 px-6 grid grid-cols-2">
-    <StackedBarChartTb data={stackbar_data} yLabel="Historic Funds Received"/>
+  <div class="w-11/12 bg-hgac-slate text-slate-200 px-6 flex items-center justify-start">
+    <div class="transform scale-75 mb-96 w-1/2">
+      <StackedBarChartTb data={stackbar_data} yLabel="Historic Funds Received" colorSet={groupColors}/>
+    </div>
+    <div class="transform scale-75 mb-96 w-1/2">
+      <StackedBarChartTb data={stackbar_services} yLabel="Historic Services Provided" colorSet={groupColors}/>
+    </div>
   </div>
 
 <!--

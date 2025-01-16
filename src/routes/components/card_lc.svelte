@@ -2,9 +2,11 @@
 	import CardBlurb from "../fragments/cardBlurb.svelte";
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 import CardHeader from "../fragments/cardHeader.svelte";
+	import AdditionalWork from "./additionalWork.svelte";
   interface cardProps {
     projectName: string,
     projectBlurb: string,
+    projectLinks?: string[],
     chart1: any
     chartTitle1: string
     chart2?: any
@@ -106,7 +108,7 @@ import CardHeader from "../fragments/cardHeader.svelte";
   }
 
 </script>
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
+<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4">
   <div class="flex flex-col bg-slate-500">
     <CardHeader projectName={props.projectName} {toggleTime} color="light"/>
     <CardBlurbTb text={props.projectBlurb}/>
@@ -155,9 +157,18 @@ import CardHeader from "../fragments/cardHeader.svelte";
       </div>
     {/if}
   </div> 
-  <button class="h-12 w-full bg-slate-500 text-white" 
+
+  <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}
   </button>  
+  <div class="flexy">
+    <AdditionalWork
+      bodyText={"Lorem Ipsum"} 
+      projectName={"Dog Poop Pickup"} 
+      funding={40} 
+      projectTimeframe={""} 
+    />
+  </div>
 </div>
 

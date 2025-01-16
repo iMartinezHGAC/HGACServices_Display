@@ -41,7 +41,7 @@
     />   
   </div>
     <div class="flexy">
-    <Card 
+    <CardLc 
       projectName={wqmp.program_name} 
       projectBlurb={wqmp.expand.blurb.program_blurb}
       projectLinks={tb.expand.links}

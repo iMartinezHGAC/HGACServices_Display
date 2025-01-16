@@ -9,7 +9,7 @@
     current_funds: number,
   }
 
-  let {data = [], yLabel = ""}: {data: stackedTrash[], yLabel: string} = $props(); // Data passed as a prop
+  let {data = [], yLabel = "", colorSet}: {data: stackedTrash[], yLabel: string, colorSet: string[]} = $props(); // Data passed as a prop
 
   // Chart dimensions
   let width = 1200;
@@ -23,8 +23,8 @@
   const legendItemHeight = 20;
   const legendItemWidth = 20;
 
-  const colors = d3.scaleSequential(d3.interpolateBlues)
-
+  //const colors = d3.scaleSequential([0.5,0.5], d3.interpolateBlues)
+  const colors = d3.scaleLinear([0,1,2,3,4], colorSet);
   // get unique data categories
   const uniqueCats = new Set(data.map((d) => d.juris))
   const intraLegendSpacing = width/(uniqueCats.size)-marginRight;
@@ -38,16 +38,13 @@
     .keys(keys)
   const stackedData = stack(data)
 
-  const att = $derived(stackedData[1].reduce((max, item) => 
+  const maxValueInStack = $derived(stackedData[1].reduce((max, item) => 
     Math.max(max, item[1]), Number.MIN_SAFE_INTEGER
   ))
 
-
+  $inspect("Stacked: ", stackedData)
   /*
  onMount(() => {
-  
- 
-  
     tooltip = d3.select('body')
       .append('div')
       .attr('class', 'tooltip')
@@ -95,9 +92,10 @@ const x = $derived(d3.scaleBand()
   )
 
 
-const y = d3.scaleLinear()
-    .domain([0, att])
-    .rangeRound([height - marginBottom, marginTop]);
+const y = $derived(d3.scaleLinear()
+    .domain([0, maxValueInStack])
+    .rangeRound([height - marginBottom, marginTop])
+  )
 
 onMount(()=> {
   d3.select(vector)
@@ -120,13 +118,13 @@ onMount(()=> {
     .selectAll('text')
     .attr('font-family', 'Metropolis')
     .attr('fill', 'black')
-    .attr('font-size', '1rem');
+    .attr('font-size', '1.3rem');
 
   // Y-LABEL
   d3.select(vector)
     .append('text')
     .attr('x', yLabel.length) // Rotate and place the label
-    .attr('y', 0) // Vertical position
+    .attr('y', -40) // Vertical position
     .attr('text-anchor', 'start')
     .attr('font-size', '1.8rem')
     .attr('font-weight', '700')
@@ -137,51 +135,58 @@ onMount(()=> {
 })
 </script>
 
-<div class="bg-white flex items-center justify-center m-4">
-<svg 
-      width={width}
-      height={height}
-      viewBox={`0, 0, ${width}, ${height}`}
-      class={'my-4 z-10'}
-      bind:this={vector}
->
-  <g>
-    {#each stackedData[1] as data,i}
-        {console.log(data)}
-      <rect
-        x={x(data.data.juris)}
-        y={y(data[1])}
-        height={y(data[0]) - y(data[1])}
-        width={x.bandwidth()}
-        fill={colors(i/data.length)}
-      >
-      </rect>
-    {/each}
-  </g>
-  <g transform={`translate(${marginLeft}, ${height-10})`}>
-    {#each keys as key,i}
-      {console.log("Key: ", key, i, colors(i/keys.length))}
-      <rect 
-        x={i*(legendItemHeight+intraLegendSpacing)} 
-        y={20} 
-        width={legendItemWidth} 
-        height={legendItemHeight} 
-        fill={colors(i/keys.length)}
-        stroke={"black"}
-        transform={`translate(${legendMargin})`}
-      >
-      </rect>
-      <text x={i*(legendItemHeight+intraLegendSpacing)} y={legendItemHeight*1.65} transform={`translate(${legendMargin*2})`}>
-        <tspan>
-            {key}
-        </tspan>
-      </text>
-    {/each}
-  </g>
-
-    // Append the horizontal axis
-
-</svg>
+<div class="bg-white flex items-center justify-center rounded-lg">
+  <svg 
+        width={width}
+        height={height}
+        viewBox={`0, 0, ${width}, ${height}`}
+        class={'z-10'}
+        bind:this={vector}
+  >
+    <g>
+      {#each stackedData[1] as data,i}
+        <rect
+          x={x(data.data.juris)}
+          y={y(data[0])}
+          transform="translate(0,0)"
+          height={-y(data[1])}
+          width={x.bandwidth()}
+          fill={colors(i/data.length)}
+        >
+        </rect>       
+        <rect
+          x={x(data.data.juris)}
+          y={y(data[1])-y(data[0])}
+            transform="translate(0,580)"
+          height={-(y(data[1])-y(data[0]))}
+          width={x.bandwidth()}
+          fill={colors(i/data.length)}
+        >
+        </rect>
+      {/each}
+    </g>
+    <g transform={`translate(${marginLeft}, ${height-10})`}>
+      {#each keys as key,i}
+        {console.log("Key: ", key, i, colors(i/keys.length))}
+        <rect 
+          x={i*(legendItemHeight+intraLegendSpacing)} 
+          y={20} 
+          width={legendItemWidth} 
+          height={legendItemHeight} 
+          fill={colors(i/keys.length)}
+          stroke={"black"}
+          transform={`translate(${legendMargin})`}
+        >
+        </rect>
+        <text x={i*(legendItemHeight+intraLegendSpacing)} y={legendItemHeight*1.65} transform={`translate(${legendMargin*2})`}>
+          <tspan>
+              {key}
+          </tspan>
+        </text>
+      {/each}
+    </g>
+      // Append the horizontal axis
+  </svg>
 </div>
 <!--
 <style>

@@ -31,9 +31,13 @@
   // total value
   function formatValue(num) {
     let value = num
-    if(postSymbol === "K") {
-       value = (num/1000).toPrecision(4)
+    if(num >= 1000000) {
+       value = (num/1000000).toPrecision(3).toString() + "M"
     }
+    else if(num >= 10000) {
+       value = (num/1000).toPrecision(4).toString() + "K"
+      }
+
     return value
   }
   let total = $derived(formatValue(d3.sum(data, (d: donutType) => d.value)))
@@ -42,7 +46,7 @@
   
   // Set up the arc and pie chart generator
   const arc = d3.arc<d3.PieArcDatum<donutType>>()
-    .innerRadius(radius * 0.55)
+    .innerRadius(radius * 0.45)
     .outerRadius(radius );
 
   const pie = d3.pie<donutType>()
@@ -78,9 +82,9 @@
     {#each arcs as arcData}
       <text transform={`translate(${arc.centroid(arcData)})`}>
         <tspan x="0" y="0em" class="text-5xl font-semibold fill-black stroke-black stroke-[8px]">
-          {preSymbol + formatValue(arcData.data.value) + postSymbol}
+          {preSymbol + formatValue(arcData.data.value) }
           <tspan x="-0.4rem" y="0em" class="absolute text-5xl font-semibold fill-white stroke-none">
-            {preSymbol + formatValue(arcData.data.value) + postSymbol}
+            {preSymbol + formatValue(arcData.data.value)}
           </tspan>
         </tspan>
       </text>
@@ -91,7 +95,7 @@
   <g>
 
     <text x="0" y="1rem" text-anchor="middle" class="font-metropolis text-[5.0rem] font-extrabold fill-white transform translate-y-4" >
-      {preSymbol + total.toLocaleString() + postSymbol}
+      {preSymbol + total.toLocaleString()}
     </text>
     <!-- 
     99,999

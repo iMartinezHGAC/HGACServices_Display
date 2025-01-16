@@ -105,9 +105,9 @@ import CardHeader from "../fragments/cardHeader.svelte";
 
 
 </script>
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
+<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4">
   <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} color="light"/>
+    <CardHeader projectName={props.projectName} color="dark"/>
     <CardBlurbTb text={props.projectBlurb}/>
   </div>
   <div class="grid grid-cols-2 gap-4 items-center justify-center px-12">

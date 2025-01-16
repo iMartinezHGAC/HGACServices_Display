@@ -50,9 +50,9 @@ function handleSetChosen(tabName: string) {
       {/if}   
 
       {#if chosenTab === "/crimjust"}
-        <Tabs tabText="Criminal Justice" color="chosen" setChosen={handleSetChosen}/>
+        <Tabs tabText="Public Safety" color="chosen" setChosen={handleSetChosen}/>
       {:else}
-        <Tabs tabText="Criminal Justice" color="yellow" setChosen={handleSetChosen}/>
+        <Tabs tabText="Public Safety" color="yellow" setChosen={handleSetChosen}/>
       {/if}
         <Tabs tabText="Community" color="gray" setChosen={handleSetChosen}/>
   </div>
