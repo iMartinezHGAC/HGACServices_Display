@@ -54,20 +54,8 @@ type stackedTrash = {
   console.log(CurrentFunding)
 const stackbar_data: stackedTrash[] = [
     { juris: 'Justice', historical_funds: 1000, current_funds: 1000 },
-    { juris: 'Justice', historical_funds: 2400, current_funds: 1500 },
-    { juris: 'Justice', historical_funds: 3700, current_funds: 2700 },
-    { juris: 'Justice', historical_funds: 4900, current_funds: 1200 },
     { juris: 'Workforce', historical_funds: 1000, current_funds: 800 },
-    { juris: 'Workforce', historical_funds: 2000, current_funds: 1200 },
-    { juris: 'Workforce', historical_funds: 3000, current_funds: 1700 },
-    { juris: 'Workforce', historical_funds: 4000, current_funds: 1000 },
-    { juris: 'Environment', historical_funds: 100, current_funds: 1100 },
-    { juris: 'Environment', historical_funds: 200, current_funds: 1500 },
-    { juris: 'Environment', historical_funds: 300, current_funds: 1300 },
     { juris: 'Environment', historical_funds: 400, current_funds: 1100 },
-    { juris: 'Criminal Justice', historical_funds: 100, current_funds: 800 },
-    { juris: 'Criminal Justice', historical_funds: 200, current_funds: 1800 },
-    { juris: 'Criminal Justice', historical_funds: 300, current_funds: 2200 },
     { juris: 'Criminal Justice', historical_funds: 400, current_funds: 900 },
     // More data entries...
   ];

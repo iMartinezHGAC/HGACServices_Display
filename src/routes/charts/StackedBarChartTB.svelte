@@ -12,7 +12,7 @@
   let {data = [], yLabel = ""}: {data: stackedTrash[], yLabel: string} = $props(); // Data passed as a prop
 
   // Chart dimensions
-  let width = 928;
+  let width = 1200;
   let height = 600;
   const marginTop = 10;
   const marginRight = 20;
