@@ -96,19 +96,14 @@ import CardHeader from "../fragments/cardHeader.svelte";
       // Add more data points...
     ];
 
-  let timeFlag = $state(false)
-  function toggleTime(timeline: boolean) {
-    timeFlag = timeline
-  }
 
 </script>
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
   <div class="flex flex-col bg-slate-500">
-    <CardHeader projectName={props.projectName} {toggleTime} color="light"/>
+    <CardHeader projectName={props.projectName} color="light"/>
     <CardBlurbTb text={props.projectBlurb}/>
   </div>
   <div class="grid grid-cols-2 gap-4 items-center justify-center px-12">
-    {#if timeFlag}
     <div class="card-style">
       <props.chart1 data={bar_data_hist} yLabel={props.chartTitle1}/>
     </div>
@@ -116,14 +111,7 @@ import CardHeader from "../fragments/cardHeader.svelte";
       <div class="card-style">
         <props.chart2 data={bar_data_hist} yLabel={props.chartTitle2}/>
       </div>
-    {:else} 
-    <div class="card-style">
-      <props.chart1 data={bar_data} yLabel={props.chartTitle1}/>
-    </div>
-      <div class="card-style">
-        <props.chart2 data={bar_data} yLabel={props.chartTitle2}/>
-      </div>
-    {/if}
+
     {#if accordionFlag}
       <div class="card-style">
         <props.chart3 data={[7,18,20,11,24]} yLabel={props.chartTitle3}/>

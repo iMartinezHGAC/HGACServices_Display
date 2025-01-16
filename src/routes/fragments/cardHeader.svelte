@@ -1,11 +1,10 @@
 <script lang="ts">
-  let timelineFlag = $state(false);
 
 
   type headerProps = {
     projectName: string,
-    links: string[]
     color: string
+    links?: string[]
   }
 
   let {projectName, links, color="dark"}: headerProps = $props()
