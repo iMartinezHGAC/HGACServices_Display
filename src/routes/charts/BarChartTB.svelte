@@ -3,7 +3,6 @@
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
   let vector: HTMLDivElement
 
-
   // Props
   let {data = [],
     width = 928, 
@@ -21,7 +20,7 @@
 
   // Set up the scales and axis on mount
     // Horizontal scale (band scale)
-  let x = $derived(d3.scaleBand()
+  let x = $state(d3.scaleBand()
       .domain(data.map(d => d.juris))
       .range([marginLeft, width - marginRight])
       .padding(0.1));
@@ -36,12 +35,29 @@
 
     // Axis for y
   let yAxis = $derived(d3.axisLeft(y).ticks(5));
+  let transform = d3.zoomIdentity
 
-  let scale = $state(1.0)
-  // Zoom function for handling the zooming behavior
-  function handleWheel(event: d3.D3ZoomEvent<SVGElement, unknown>) {
-    x.range([marginLeft, width - marginRight].map(d => event.transform.applyX(d)));
+  function handleWheel(event: WheelEvent) {
+    event.preventDefault()
+    const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9; // zoom in or out based on mouse input
+    const [xPos] = d3.pointer(event, event.currentTarget as SVGSVGElement) // get mouse position relative to SVG
+    
+    const newScale = transform.k * scaleFactor
+    const offset = (xPos - transform.applyX(xPos)) / transform.k
+
+    transform = d3.zoomIdentity
+      .translate(transform.x + offset * (1-scaleFactor),0)
+      .scale(newScale)
+
+    const newX = d3.scaleBand()
+      .domain(data.map(d => d.juris))
+      .range([marginLeft, width - marginRight].map(d => transform.applyX(d)))
+      .padding(0.1);
+
+    console.log(`ScaleFactor: ${scaleFactor}, \nnewScale: ${newScale} \n${offset}\nTransform: ${transform}`)
+    x = newX
   }
+
 </script>
 <button onclick={()=> exportChartToPDF(vector)}>Export</button>
 <div 
@@ -53,8 +69,7 @@
        height={height} 
        viewBox={`0 0 ${width} ${height}`} 
        class="w-fill"
-      transform={`scale(${scale})`}
-      onwheel={handleWheel}
+        onwheel={handleWheel}
   >
 
     <!-- x-axis -->
