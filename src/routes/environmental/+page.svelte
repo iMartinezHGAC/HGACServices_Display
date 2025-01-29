@@ -9,10 +9,16 @@
 	import type { PageData } from './$types';
 	import BarChartTb from "../charts/BarChartTB.svelte";
 	import Sidebar from "./sidebar.svelte";
+	import type { RecordModel } from "pocketbase";
 
 	let { data}: { data: PageData } = $props();
 
-  let tb = $derived(data.post[4])
+  let tb = $derived.by(()=> {
+    if(data)
+       return data.post[4]
+    return {} as RecordModel 
+  }
+  )
   let wqmp = $derived(data.post[2])
   let sw = $derived(data.post[0])
   let cr = $derived(data.post[1])
@@ -110,22 +116,21 @@ function convertToCamelCase(input: string): string {
 
 
 const cardNames=$derived([tb.program_name])
-  console.log("camelCase name", convertToCamelCase(tb.program_name))
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
   <div class="text-slate-200 font-metropolis font-medium">
-    <a href={convertToCamelCase(cardName)}>{cardName}</a>
+    <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded bg-slate-600 focus:bg-slate-800">{cardName}</a>
   </div>
 {/snippet}
 
-<div class="fixed left-0 w-44 h-full bg-slate-600 flex justify-center items-start pt-4 text-xl">
+<div class="fixed left-0 top-28 w-44 h-full bg-slate-600 flex justify-center items-start pt-4 text-xl transform z-20">
   {#each cardNames as cardName}
     {@render formattedEntryText(cardName)}
   {/each}
 </div>
 
-<div  in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
+<div in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
   <div class="flexy flex-col">
     <div class="flexy" id="trashBash">
       <Card 

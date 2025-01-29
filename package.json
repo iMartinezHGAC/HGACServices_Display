@@ -48,6 +48,7 @@
 		"@fontsource/staatliches": "^5.1.0",
 		"@fontsource/yeseva-one": "^5.1.0",
 		"d3": "^7.9.0",
+		"jspdf": "^2.5.2",
 		"pocketbase": "^0.25.0"
 	}
 }
