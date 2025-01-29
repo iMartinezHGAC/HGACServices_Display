@@ -8,6 +8,7 @@
 
 	import type { PageData } from './$types';
 	import BarChartTb from "../charts/BarChartTB.svelte";
+	import Sidebar from "./sidebar.svelte";
 
 	let { data}: { data: PageData } = $props();
 
@@ -91,11 +92,42 @@
     }
  ])
 
+function convertToCamelCase(input: string): string {
+    // Split the string by space, then map over the words
+    const words = input.split(' ');
+
+    // Convert the first word to lowercase and the rest to lowercase as well
+    const formattedWords = words.map((word, index) => {
+        if (index === 0) {
+            return word.toLowerCase(); // First word becomes lowercase
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(); // Capitalize subsequent words
+    });
+
+    // Join all words together to form a single string
+    return "#" +formattedWords.join('');
+}
+
+
+const cardNames=$derived([tb.program_name])
+  console.log("camelCase name", convertToCamelCase(tb.program_name))
 </script>
+
+{#snippet formattedEntryText(cardName: string)}
+  <div class="text-slate-200 font-metropolis font-medium">
+    <a href={convertToCamelCase(cardName)}>{cardName}</a>
+  </div>
+{/snippet}
+
+<div class="fixed left-0 w-44 h-full bg-slate-600 flex justify-center items-start pt-4 text-xl">
+  {#each cardNames as cardName}
+    {@render formattedEntryText(cardName)}
+  {/each}
+</div>
 
 <div  in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
   <div class="flexy flex-col">
-    <div class="flexy">
+    <div class="flexy" id="trashBash">
       <Card 
         project={tb} 
         charts={cardTB}
