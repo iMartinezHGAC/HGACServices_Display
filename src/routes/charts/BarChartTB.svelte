@@ -26,7 +26,7 @@
       .padding(0.1));
 
     // Vertical scale (linear scale)
-  let y = $derived(d3.scaleLinear()
+  let y = $state(d3.scaleLinear()
       .domain([0, d3.max(data, d => d.value)]).nice()
       .range([height - marginBottom, marginTop]));
 
@@ -40,13 +40,13 @@
   function handleWheel(event: WheelEvent) {
     event.preventDefault()
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9; // zoom in or out based on mouse input
-    const [xPos] = d3.pointer(event, event.currentTarget as SVGSVGElement) // get mouse position relative to SVG
+    const [xPos, yPos] = d3.pointer(event, event.currentTarget as SVGSVGElement) // get mouse position relative to SVG
     
     const newScale = transform.k * scaleFactor
-    const offset = (xPos - transform.applyX(xPos)) / transform.k
-
+    const offsetX = (xPos - transform.applyX(xPos)) / transform.k
+    const offsetY = (yPos - transform.applyX(yPos)) / transform.k
     transform = d3.zoomIdentity
-      .translate(transform.x + offset * (1-scaleFactor),0)
+      .translate(transform.x + offsetX * (1-scaleFactor),transform.y + offsetY * (1-scaleFactor))
       .scale(newScale)
 
     const newX = d3.scaleBand()
@@ -54,8 +54,12 @@
       .range([marginLeft, width - marginRight].map(d => transform.applyX(d)))
       .padding(0.1);
 
-    console.log(`ScaleFactor: ${scaleFactor}, \nnewScale: ${newScale} \n${offset}\nTransform: ${transform}`)
+    const newY = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.value)!]).nice()
+      .range([height - marginBottom, marginTop].map(d=> transform.applyY(d)));
+
     x = newX
+    y = newY
   }
 
 </script>
