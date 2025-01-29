@@ -1,6 +1,8 @@
-<script>
+<script lang="ts">
   import * as d3 from 'd3';
-	import Tabs from '../components/tabs.svelte';
+  import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
+  let vector: HTMLDivElement
+
 
   // Props
   let {data = [],
@@ -35,57 +37,64 @@
     // Axis for y
   let yAxis = $derived(d3.axisLeft(y).ticks(5));
 
+  let scale = $state(1.0)
   // Zoom function for handling the zooming behavior
-  function zoomed(event) {
+  function handleWheel(event: d3.D3ZoomEvent<SVGElement, unknown>) {
     x.range([marginLeft, width - marginRight].map(d => event.transform.applyX(d)));
   }
 </script>
+<button onclick={()=> exportChartToPDF(vector)}>Export</button>
+<div 
+      class="flexy"
+      bind:this={vector}
+>
+  <svg id="zoomable-bar-chart" 
+       width={width} 
+       height={height} 
+       viewBox={`0 0 ${width} ${height}`} 
+       class="w-fill"
+      transform={`scale(${scale})`}
+      onwheel={handleWheel}
+  >
 
-<svg id="zoomable-bar-chart" 
-     width={width} 
-     height={height} 
-     viewBox={`0 0 ${width} ${height}`} 
-      class="w-fill"
-     on:wheel|passive={zoomed}>
+    <!-- x-axis -->
+    <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
+      {#each x.domain() as d}
+        <g transform={`translate(${x(d) -marginLeft/3},0) rotate(45 0 0)`}>
+          <text class="font-metropolis text-lg transform translate-y-6" text-anchor="start">{d}</text>
+        </g>
+      {/each}
+    </g>
 
-  <!-- x-axis -->
-  <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
-    {#each x.domain() as d}
-      <g transform={`translate(${x(d) -marginLeft/3},0) rotate(45 0 0)`}>
-        <text class="font-metropolis text-lg transform translate-y-6" text-anchor="start">{d}</text>
-      </g>
+   <!-- Y-axis group -->
+    <g transform={`translate(${marginLeft},0)`} class="y-axis">
+      <text 
+        x={`${(0)}`} 
+        y={`${0}`} 
+        text-anchor="left"
+        class="text-3xl font-bold font-metropolis text-start items-start fill-slate-700"
+      >
+        {yLabel}
+      </text>
+
+      {#each y.ticks(5) as tick}
+        <g transform={`translate(0,${y(tick)})`}>
+          <line x2={width - marginRight - marginLeft} stroke="black" transform="translate(20,0)"/>
+          <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
+        </g>
+      {/each}
+    </g> 
+    <!-- Bars -->
+    {#each data as d}
+      <rect x={x(d.juris)} 
+            y={y(d.value)} 
+            width={x.bandwidth()} 
+            height={y(0) - y(d.value)} 
+            transform="translate(20,0)"
+            fill="forestgreen" />
     {/each}
-  </g>
-
- <!-- Y-axis group -->
-  <g transform={`translate(${marginLeft},0)`} class="y-axis">
-    <text 
-      x={`${(0)}`} 
-      y={`${0}`} 
-      text-anchor="left"
-      class="text-3xl font-bold font-metropolis text-start items-start fill-slate-700"
-    >
-      {yLabel}
-    </text>
-
-    {#each y.ticks(5) as tick}
-      <g transform={`translate(0,${y(tick)})`}>
-        <line x2={width - marginRight - marginLeft} stroke="black" transform="translate(20,0)"/>
-        <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
-      </g>
-    {/each}
-  </g> 
-  <!-- Bars -->
-  {#each data as d}
-    <rect x={x(d.juris)} 
-          y={y(d.value)} 
-          width={x.bandwidth()} 
-          height={y(0) - y(d.value)} 
-          transform="translate(20,0)"
-          fill="forestgreen" />
-  {/each}
-</svg>
-
+  </svg>
+</div>
 <style>
   svg {
     @apply
