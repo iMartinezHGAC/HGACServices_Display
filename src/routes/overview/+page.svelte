@@ -60,8 +60,8 @@ const stackbar_data: stackedTrash[] = [
     { juris: 'Environment', historical_funds: 800, current_funds: 1100 },
     { juris: 'Public Safety', historical_funds: 1000, current_funds: 1000 },
     // More data entries...
-  ]
-  ;const stackbar_services: stackedTrash[] = [
+  ];
+  const stackbar_services: stackedTrash[] = [
     { juris: 'Justice', historical_services: 7, current_services: 15 },
     { juris: 'Transportation', historical_services: 11, current_services: 10 },
     { juris: 'Workforce', historical_services: 10, current_services: 8 },
@@ -71,15 +71,19 @@ const stackbar_data: stackedTrash[] = [
   ];
 
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
+  //const blurb = ""
+  const blurb = "Blurb, if any, for communications (will probably only be here for large jurisdictions)"
 </script>
 
-<div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-fit w-full z-10">
-  <div class="w-11/12 h-12 flexy bg-slate-700 text-slate-200 flex rounded-t-lg">
-    <p class="font-poppins font-medium py-4 w-3/4 flexy">
-      Blurb, if any, for communications (will probably only be here for large jurisdictions)
-    </p>
+<div in:fly={{x:300}} out:fly={{x:-400}} class="flex-col w-11/12 h-full z-10 overflow-y-auto">
+  <div class="bg-slate-700 rounded-t-lg z-20">
+    {#if blurb}
+      <p class="font-poppins font-medium flexy text-slate-200 h-20">
+        {blurb}
+      </p>
+    {/if}
   </div>
-  <div class="w-11/12 h-96 flexy flex-row">
+  <div class="w-fill h-96 flexy flex-row">
     <StatDisplay 
       header="Current Funding" 
       data={CurrentFunding} 
@@ -90,16 +94,18 @@ const stackbar_data: stackedTrash[] = [
     />
     <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
     <StatDisplay header="Participation" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
-    <div class="bg-slate-700 flexy h-full w-1/4 pr-10">
+    <div class="bg-slate-700 flexy h-full w-1/4">
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>
   </div>
-  <div class="w-11/12 bg-hgac-slate text-slate-200 px-6 flex items-center justify-start">
-    <div class="transform scale-75 mb-96 w-1/2">
-      <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
-    </div>
-    <div class="transform scale-75 mb-96 w-1/2">
-      <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
+  <div class="w-full h-auto bg-hgac-slate text-slate-200 flex items-center justify-center">
+    <div class="grid grid-cols-2 ">
+      <div class="transform scale-90">
+        <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
+      </div>
+      <div class="transform scale-90">
+        <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
+      </div>
     </div>
   </div>
 

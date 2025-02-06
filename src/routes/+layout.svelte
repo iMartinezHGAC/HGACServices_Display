@@ -15,7 +15,7 @@
 </script>
 
 
-<main class="fixed flex w-screen h-screen justify-center items-center bg-cover bg-slate-200">
+<main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
   <Splash chosenTab={data.routeID} jurisdiction="harris_county"/>
   {@render children()}
 </main>

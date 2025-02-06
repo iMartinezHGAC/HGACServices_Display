@@ -24,9 +24,9 @@ let {
 
 </script>
 
-<div class="flexy flex-col h-full bg-slate-700 pr-24 pt-0">
+<div class="flex items-center justify-start flex-col h-full bg-slate-700 pr-24 pt-0">
   {#if above}
-  <p class="font-staatliches text-2xl text-slate-200 w-full absolute top-12 left-[104rem]">
+  <p class="font-staatliches text-2xl text-slate-200 w-full flexy pb-12">
     {aboveText}
   </p>
   {/if}

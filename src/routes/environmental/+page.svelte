@@ -124,19 +124,21 @@ const cardNames=$derived([tb.program_name])
   </div>
 {/snippet}
 
-<div class="fixed left-0 top-28 w-44 h-full bg-slate-600 flex justify-center items-start pt-4 text-xl transform z-20">
-  {#each cardNames as cardName}
-    {@render formattedEntryText(cardName)}
-  {/each}
-</div>
+<div class="flex w-screen">
+  <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex justify-center items-start pt-4 text-xl transform z-20">
+    {#each cardNames as cardName}
+      {@render formattedEntryText(cardName)}
+    {/each}
+  </div>
 
-<div in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
-  <div class="flexy flex-col">
-    <div class="flexy" id="trashBash">
-      <Card 
-        project={tb} 
-        charts={cardTB}
-      />   
+  <div in:fly={{x:300}} out:fly={{x:-400}}  class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
+    <div class="flexy flex-col">
+      <div class="flexy" id="trashBash">
+        <Card 
+          project={tb} 
+          charts={cardTB}
+        />   
+      </div>
     </div>
   </div>
 </div>

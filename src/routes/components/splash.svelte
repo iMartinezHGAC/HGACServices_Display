@@ -28,11 +28,12 @@ function handleSetChosen(tabName: string) {
       {/if}
 {/snippet}
 
-<div class="fixed flexy h-28 w-screen top-0 bg-hgac-slate shadow-lg shadow-slate-500">
-  <p class="fixed left-36 text-4xl font-extrabold font-metropolis small-caps text-slate-200 select-none">{human_readable}</p>
-  <img src={county_logo} alt="harris" class="fixed h-24 left-4">
-  <img src={logo} alt="HGAC" class="fixed h-24 right-4">
-  <div class="fixed flexy top-16">
+<div class="flexy h-1/6 w-screen bg-hgac-slate shadow-lg shadow-slate-500">
+  <div class="flex justify-start items-center w-1/4">
+    <img src={county_logo} alt="harris" class="h-24 p-2">
+    <p class="px-6 text-2xl w-3/4 font-extrabold font-metropolis small-caps text-slate-200 select-none">{human_readable}</p>
+  </div>
+  <div class="flexy absolute top-14">
       {@render tabSnippet("/overview", "Overview", "gray")}
       {@render tabSnippet("/transportation", "Transportation", "blue")}
       {@render tabSnippet("/environmental", "Environmental", "green")}
@@ -41,4 +42,6 @@ function handleSetChosen(tabName: string) {
       {@render tabSnippet("/community", "Community", "gray")}
       {@render tabSnippet("/aging", "Aging", "gray")}
   </div>
+  <div class="flex-grow"></div>
+  <img src={logo} alt="HGAC" class="h-24 right-4">
 </div>

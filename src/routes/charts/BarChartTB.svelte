@@ -35,16 +35,20 @@
 
     // Axis for y
   let yAxis = $derived(d3.axisLeft(y).ticks(5));
+
   let transform = d3.zoomIdentity
+
+  function roundToTenth(value: number) {
+    return Math.round(value*10) / 10
+  }
 
   function handleWheel(event: WheelEvent) {
     event.preventDefault()
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9; // zoom in or out based on mouse input
     const [xPos, yPos] = d3.pointer(event, event.currentTarget as SVGSVGElement) // get mouse position relative to SVG
-    
     const newScale = transform.k * scaleFactor
-    const offsetX = (xPos - transform.applyX(xPos)) / transform.k
-    const offsetY = (yPos - transform.applyX(yPos)) / transform.k
+    const offsetX = roundToTenth((xPos - transform.applyX(xPos)) / transform.k)
+    const offsetY = roundToTenth((yPos - transform.applyX(yPos)) / transform.k)
     transform = d3.zoomIdentity
       .translate(transform.x + offsetX * (1-scaleFactor),transform.y + offsetY * (1-scaleFactor))
       .scale(newScale)
@@ -59,7 +63,10 @@
       .range([height - marginBottom, marginTop].map(d=> transform.applyY(d)));
 
     x = newX
-    y = newY
+    //y = newY
+  }
+  function clickGraph() {
+
   }
 
 </script>

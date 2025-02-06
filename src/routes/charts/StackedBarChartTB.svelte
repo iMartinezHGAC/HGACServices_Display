@@ -12,7 +12,7 @@
   let {data = [], yLabel = "", colorSet}: {data: stackedTrash[], yLabel: string, colorSet: string[]} = $props(); // Data passed as a prop
 
   // Chart dimensions
-  let width = 1200;
+  let width = 1000;
   let height = 600;
   const marginTop = 10;
   const marginRight = 20;
@@ -134,12 +134,12 @@ onMount(()=> {
 })
 </script>
 
-<div class="bg-white flex items-center justify-center rounded-lg">
+<div class="bg-slate-200 w-auto h-auto flex items-center justify-center rounded-lg">
   <svg 
         width={width}
         height={height}
         viewBox={`0, 0, ${width}, ${height}`}
-        class={'z-10'}
+        class={'z-10 w-5/6 h-6/6'}
         bind:this={vector}
   >
     <g>
