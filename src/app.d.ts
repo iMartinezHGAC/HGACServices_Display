@@ -1,7 +1,12 @@
+import PocketBase from "pocketbase"
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
 	namespace App {
+    interface Locals {
+      pb: PocketBase.default,
+      user: PocketBase.default['authstore']['model']
+    }
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
