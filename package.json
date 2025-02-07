@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/kit": "^2.12.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
@@ -47,6 +47,9 @@
 		"@fontsource/poppins": "^5.1.0",
 		"@fontsource/staatliches": "^5.1.0",
 		"@fontsource/yeseva-one": "^5.1.0",
-		"d3": "^7.9.0"
+		"d3": "^7.9.0",
+		"html2canvas": "^1.4.1",
+		"jspdf": "^2.5.2",
+		"pocketbase": "^0.25.0"
 	}
 }

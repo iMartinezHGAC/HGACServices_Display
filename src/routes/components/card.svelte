@@ -1,23 +1,24 @@
 <script lang="ts">
-	import CardBlurb from "../fragments/cardBlurb.svelte";
-import CardHeader from "../fragments/cardHeader.svelte";
+  import CardHeader from "../fragments/cardHeader.svelte";
+  import type { Component } from "svelte"
+	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
+	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+	import AdditionalWork from "./additionalWork.svelte";
+	import type { RecordModel } from "pocketbase";
 
+  
+  type chartType = {
+    chartTitle: string,
+    chartData: object,
+    Chart: Component,
+  }
   interface cardProps {
-    projectName: string,
-    projectBlurb: string,
-    chart1: any
-    chartTitle1: string
-    chart2?: any
-    chartTitle2?: string
-    chart3?: any
-    chartTitle3?: string
-    chart4?: any
-    chartTitle4?: string
-    chart5?: any
-    chartTitle5?: string
+    project: RecordModel,
+    charts: chartType[]
   }
 
-  const props: cardProps = $props()
+  const {project, charts}: cardProps = $props()
+
 
   let accordionFlag = $state(false);
   let accordionText = $derived.by(() => {
@@ -25,122 +26,56 @@ import CardHeader from "../fragments/cardHeader.svelte";
       return "Show more metrics.." 
     return "Show fewer metrics"
   })
-  const bar_data = [
-      { juris: 'Travis', frequency: 55 },
-      { juris: 'Montgomery', frequency: 36 },
-      { juris: 'Waller', frequency: 25 },
-      { juris: 'Fort Bend', frequency: 75 },
-      { juris: 'Tarrant', frequency: 40 },
-      { juris: 'Galveston', frequency: 35 },
-      { juris: 'Bexar', frequency: 40 },
-      { juris: 'Harris', frequency: 90 }
-    ];
-  const bar_data_hist = [
-      { juris: 'Travis', frequency: 25 },
-      { juris: 'Montgomery', frequency: 30 },
-      { juris: 'Waller', frequency: 55 },
-      { juris: 'Fort Bend', frequency: 65 },
-      { juris: 'Tarrant', frequency: 15 },
-      { juris: 'Galveston', frequency: 40 },
-      { juris: 'Bexar', frequency: 20 },
-      { juris: 'Harris', frequency: 90 }
-    ];
-  const stackbar_data = [
-      { juris: 'Harris', age: '18-24', population: 2800 },
-      { juris: 'Harris', age: '25-34', population: 2200 },
-      { juris: 'Harris', age: '35-44', population: 1700 },
-      { juris: 'Harris', age: '45-54', population: 1300 },
-      { juris: 'Harris', age: '55-64', population: 1200 },
-      { juris: 'Fort Bend', age: '18-24', population: 1200 },
-      { juris: 'Fort Bend', age: '25-34', population: 1600 },
-      { juris: 'Fort Bend', age: '35-44', population: 1200 },
-      { juris: 'Fort Bend', age: '45-54', population: 700 },
-      { juris: 'Fort Bend', age: '55-64', population: 1100 },
-      { juris: 'Waller', age: '18-24', population: 2100 },
-      { juris: 'Waller', age: '25-34', population: 2500 },
-      { juris: 'Waller', age: '35-44', population: 1100 },
-      { juris: 'Waller', age: '45-54', population: 900 },
-      { juris: 'Waller', age: '55-64', population: 1400 },
-      // More data entries...
-    ];
-  const stackbar_data_hist = [
-      { juris: 'Harris', age: '18-24', population: 1000 },
-      { juris: 'Harris', age: '25-34', population: 1500 },
-      { juris: 'Harris', age: '35-44', population: 2700 },
-      { juris: 'Harris', age: '45-54', population: 1200 },
-      { juris: 'Harris', age: '55-64', population: 1800 },
-      { juris: 'Fort Bend', age: '18-24', population: 800 },
-      { juris: 'Fort Bend', age: '25-34', population: 1200 },
-      { juris: 'Fort Bend', age: '35-44', population: 1700 },
-      { juris: 'Fort Bend', age: '45-54', population: 1000 },
-      { juris: 'Fort Bend', age: '55-64', population: 1800 },
-      { juris: 'Waller', age: '18-24', population: 1100 },
-      { juris: 'Waller', age: '25-34', population: 1500 },
-      { juris: 'Waller', age: '35-44', population: 1300 },
-      { juris: 'Waller', age: '45-54', population: 1100 },
-      { juris: 'Waller', age: '55-64', population: 1800 },
-      // More data entries...
-    ];
-  const area_data  = [
-      { date: new Date('2021-01-01'), juris: 'Harris County', unemployed: 500 },
-      { date: new Date('2021-01-01'), juris: 'Fort Bend County', unemployed: 300 },
-      { date: new Date('2021-01-01'), juris: 'Tarrant County', unemployed: 700 },
-      { date: new Date('2021-02-01'), juris: 'Harris County', unemployed: 450 },
-      { date: new Date('2021-02-01'), juris: 'Fort Bend County', unemployed: 350 },
-      { date: new Date('2021-02-01'), juris: 'Tarrant County', unemployed: 200 },
-      { date: new Date('2021-03-01'), juris: 'Harris County', unemployed: 600 },
-      { date: new Date('2021-03-01'), juris: 'Fort Bend County', unemployed: 200 },
-      { date: new Date('2021-03-01'), juris: 'Tarrant County', unemployed: 500 },
-      // Add more data points...
-    ];
 
+  /*
   let timeFlag = $state(false)
   function toggleTime(timeline: boolean) {
     timeFlag = timeline
   }
+  */
 
+  //$inspect(props.projectLinks)
+  let linkUrls = $derived(project.expand!.links.map(
+    (item: any) => item.url_string)
+  )
+
+  let blurb = $derived(project.expand!.blurb.program_blurb)
+
+  //$inspect(linkUrls)
 </script>
 
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
-  <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} {toggleTime} color="dark"/>
-    <CardBlurb text={props.projectBlurb}/>
+  <div class="flex bg-slate-700">
+    <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
+    <CardBlurbTb text={blurb}/>
   </div>
-  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12">
-    {#if timeFlag}
-    <div class="card-style">
-      <props.chart1 data={stackbar_data_hist} yLabel={props.chartTitle1}/>
-    </div>
-      <!-- bar: tires count-->
-      <div class="card-style">
-        <props.chart2 data={bar_data_hist} width={800} height={580} yLabel={props.chartTitle2}/>
-      </div>
-    {:else} 
-    <div class="card-style">
-      <props.chart1 data={stackbar_data} yLabel={props.chartTitle1}/>
-    </div>
-      <div class="card-style">
-        <props.chart2 data={bar_data} width={800} height={580} yLabel={props.chartTitle2}/>
-      </div>
-    {/if}
+  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12 mt-8">
+      {#each charts as {chartTitle, chartData, Chart},i}
+        {#if i<2}
+          <div class="card-style">
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle}/>
+          </div>
+        {:else if i>=2 && accordionFlag}
+          <div class="card-style">
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle}/>
+          </div>
+        {/if}
+      {/each}
     {#if accordionFlag}
       <!-- bar: volunteer count-->
-      <div class="card-style">
-        <props.chart3 data={bar_data} yLabel={props.chartTitle3}/>
-      </div>
-      <!-- bar: shoreline miles-->
-      <div class="card-style">
-        <props.chart4 data={bar_data} yLabel={props.chartTitle4}/>
-      </div>
-      <!-- bar: cleanup sites-->
-      <div class="card-style">
-        <props.chart5 data={bar_data} yLabel={props.chartTitle5}/>
-      </div>
+
     {/if}
-  </div> 
-  <button class="h-12 w-full bg-slate-700 text-white" 
+  </div>  
+  <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}
   </button>  
+  <div class="flexy">
+    <AdditionalWork 
+      bodyText={"Lorem Ipsum"} 
+      projectName={"Dog Poop Pickup"} 
+      funding={40} 
+      projectTimeframe={""} 
+    />
+  </div>
 </div>
-

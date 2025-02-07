@@ -9,7 +9,7 @@
   let height = 600;
   const marginTop = 10;
   const marginRight = 20;
-  const marginBottom = 20;
+  const marginBottom = 30;
   const marginLeft = 70;
   const yLabelMargin = 50;
   const legendMargin = 30;
@@ -52,11 +52,11 @@
       .rangeRound([height - marginBottom, marginTop]);
 
     // Check if color range is being set correctly
-    console.log('Color range:', d3.schemeSpectral[ageKeys.length]); // Debugging output
+    console.log('Color range:', d3.schemeBrBG[ageKeys.length]); // Debugging output
 
     const color = d3.scaleOrdinal()
       .domain(ageKeys)
-      .range(d3.schemeSpectral[ageKeys.length] || d3.schemeCategory10) // Fall back to Category10 if needed
+      .range(d3.schemeGreens[ageKeys.length] || d3.schemeCategory10) // Fall back to Category10 if needed
       .unknown("#ccc");
 
     // A function to format the value in the tooltip.

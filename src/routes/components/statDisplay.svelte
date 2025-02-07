@@ -5,11 +5,12 @@
     header: string,
     data: {name: string, value:number}[],
     index: number,
+    colors: string[],
     preSymbol?: string,
     postSymbol?: string,
   }
 
-let {header, data, index, preSymbol="", postSymbol=""}: donutDisplayType = $props()
+let {header, data, index, preSymbol="", postSymbol="", colors}: donutDisplayType = $props()
 
 </script>
 
@@ -18,5 +19,5 @@ let {header, data, index, preSymbol="", postSymbol=""}: donutDisplayType = $prop
   <p class="font-staatliches text-2xl text-slate-200 mb-4">
     {header}
   </p>
-  <DonutChart data={data} width={800} height={800} index={index} preSymbol={preSymbol} postSymbol={postSymbol}/>
+  <DonutChart data={data} width={800} height={800} index={index} preSymbol={preSymbol} postSymbol={postSymbol} colors={colors}/>
 </div>

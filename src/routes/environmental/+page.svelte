@@ -1,95 +1,144 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
-	import BarChart from "../charts/BarChart.svelte";
-	import FilledAreaChart from "../charts/FilledAreaChart.svelte";
-	import LinePlot from "../charts/LinePlot.svelte";
+  import BarChartTB from "../charts/BarChartTB.svelte";
 	import StackedBarChart from "../charts/StackedBarChart.svelte";
-	import AdditionalWork from "../components/additionalWork.svelte";
+	import StackedBarChartTB from "../charts/StackedBarChart.svelte";
 	import Card from "../components/card.svelte";
-	import CardLc from "../components/card_lc.svelte";
-	import CardRc from "../components/card_rc.svelte";
-	import CardSw from "../components/card_sw.svelte";
+  import type { Component } from "svelte"
 
+	import type { PageData } from './$types';
+	import BarChartTb from "../charts/BarChartTB.svelte";
+	import Sidebar from "./sidebar.svelte";
+	import type { RecordModel } from "pocketbase";
+
+	let { data}: { data: PageData } = $props();
+
+  let tb = $derived.by(()=> {
+    if(data)
+       return data.post[4]
+    return {} as RecordModel 
+  }
+  )
+  let wqmp = $derived(data.post[2])
+  let sw = $derived(data.post[0])
+  let cr = $derived(data.post[1])
+
+  type chartType = {
+    chartTitle: string,
+    chartData: object,
+    Chart: Component,
+  }
+
+  type tbKey = keyof Trashbash
+
+  function makeBarData(dataset: Trashbash[], key: tbKey) {
+    if(dataset) {
+    return dataset.map((item: Trashbash) => ({
+        juris: item.expand.collection_site_id.site_name,
+        value: item[key]
+      }))    }
+  }
+
+  /*
+  function makeStackedBarData(dataset: Trashbash[], key1: tbKey, key2: tbKey) {
+    if(dataset) {
+    return dataset.map((item: Trashbash) => ({
+        juris: item.expand.collection_site_id.site_name,
+        recycled_pounds: item[key2],
+        trash_pounds: item[key1],
+      })).filter((item: any) => item.trash_pounds !== 0)
+    }
+  }
+  */
+
+
+  let trash_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "trash_pounds"))
+  let tires  = $derived(makeBarData(data.trashbash as Trashbash[], "tires"))
+  let recycled_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "recycled_pounds" as tbKey))
+  let tot_volunteer_count = $derived(makeBarData(data.trashbash as Trashbash[], "tot_volunteer_count" as tbKey))
+  let vol_under_18= $derived(makeBarData(data.trashbash as Trashbash[], "vol_under_18" as tbKey))
+  let vol_scouts= $derived(makeBarData(data.trashbash as Trashbash[], "vol_scouts" as tbKey))
+  let miles_cleaned = $derived(makeBarData(data.trashbash as Trashbash[], "miles_cleaned" as tbKey))
+
+  const cardTB: chartType[] = $derived([
+    {
+      chartTitle: "Trash Pounds",
+      chartData: trash_pounds,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Tire Count",
+      chartData: tires,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Miles Cleaned",
+      chartData: miles_cleaned,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Recycled Pounds",
+      chartData: recycled_pounds,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Under 18 Volunteers",
+      chartData: vol_under_18,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Scouts Volunteers",
+      chartData: vol_scouts,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Total Volunteers",
+      chartData: tot_volunteer_count,
+      Chart: BarChartTb,
+    }
+ ])
+
+function convertToCamelCase(input: string): string {
+    // Split the string by space, then map over the words
+    const words = input.split(' ');
+
+    // Convert the first word to lowercase and the rest to lowercase as well
+    const formattedWords = words.map((word, index) => {
+        if (index === 0) {
+            return word.toLowerCase(); // First word becomes lowercase
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(); // Capitalize subsequent words
+    });
+
+    // Join all words together to form a single string
+    return "#" +formattedWords.join('');
+}
+
+
+const cardNames=$derived([tb.program_name])
 </script>
-<div  in:fly={{x:300}} out:fly={{x:-400}}  class="fixed top-28 flex flex-col items-center justify-start w-screen h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
-  <div class="flexy flex-col">
-    <div class="flexy">
-    <Card 
-      projectName={"Trash Bash"} 
-      projectBlurb={"Lorem ipso facto"} 
-      chart1={StackedBarChart} 
-      chartTitle1={"Trash & Recycyling tonnage"}
-      chart2={BarChart}
-      chartTitle2={"Tire Count"}
-      chart3={BarChart}
-      chartTitle3={"Count"}
-      chart4={BarChart}
-      chartTitle4={"Total Miles"}
-      chart5={BarChart}
-      chartTitle5={"Cleanup Sites"}
-    />   
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
+
+{#snippet formattedEntryText(cardName: string)}
+  <div class="text-slate-200 font-metropolis font-medium">
+    <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded bg-slate-600 focus:bg-slate-800">{cardName}</a>
   </div>
-    <div class="flexy">
-    <CardLc 
-      projectName={"Livable Centers"} 
-      projectBlurb={"Lorem ipso facto"} 
-      chart1={BarChart} 
-      chartTitle1={"Projects Count"}
-      chart2={LinePlot}
-      chartTitle2={"Funding Dollars"}
-      chart3={FilledAreaChart}
-      chartTitle3={"Studies Adopted"}
-      chart4={FilledAreaChart}
-      chartTitle4={"Recommendations Implemented"}
-      chart5={FilledAreaChart}
-      chartTitle5={"Legacy Studies"}
-      chart6={FilledAreaChart}
-      chartTitle6={"Maturing Studies"}
-      chart7={BarChart}
-      chartTitle7={"New Studies"}
-      chart8={BarChart}
-      chartTitle8={"VMT Reduction"}
-    />   
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
-  </div>
-  <!-- rc -->
-    <div class="flexy">
-    <CardRc 
-      projectName={"Regional Conservation"} 
-      projectBlurb={"Lorem ipso facto"} 
-      chart1={BarChart} 
-      chartTitle1={"Project Count"}
-      chart2={BarChart}
-      chartTitle2={"Assistance Given"}
-      chart3={BarChart}
-      chartTitle3={"# Meetings"}
-      chart4={BarChart}
-      chartTitle4={"Meeting Hours"}
-      chart5={LinePlot}
-      chartTitle5={"Funding Dollars"}
-      chart6={FilledAreaChart}
-      chartTitle6={"Data Request Hours"}
-      chart7={LinePlot}
-      chartTitle7={"Funding Dollars lev"}
-    />    
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
-  </div>
-  <!-- sw -->
-  <div class="flexy">
-    <CardSw
-      projectName={"Solid Waste"} 
-      projectBlurb={"Lorem ipso facto"} 
-      chart1={BarChart} 
-      chartTitle1={"# Attendees"}
-      chart2={BarChart}
-      chartTitle2={"Assistance Given"}
-      chart3={LinePlot}
-      chartTitle3={"Dollars"}
-    />
-    <AdditionalWork bodyText={"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere, sunt inventore? Voluptas eos minima ipsum distinctio animi, odit praesentium perspiciatis corrupti iure nostrum! Sunt odit autem sapiente consequatur unde dignissimos?"}/>
+{/snippet}
+
+<div class="flex w-screen">
+  <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex justify-center items-start pt-4 text-xl transform z-20">
+    {#each cardNames as cardName}
+      {@render formattedEntryText(cardName)}
+    {/each}
   </div>
 
+  <div in:fly={{x:300}} out:fly={{x:-400}}  class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
+    <div class="flexy flex-col">
+      <div class="flexy" id="trashBash">
+        <Card 
+          project={tb} 
+          charts={cardTB}
+        />   
+      </div>
+    </div>
   </div>
 </div>
-

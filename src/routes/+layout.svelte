@@ -7,11 +7,15 @@
   import '@fontsource/patua-one';
   import '@fontsource/metropolis';
 	import Splash from './components/splash.svelte';
-	let { children } = $props();
+	import type { LayoutData } from './$types';
+	import type { Snippet } from 'svelte';
+
+  let {data, children}: {data: LayoutData, children: Snippet} = $props()
+  console.log(data)
 </script>
 
 
-<main class="fixed flex w-screen h-screen justify-center items-center bg-cover bg-slate-200">
-  <Splash jurisdiction="harris_county"/>
+<main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
+  <Splash chosenTab={data.routeID} jurisdiction="harris_county"/>
   {@render children()}
 </main>

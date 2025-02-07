@@ -1,0 +1,306 @@
+[
+    {
+        "Group":"Transportation",
+        "Program":"Transportation Planning Studies",
+        "Current_Funds":200000,
+        "Current_Services":1,
+        "Current_Total_Participation":8,
+        "Historical_Funds":950000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Clean Vehicles Program",
+        "Current_Funds":101240,
+        "Current_Services":1,
+        "Current_Total_Participation":2,
+        "Historical_Funds":400000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Transportation Improvement Plan",
+        "Current_Funds":240000,
+        "Current_Services":1,
+        "Current_Total_Participation":92,
+        "Historical_Funds":500000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Regional Transportation Plan",
+        "Current_Funds":400000,
+        "Current_Services":1,
+        "Current_Total_Participation":11,
+        "Historical_Funds":1000000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Gulf Coast Regional Tow and Go",
+        "Current_Funds":224000,
+        "Current_Services":1,
+        "Current_Total_Participation":8,
+        "Historical_Funds":400000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Transportation Demand Modeling",
+        "Current_Funds":500000,
+        "Current_Services":1,
+        "Current_Total_Participation":100,
+        "Historical_Funds":560000
+    },
+    {
+        "Group":"Transportation",
+        "Program":"Socio Economic Modeling",
+        "Current_Funds":400000,
+        "Current_Services":1,
+        "Current_Total_Participation":2,
+        "Historical_Funds":1200000
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Clean Rivers Program",
+        "Current_Funds":100000,
+        "Current_Services":1,
+        "Current_Total_Participation":44,
+        "Historical_Funds":309000
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Water Quality Management Plan",
+        "Current_Funds":200000,
+        "Current_Services":1,
+        "Current_Total_Participation":8,
+        "Historical_Funds":600212
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Trash Bash",
+        "Current_Funds":30000,
+        "Current_Services":1,
+        "Current_Total_Participation":112.0,
+        "Historical_Funds":120000
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Volunteer Water Quality Monitoring",
+        "Current_Funds":24000,
+        "Current_Services":1,
+        "Current_Total_Participation":4,
+        "Historical_Funds":100000
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Watershed Based Planning",
+        "Current_Funds":150000,
+        "Current_Services":1,
+        "Current_Total_Participation":0,
+        "Historical_Funds":450000
+    },
+    {
+        "Group":"Environmental",
+        "Program":"Solid Waste Management",
+        "Current_Funds":300000,
+        "Current_Services":1,
+        "Current_Total_Participation":25.0,
+        "Historical_Funds":900000
+    },
+    {
+        "Group":"Workforce",
+        "Program":"Work In Texas (WIT)",
+        "Current_Funds":300000,
+        "Current_Services":1,
+        "Current_Total_Participation":1244.0,
+        "Historical_Funds":1000000
+    },
+    {
+        "Group":"Workforce",
+        "Program":"Texas Educating Adult Management_System (TEAMS)",
+        "Current_Funds":350000,
+        "Current_Services":1,
+        "Current_Total_Participation":122.0,
+        "Historical_Funds":1200000
+    },
+    {
+        "Group":"Workforce",
+        "Program":"The Workforce Integrated System of Texas",
+        "Current_Funds":400000,
+        "Current_Services":1,
+        "Current_Total_Participation":1590.0,
+        "Historical_Funds":700000
+    },
+    {
+        "Group":"Workforce",
+        "Program":"Subsidized Childcare Services",
+        "Current_Funds":150000,
+        "Current_Services":1,
+        "Current_Total_Participation":123.0,
+        "Historical_Funds":400000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Regional Law Enforcement Training",
+        "Current_Funds":40000,
+        "Current_Services":1,
+        "Current_Total_Participation":91,
+        "Historical_Funds":120000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Regional Criminal Justice Grants",
+        "Current_Funds":100000,
+        "Current_Services":1,
+        "Current_Total_Participation":22,
+        "Historical_Funds":300000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Regional Elder Justice Program",
+        "Current_Funds":30000,
+        "Current_Services":1,
+        "Current_Total_Participation":40,
+        "Historical_Funds":150000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Regional Juvenile Mental Health",
+        "Current_Funds":50000,
+        "Current_Services":1,
+        "Current_Total_Participation":80,
+        "Historical_Funds":200000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"9-1-1 Emergency Communications District",
+        "Current_Funds":150000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":500000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Hazard Mitigation",
+        "Current_Funds":80000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":200000
+    },
+    {
+        "Group":"Public_Safety",
+        "Program":"Emergency Preparedness Planning",
+        "Current_Funds":120000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":400000
+    },
+    {
+        "Group":"Community",
+        "Program":"Regional Conservation",
+        "Current_Funds":250000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":600000
+    },
+    {
+        "Group":"Community",
+        "Program":"Bringing Back Main Street",
+        "Current_Funds":109240,
+        "Current_Services":0,
+        "Current_Total_Participation":12.0,
+        "Historical_Funds":400000
+    },
+    {
+        "Group":"Community",
+        "Program":"Parks and Natural Areas",
+        "Current_Funds":12000,
+        "Current_Services":1,
+        "Current_Total_Participation":34.0,
+        "Historical_Funds":100000
+    },
+    {
+        "Group":"Community",
+        "Program":"Fall Planning Workshop",
+        "Current_Funds":30000,
+        "Current_Services":1,
+        "Current_Total_Participation":48.0,
+        "Historical_Funds":100000
+    },
+    {
+        "Group":"Community",
+        "Program":"Water Innovation Strategies of Excellence awards programs",
+        "Current_Funds":15000,
+        "Current_Services":1,
+        "Current_Total_Participation":26.0,
+        "Historical_Funds":120000
+    },
+    {
+        "Group":"Community",
+        "Program":"Livable Centers",
+        "Current_Funds":200000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":900000
+    },
+    {
+        "Group":"Community",
+        "Program":"Nutrition and Transportation Services",
+        "Current_Funds":140000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":760000
+    },
+    {
+        "Group":"Community",
+        "Program":"Direct_Services",
+        "Current_Funds":120000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":670000
+    },
+    {
+        "Group":"Community",
+        "Program":"Education and Information Services",
+        "Current_Funds":110000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":300000
+    },
+    {
+        "Group":"Community",
+        "Program":"Longterm Care Ombudsman Program",
+        "Current_Funds":50000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":100000
+    },
+    {
+        "Group":"Community",
+        "Program":"Economic Development",
+        "Current_Funds":120000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":600000
+    },
+    {
+        "Group":"Community",
+        "Program":"H-GAC Energy Corporation",
+        "Current_Funds":100000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":120000
+    },
+    {
+        "Group":"Community",
+        "Program":"Small Business Loans",
+        "Current_Funds":140000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":600000
+    },
+    {
+        "Group":"Community",
+        "Program":"H-GAC Cooperative Purchasing",
+        "Current_Funds":130000,
+        "Current_Services":1,
+        "Current_Total_Participation":null,
+        "Historical_Funds":400000
+    }
+]

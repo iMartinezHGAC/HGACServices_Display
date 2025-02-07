@@ -1,6 +1,8 @@
 <script lang="ts">
+	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import CardBlurb from "../fragments/cardBlurb.svelte";
 import CardHeader from "../fragments/cardHeader.svelte";
+	import AdditionalWork from "./additionalWork.svelte";
 
   interface cardProps {
     projectName: string,
@@ -100,19 +102,15 @@ import CardHeader from "../fragments/cardHeader.svelte";
       // Add more data points...
     ];
 
-  let timeFlag = $state(false)
-  function toggleTime(timeline: boolean) {
-    timeFlag = timeline
-  }
+
 
 </script>
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700">
+<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4">
   <div class="flex flex-col bg-slate-700">
-    <CardHeader projectName={props.projectName} {toggleTime} color="light"/>
-    <CardBlurb text={props.projectBlurb}/>
+    <CardHeader projectName={props.projectName} color="dark"/>
+    <CardBlurbTb text={props.projectBlurb}/>
   </div>
   <div class="grid grid-cols-2 gap-4 items-center justify-center px-12">
-    {#if timeFlag}
     <div class="card-style">
       <props.chart1 data={bar_data_hist} yLabel={props.chartTitle1}/>
     </div>
@@ -120,14 +118,6 @@ import CardHeader from "../fragments/cardHeader.svelte";
       <div class="card-style">
         <props.chart2 data={bar_data_hist} yLabel={props.chartTitle2}/>
       </div>
-    {:else} 
-    <div class="card-style">
-      <props.chart1 data={bar_data} yLabel={props.chartTitle1}/>
-    </div>
-      <div class="card-style">
-        <props.chart2 data={bar_data} yLabel={props.chartTitle2}/>
-      </div>
-    {/if}
     {#if accordionFlag}
       <!-- bar: volunteer count-->
       <div class="card-style">
@@ -151,9 +141,18 @@ import CardHeader from "../fragments/cardHeader.svelte";
       </div>
     {/if}
   </div> 
-  <button class="h-12 w-full bg-slate-700 text-white" 
+
+  <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}
   </button>  
+  <div class="flexy">
+    <AdditionalWork 
+      bodyText={"Lorem Ipsum"} 
+      projectName={"Dog Poop Pickup"} 
+      funding={40} 
+      projectTimeframe={""} 
+    />
+  </div>
 </div>
 

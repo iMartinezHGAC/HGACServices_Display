@@ -1,91 +1,123 @@
 <script lang="ts">
-	import { symbol } from "d3";
-import StackedBarChart from "../charts/StackedBarChart.svelte";
-import StatDisplay from "../components/statDisplay.svelte";
+	import type { PageData} from "../$types";
+	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+	import Indicator from "../components/indicator.svelte";
+  import StatDisplay from "../components/statDisplay.svelte";
   import {fly} from "svelte/transition"
+  const {data}: {data: PageData } = $props() 
 
-const donut_data = [
-    {name: 'Justice', value: 100}, 
-    {name: 'Workforce', value: 200}, 
-    {name: 'Environment', value: 300}]
+  $inspect(data)
 
-const donut_data2 = [
-    {name: 'Justice', value: 200}, 
-    {name: 'Workforce', value: 300}, 
-    {name: 'Environment', value: 350}
-  ]
 
-const donut_data3 = [
-    {name: 'Justice', value: 270}, 
-    {name: 'Workforce', value: 127}, 
-    {name: 'Environment', value: 188},
-    {name: 'Transportation', value: 72},
-  ]
-const donut_data4 = [
-    {name: 'Justice', value: 37000}, 
-    {name: 'Workforce', value: 42700}, 
-    {name: 'Environment', value: 19008},
-    {name: 'Transportation', value: 27200},
-  ]
-const bar_data = [
-    { juris: 'A', frequency: 25 },
-    { juris: 'Transportation', frequency: 30 },
-    { juris: 'Environment', frequency: 55 },
-    { juris: 'Workforce', frequency: 65 },
-    { juris: 'C', frequency: 15 },
-    { juris: 'Galveston', frequency: 40 },
-    { juris: 'B', frequency: 20 },
-    { juris: 'Justice', frequency: 90 }
-  ];
 
-const area_data  = [
-    { date: new Date('2021-01-01'), juris: 'Justice County', unemployed: 500 },
-    { date: new Date('2021-01-01'), juris: 'Workforce County', unemployed: 300 },
-    { date: new Date('2021-01-01'), juris: 'Tarrant County', unemployed: 700 },
-    { date: new Date('2021-02-01'), juris: 'Justice County', unemployed: 450 },
-    { date: new Date('2021-02-01'), juris: 'Workforce County', unemployed: 350 },
-    { date: new Date('2021-02-01'), juris: 'Tarrant County', unemployed: 200 },
-    { date: new Date('2021-03-01'), juris: 'Justice County', unemployed: 600 },
-    { date: new Date('2021-03-01'), juris: 'Workforce County', unemployed: 200 },
-    { date: new Date('2021-03-01'), juris: 'Tarrant County', unemployed: 500 },
-    // Add more data points...
-  ];
+  function doesGroupExist(objectArray: serviceType[], group: string) {
+    return objectArray.find(item => item.Group === group)
+  }
 
-const stackbar_data = [
-    { juris: 'Justice', age: '18-24', population: 1000 },
-    { juris: 'Justice', age: '25-34', population: 1500 },
-    { juris: 'Justice', age: '35-44', population: 2700 },
-    { juris: 'Justice', age: '45-54', population: 1200 },
-    { juris: 'Workforce', age: '18-24', population: 800 },
-    { juris: 'Workforce', age: '25-34', population: 1200 },
-    { juris: 'Workforce', age: '35-44', population: 1700 },
-    { juris: 'Workforce', age: '45-54', population: 1000 },
-    { juris: 'Environment', age: '18-24', population: 1100 },
-    { juris: 'Environment', age: '25-34', population: 1500 },
-    { juris: 'Environment', age: '35-44', population: 1300 },
-    { juris: 'Environment', age: '45-54', population: 1100 },
+  function calculateCategoryTotal(objectArray: serviceType[], group: string, category: serviceKey) {
+    const total = objectArray
+      .filter((item: serviceType) => item.Group===group)
+      .reduce((totalValue: number, currentItem: serviceType) => {
+        return totalValue += currentItem[category] as number
+    }, 0)
+    return total
+  }
+
+  function getGroupTotal(objectArray: serviceType[], group: string, category: serviceKey) {
+    if(!doesGroupExist(objectArray, group)) return -1;
+    return calculateCategoryTotal(objectArray, group, category)
+  }
+
+  function donutGetCurrentFunds(objectArray: serviceType[], group: string, category: serviceKey) {
+    return {
+      name: group,
+      value: getGroupTotal(objectArray, group, category)
+    }
+  }
+
+  function convertAllToDonut(objectArray: serviceType[], groups: string[], category: serviceKey) {
+    let newObjectArray: donutType[] = []
+    groups.forEach((group: string) => {
+      newObjectArray.push(donutGetCurrentFunds(objectArray, group, category))
+    })
+    return newObjectArray
+  }
+
+type stackedTrash = {
+  juris: string,
+  historical_funds: number,
+  current_funds: number,
+}
+  const CurrentFunding = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Public_Safety","Community"], "Current_Funds")
+  const Services = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Public_Safety","Community"], "Current_Services")
+  const Participation = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce","Public_Safety","Community"], "Current_Total_Participation")
+
+  console.log(CurrentFunding)
+const stackbar_data: stackedTrash[] = [
+    { juris: 'Justice', historical_funds: 1000, current_funds: 900 },
+    { juris: 'Transportation', historical_funds: 1000, current_funds: 1200 },
+    { juris: 'Workforce', historical_funds: 1000, current_funds: 800 },
+    { juris: 'Environment', historical_funds: 800, current_funds: 1100 },
+    { juris: 'Public Safety', historical_funds: 1000, current_funds: 1000 },
     // More data entries...
   ];
+  const stackbar_services: stackedTrash[] = [
+    { juris: 'Justice', historical_services: 7, current_services: 15 },
+    { juris: 'Transportation', historical_services: 11, current_services: 10 },
+    { juris: 'Workforce', historical_services: 10, current_services: 8 },
+    { juris: 'Environment', historical_services: 8, current_services: 13 },
+    { juris: 'Public Safety', historical_services: 12, current_services: 12 },
+    // More data entries...
+  ];
+
+  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
+  //const blurb = ""
+  const blurb = "Blurb, if any, for communications (will probably only be here for large jurisdictions)"
 </script>
 
-<div in:fly={{x:300}} out:fly={{x:-400}} class="flexy flex-col fixed top-28 h-fit w-full z-10">
-  <div class="w-5/6 h-12 flexy bg-slate-700 text-slate-200 flex rounded-t-lg">
-    <p class="font-poppins font-medium py-4 w-3/4 flexy">
-      Blurb, if any, for jurisdiction form communications (will probably only be here for large jurisdictions)
-    </p>
+<div in:fly={{x:300}} out:fly={{x:-400}} class="flex-col w-11/12 h-full z-10 overflow-y-auto">
+  <div class="bg-slate-700 rounded-t-lg z-20">
+    {#if blurb}
+      <p class="font-poppins font-medium flexy text-slate-200 h-20">
+        {blurb}
+      </p>
+    {/if}
   </div>
-  <div class="w-5/6 h-96 flexy flex-row">
-    <StatDisplay header="Total Funds Received" data={donut_data} index={0} preSymbol="$" postSymbol="M"/>
-    <StatDisplay header="Services Received" data={donut_data2} index={1} postSymbol=""/>
-    <StatDisplay header="Total Participation" data={donut_data3} index={2} />
-    <StatDisplay header="Transportation Projects" data={donut_data4} index={3}/>
-  </div>
-  <div class="w-5/6 h-3/6 bg-hgac-slate text-slate-200 px-6 grid grid-cols-2">
-    <div class="transform scale-[70%] -translate-y-20">
-    <StackedBarChart data={stackbar_data} yLabel="Historic Funds Received"/>
+  <div class="w-fill h-96 flexy flex-row">
+    <StatDisplay 
+      header="Current Funding" 
+      data={CurrentFunding} 
+      index={0} 
+      preSymbol="$" 
+      postSymbol="K"
+      colors={groupColors}
+    />
+    <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
+    <StatDisplay header="Participation" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
+    <div class="bg-slate-700 flexy h-full w-1/4">
+      <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>
-    <div class="transform scale-[70%] -translate-y-20">
-    <StackedBarChart data={stackbar_data} yLabel="Historic Services Received"/>
+  </div>
+  <div class="w-full h-auto bg-hgac-slate text-slate-200 flex items-center justify-center">
+    <div class="grid grid-cols-2 ">
+      <div class="transform scale-90">
+        <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
+      </div>
+      <div class="transform scale-90">
+        <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
+      </div>
     </div>
   </div>
+
+<!--
+  Current 2024
+  Historical 2023
+  One bar for each group
+  Color
+    Green for environmental
+      From saturated to desaturated
+        Current to Historical
+          Split historical funding by percenthistorical_funds to fake 2022, 2021, 2020 data
+  
+-->
 </div>

@@ -50,8 +50,8 @@
   <!-- x-axis -->
   <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
     {#each x.domain() as d}
-      <g transform={`translate(${x(d) -marginLeft/5},0)`}>
-        <text class="font-metropolis text-lg transform translate-y-6" text-anchor="middle">{d}</text>
+      <g transform={`translate(${x(d) -marginLeft/3},0) rotate(45 0 0)`}>
+        <text class="font-metropolis text-lg transform translate-y-6" text-anchor="start">{d}</text>
       </g>
     {/each}
   </g>
@@ -79,7 +79,7 @@
           y={y(d.frequency)} 
           width={x.bandwidth()} 
           height={y(0) - y(d.frequency)} 
-          fill="steelblue" />
+          fill="forestgreen" />
   {/each}
 </svg>
 
