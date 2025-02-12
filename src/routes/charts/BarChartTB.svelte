@@ -1,8 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
   let vector: HTMLDivElement
-
   // Props
   let {data = [],
     width = 928, 
@@ -17,6 +15,15 @@
 
   // Reactive variables
   const barColors = ["#ffffff","#fff9d8"]
+
+  // import state
+  import { graphsState } from "./graphVectors.svelte"
+
+  const graphstate = graphsState()
+
+  export function handleAdd() {
+    console.log("Called child from parent")
+  }
 
   // Set up the scales and axis on mount
     // Horizontal scale (band scale)
@@ -65,12 +72,9 @@
     x = newX
     //y = newY
   }
-  function clickGraph() {
 
-  }
 
 </script>
-<button onclick={()=> exportChartToPDF(vector)}>Export</button>
 <div 
       class="flexy"
       bind:this={vector}

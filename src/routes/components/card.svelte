@@ -1,8 +1,7 @@
 <script lang="ts">
   import CardHeader from "../fragments/cardHeader.svelte";
-  import type { Component } from "svelte"
+  import { setContext, type Component } from "svelte"
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
-	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
 	import type { RecordModel } from "pocketbase";
 
@@ -19,6 +18,16 @@
 
   const {project, charts}: cardProps = $props()
 
+  const graphState = graphsState()
+
+  let graphVectors: HTMLDivElement[]
+  let cardInstance = $state()
+
+  function handleExportClick() {
+    console.log("called function in parent")
+    cardInstance.handleAdd()
+    //exportChartToPDF(graphVectors)
+  }
 
   let accordionFlag = $state(false);
   let accordionText = $derived.by(() => {
@@ -41,6 +50,8 @@
 
   let blurb = $derived(project.expand!.blurb.program_blurb)
 
+  import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
+	import { graphsState } from "../charts/graphVectors.svelte";
   //$inspect(linkUrls)
 </script>
 
@@ -48,16 +59,17 @@
   <div class="flex bg-slate-700">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
     <CardBlurbTb text={blurb}/>
+    <button onclick={handleExportClick} class="px-2 bg-green-200 font-staatliches font-medium active:bg-green-300">Export to PDF</button>
   </div>
   <div class="grid grid-cols-2 gap-2 items-center justify-center px-12 mt-8">
       {#each charts as {chartTitle, chartData, Chart},i}
         {#if i<2}
           <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle}/>
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstance}/>
           </div>
         {:else if i>=2 && accordionFlag}
           <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle}/>
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstance}/>
           </div>
         {/if}
       {/each}
