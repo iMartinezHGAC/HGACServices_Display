@@ -3,13 +3,21 @@ let graphs: HTMLDivElement[] = $state([])
 
 export function graphsState() {
 
+  $inspect(graphs)
   function doesGraphExist(checkedGraph: HTMLDivElement) {
-    if(graphs.find(graph => graph === checkedGraph)) return true
-    return false
+    if(graphs.find(graph => graph === checkedGraph) === undefined) return false 
+    return true
   }
 
   function addGraph(newGraph: HTMLDivElement) {
     graphs.push(newGraph)
+  }
+
+  function useAddGraph(newGraph: HTMLDivElement) {
+    if(doesGraphExist(newGraph))
+      console.log("Graph already in state")
+    else
+      addGraph(newGraph)
   }
 
   function clearGraphs() {
@@ -18,7 +26,7 @@ export function graphsState() {
 
   return {
     get graph() {return graphs},
-    add: addGraph,
+    add: useAddGraph,
     clear: clearGraphs
   }
 }

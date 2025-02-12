@@ -21,12 +21,16 @@
   const graphState = graphsState()
 
   let graphVectors: HTMLDivElement[]
-  let cardInstance = $state()
+  let cardInstances = $state([])
 
   function handleExportClick() {
     console.log("called function in parent")
-    cardInstance.handleAdd()
-    //exportChartToPDF(graphVectors)
+    graphState.clear()
+    cardInstances.forEach((instance, i) => {
+      console.log(`Instance ${i}`)
+      instance.handleAdd()}
+    )
+    exportChartToPDF(graphState.graph)
   }
 
   let accordionFlag = $state(false);
@@ -65,11 +69,11 @@
       {#each charts as {chartTitle, chartData, Chart},i}
         {#if i<2}
           <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstance}/>
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
           </div>
         {:else if i>=2 && accordionFlag}
           <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstance}/>
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
           </div>
         {/if}
       {/each}

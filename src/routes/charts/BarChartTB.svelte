@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
+	import { graphsState } from './graphVectors.svelte';
   let vector: HTMLDivElement
   // Props
   let {data = [],
@@ -17,12 +18,12 @@
   const barColors = ["#ffffff","#fff9d8"]
 
   // import state
-  import { graphsState } from "./graphVectors.svelte"
+  const graphState = graphsState()
 
-  const graphstate = graphsState()
 
   export function handleAdd() {
     console.log("Called child from parent")
+    graphState.add(vector)
   }
 
   // Set up the scales and axis on mount
@@ -84,7 +85,6 @@
        height={height} 
        viewBox={`0 0 ${width} ${height}`} 
        class="w-fill"
-        onwheel={handleWheel}
   >
 
     <!-- x-axis -->
