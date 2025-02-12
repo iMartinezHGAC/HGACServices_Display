@@ -7,38 +7,46 @@ const A4HEIGHT = 11;
 export default function exportChartToPDF(vectors: HTMLDivElement[]) {
       // set in p (portrait), with data interpreted as points on a screen. Canvas size is A4
     const pdf = new jsPDF('l', 'in', 'letter')
-    vectors.forEach((vector,i) =>
-      html2canvas(vector, {
-        logging: true,
-        scale: 4
-    }).then(canvas => {
-        let viewHeight = canvas.height
-        // offset to place an image on a new page
-        let position = 0
+  // Assuming vectors is an array of HTMLDivElement elements
 
-        // image height and width
-        const pageWidth = pdf.internal.pageSize.getWidth()
-        const pageHeight = pdf.internal.pageSize.getHeight()
-        const margin = 0.5 // half inch margin
-        const contentWidth = (pageWidth - 3* margin) / 2 // width of each div
-        const contentHeight = (pageHeight - margin*2) / 2 
+const processVector = async (vector: HTMLDivElement, index: number) => {
+  const canvas = await html2canvas(vector, { logging: true, scale: 4 });
+  const vectorData = canvas.toDataURL('image/png')
+  
+  // Calculate dimensions and positions as before
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 0.5;
+  const contentWidth = (pageWidth - 3 * margin) / 2;
+  const contentHeight = (pageHeight - margin * 2) / 2;
 
+  // Determine row and column based on index
+  const row = Math.floor((index % 4) / 2);
+  const col = (index % 4) % 2;
+  
+  const x = margin + col * (contentWidth + margin);
+  const y = margin + row * (contentHeight + margin);
 
-        // set image filetype and quality
-        const imgData = canvas.toDataURL('image/png')
+  // Add the image to the PDF
+  pdf.addImage(
+    canvas,
+    x,
+    y,
+    contentWidth,
+    contentHeight
+  );
 
-        const row = Math.floor((i % 4) / 2) // 0 or 1
-        const col = (i % 4) % 2 // 0 or 1
-        const x = margin + col * (contentWidth + margin)
-        const y = margin + row * (contentHeight + margin) 
+  // Add a new page if necessary (e.g., every 4 images)
+  if ((index + 1) % 4 === 0 && index !== vectors.length - 1) {
+    pdf.addPage();
+  }
+};
 
-        // If the total size of the canvas is less than the size of the page
-        // then we insert the first image onto the page
-        if(i > 0 && i % 4 === 0) {
-          pdf.addPage()
-        }
-      pdf.addImage(imgData, 'PNG', x, y-1, contentWidth, contentHeight*1.5)
-      if(vectors.length - i === 1) pdf.save("graph.pdf")
-    })
-  )
-}
+// Create an array of promises for each vector processing
+const promises = vectors.map((vector, i) => processVector(vector, i));
+
+// Once all images are processed and added to the PDF, save it
+Promise.all(promises).then(() => {
+  pdf.save('output.pdf');
+});
+   }
