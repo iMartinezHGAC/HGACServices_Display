@@ -5,6 +5,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 
 export const initPB: Handle = async({event, resolve}) => {
   event.locals.pb = new PocketBase(PB_URL)
+  // load the store data from request cookie string
   event.locals.pb.authStore.loadFromCookie(event.request.headers.get('cookie') || '')
 
   // Attempt to verify authorization
@@ -15,7 +16,6 @@ export const initPB: Handle = async({event, resolve}) => {
   } catch(__any) {
     // If anything is wrong with the token, destroy all client-side user information
     event.locals.pb.authStore.clear()
-    event.locals.user = null
   }
   // ensure cookies don't exist forever
   const expires = new Date()

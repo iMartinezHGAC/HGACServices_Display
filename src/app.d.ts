@@ -5,7 +5,6 @@ declare global {
 	namespace App {
     interface Locals {
       pb: PocketBase.default,
-      user: PocketBase.default['authstore']['model']
     }
 		// interface Error {}
 		// interface Locals {}

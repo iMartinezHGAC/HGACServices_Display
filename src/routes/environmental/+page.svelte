@@ -115,17 +115,17 @@ function convertToCamelCase(input: string): string {
 }
 
 
-const cardNames=$derived([tb.program_name])
+const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name])
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
-  <div class="text-slate-200 font-metropolis font-medium">
+  <div class="flex text-slate-200 font-metropolis font-medium">
     <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded bg-slate-600 focus:bg-slate-800">{cardName}</a>
   </div>
 {/snippet}
 
 <div class="flex w-screen">
-  <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex justify-center items-start pt-4 text-xl transform z-20">
+  <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20">
     {#each cardNames as cardName}
       {@render formattedEntryText(cardName)}
     {/each}
@@ -136,6 +136,24 @@ const cardNames=$derived([tb.program_name])
       <div class="flexy" id="trashBash">
         <Card 
           project={tb} 
+          charts={cardTB}
+        />   
+      </div>      
+      <div class="flexy" id="waterQualityManagementPlan">
+        <Card 
+          project={wqmp} 
+          charts={cardTB}
+        />   
+      </div>
+      <div class="flexy" id="solidWasteManagement">
+        <Card 
+          project={sw} 
+          charts={cardTB}
+        />   
+      </div>      
+      <div class="flexy" id="cleanRiversProgram">
+        <Card 
+          project={cr} 
           charts={cardTB}
         />   
       </div>
