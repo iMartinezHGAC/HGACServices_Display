@@ -16,6 +16,6 @@
 
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
-  <Splash chosenTab={data.routeID} jurisdiction="harris_county"/>
+  <Splash chosenTab={data.routeID} jurisdiction="fort_bend_county"/>
   {@render children()}
 </main>

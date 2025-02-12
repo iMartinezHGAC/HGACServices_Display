@@ -124,14 +124,14 @@ const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, c
   </div>
 {/snippet}
 
-<div class="flex w-screen">
+<div class="flex w-screen ">
   <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20">
     {#each cardNames as cardName}
       {@render formattedEntryText(cardName)}
     {/each}
   </div>
 
-  <div in:fly={{x:300}} out:fly={{x:-400}}  class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10">
+  <div in:fly={{x:300}} out:fly={{x:-400}}  class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth">
     <div class="flexy flex-col">
       <div class="flexy" id="trashBash">
         <Card 
