@@ -20,7 +20,7 @@ export const GET: RequestHandler = async({locals, url, cookies}) => {
         REDIRECT_URL + provider.name
       )
   } catch(error) {
-    console.log(error)
+    console.error(error)
     // return redirect(304, '/errors')
   }
   // after login, redirect to home page

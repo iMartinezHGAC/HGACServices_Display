@@ -18,7 +18,6 @@ type stackedTrash = {
   const Services = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce", "Public_Safety","Community"], "Current_Services")
   const Participation = convertAllToDonut(data.fakeData, ["Transportation","Environmental", "Workforce","Public_Safety","Community"], "Current_Total_Participation")
 
-  console.log(CurrentFunding)
 const stackbar_data: stackedTrash[] = [
     { juris: 'Justice', historical_funds: 1000, current_funds: 900 },
     { juris: 'Transportation', historical_funds: 1000, current_funds: 1200 },
@@ -28,21 +27,20 @@ const stackbar_data: stackedTrash[] = [
     // More data entries...
   ];
   const stackbar_services: stackedTrash[] = [
-    { juris: 'Justice', historical_services: 7, current_services: 15 },
+    { juris: 'Justice', historical_services: 7, current_services: 5 },
     { juris: 'Transportation', historical_services: 11, current_services: 10 },
     { juris: 'Workforce', historical_services: 10, current_services: 8 },
-    { juris: 'Environment', historical_services: 8, current_services: 13 },
-    { juris: 'Public Safety', historical_services: 12, current_services: 12 },
+    { juris: 'Environment', historical_services: 3, current_services: 7 },
+    { juris: 'Public Safety', historical_services: 16, current_services: 16 },
     // More data entries...
   ];
 
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
-  //const blurb = ""
   const blurb = "Blurb, if any, for communications (will probably only be here for large jurisdictions)"
 </script>
 
-<div in:fly={{x:300}} out:fly={{x:-400}} class="flex-col w-11/12 h-full z-10 overflow-y-auto">
-  <div class="bg-slate-700 rounded-t-lg z-20">
+<div class="flex-col w-11/12 h-full z-10 overflow-y-auto">
+  <div class="bg-slate-700 z-20">
     {#if blurb}
       <p class="font-poppins font-medium flexy text-slate-200 h-20">
         {blurb}
@@ -64,17 +62,17 @@ const stackbar_data: stackedTrash[] = [
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>
   </div>
-  <div class="w-full h-auto bg-hgac-slate text-slate-200 flex items-center justify-center">
-    <div class="grid grid-cols-2 ">
-      <div class="transform scale-90">
+  <div class="w-full h-auto bg-hgac-slate text-slate-200 flex items-center justify-center rounded-b-xl">
+    <div class="grid grid-cols-2">
+      <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
         <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
       </div>
-      <div class="transform scale-90">
+      <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
         <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
       </div>
     </div>
   </div>
-
+</div>
 <!--
   Current 2024
   Historical 2023
@@ -86,4 +84,3 @@ const stackbar_data: stackedTrash[] = [
           Split historical funding by percenthistorical_funds to fake 2022, 2021, 2020 data
   
 -->
-</div>

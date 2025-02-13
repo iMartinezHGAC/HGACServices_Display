@@ -1,15 +1,12 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
-  import BarChartTB from "../charts/BarChartTB.svelte";
-	import StackedBarChart from "../charts/StackedBarChart.svelte";
-	import StackedBarChartTB from "../charts/StackedBarChart.svelte";
 	import Card from "../components/card.svelte";
-  import type { Component } from "svelte"
+  import { onMount, type Component } from "svelte"
 
 	import type { PageData } from './$types';
 	import BarChartTb from "../charts/BarChartTB.svelte";
-	import Sidebar from "./sidebar.svelte";
 	import type { RecordModel } from "pocketbase";
+	import { disableScrollHandling } from "$app/navigation";
 
 	let { data}: { data: PageData } = $props();
 
@@ -38,19 +35,6 @@
         value: item[key]
       }))    }
   }
-
-  /*
-  function makeStackedBarData(dataset: Trashbash[], key1: tbKey, key2: tbKey) {
-    if(dataset) {
-    return dataset.map((item: Trashbash) => ({
-        juris: item.expand.collection_site_id.site_name,
-        recycled_pounds: item[key2],
-        trash_pounds: item[key1],
-      })).filter((item: any) => item.trash_pounds !== 0)
-    }
-  }
-  */
-
 
   let trash_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "trash_pounds"))
   let tires  = $derived(makeBarData(data.trashbash as Trashbash[], "tires"))
@@ -116,22 +100,22 @@ function convertToCamelCase(input: string): string {
 
 
 const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name])
+
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
   <div class="flex text-slate-200 font-metropolis font-medium">
-    <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded bg-slate-600 focus:bg-slate-800">{cardName}</a>
+    <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded w-56 bg-slate-600 text-slate-200 focus:bg-slate-800 hover:bg-slate-700 hover:text-white ">{cardName}</a>
   </div>
 {/snippet}
 
-<div class="flex w-screen ">
-  <div class="left-0 top-24 w-[12%] h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20">
+<div class="flex w-screen">
+  <div class="left-0 top-24 w-56 h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20" transition:fly={{y:200, duration: 300}}>
     {#each cardNames as cardName}
       {@render formattedEntryText(cardName)}
     {/each}
   </div>
-
-  <div in:fly={{x:300}} out:fly={{x:-400}}  class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth">
+  <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:400, duration:300 }}>
     <div class="flexy flex-col">
       <div class="flexy" id="trashBash">
         <Card 

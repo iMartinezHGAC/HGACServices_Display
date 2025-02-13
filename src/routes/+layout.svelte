@@ -11,7 +11,6 @@
 	import type { Snippet } from 'svelte';
 
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
-  console.log(data)
 </script>
 
 

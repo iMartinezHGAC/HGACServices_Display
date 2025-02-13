@@ -24,10 +24,8 @@
   let cardInstances = $state([])
 
   function handleExportClick() {
-    console.log("called function in parent")
     graphState.clear()
     cardInstances.forEach((instance, i) => {
-      console.log(`Instance ${i}`)
       instance.handleAdd()}
     )
     exportChartToPDF(graphState.graph)

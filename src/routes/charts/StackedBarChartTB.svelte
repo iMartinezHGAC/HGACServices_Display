@@ -144,43 +144,50 @@ onMount(()=> {
   >
     <g>
       {#each stackedData[1] as data,i}
+        {console.log(`Stackedbar Data: ${data}\nY data: ${y(data[0])}`)}
+        <!----
+        <rect
+          x={x(data.data.juris)}
+          y={y(data[0])}
+          height={height-y(data[0])}
+          width={x.bandwidth()}
+          fill={colors(0)}
+        >
+        </rect>       
+        ---->
         <rect
           x={x(data.data.juris)}
           y={y(data[1])}
-          transform="translate(0,10)"
-          height={y(data[0])}
+          height={height-y(data[1])}
           width={x.bandwidth()}
           fill={colors(0)}
         >
         </rect>       
         <rect
           x={x(data.data.juris)}
-          y={y(data[1]-data[0])}
-          transform="translate(0,0)"
-          height={-(y(data[1])-y(data[0]))}
+          y={y(data[0])}
+          height={height-y(data[0])}
           width={x.bandwidth()}
           fill={colors(1)}
         >
         </rect>
       {/each}
     </g>
+
+    <!-------------------- Legend --------------------->
     <g transform={`translate(${marginLeft}, ${height-10})`}>
       {#each keys as key,i}
-        {console.log("Key: ", key, i, colors(i/keys.length))}
         <rect 
           x={i*(legendItemHeight+intraLegendSpacing)} 
           y={35} 
           width={legendItemWidth} 
           height={legendItemHeight} 
           fill={colors(i)}
-          stroke={"black"}
-          transform={`translate(${legendMargin})`}
+          class={`stroke-black transform translate-x-8`}
         >
         </rect>
         <text x={i*(legendItemHeight+intraLegendSpacing)} y={legendItemHeight*2.65} 
-            font-family={"Metropolis"}
-            font-size={"1.4em"}
-            transform={`translate(${legendMargin*2})`}>
+            class="font-metropolis text-xl transform translate-x-16">
           <tspan>
               {key}
           </tspan>

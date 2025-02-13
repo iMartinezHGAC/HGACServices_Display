@@ -21,10 +21,13 @@
   const graphState = graphsState()
 
 
+  // when parent Export to PDF button is clicked, add this vector to the array of vectors to be exported
   export function handleAdd() {
-    console.log("Called child from parent")
     graphState.add(vector)
   }
+
+
+  ///////////////  GRAPH FUNCTIONS /////////////////////
 
   // Set up the scales and axis on mount
     // Horizontal scale (band scale)
@@ -50,6 +53,9 @@
     return Math.round(value*10) / 10
   }
 
+
+  ///////////////// Zoom functions ////////////////////
+
   function handleWheel(event: WheelEvent) {
     event.preventDefault()
     const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9; // zoom in or out based on mouse input
@@ -74,6 +80,26 @@
     //y = newY
   }
 
+  /////////////////////// custom SVG bar ////////////////////
+  /*
+  const svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", 500)
+    .attr("height", 300)
+
+  import tire from "$lib/assets/tire.svg"
+  d3.xml(tire).then(function(svgData) {
+    //generate tire pattern
+    const pattern = svg.append("defs")
+      .append("pattern")
+      .attr("id", "tire-pattern")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", 40)
+      .attr("height", 10)
+      .append("g")
+      .html(svgData.documentElement.outerHTML)
+  })
+  */
 
 </script>
 <div 

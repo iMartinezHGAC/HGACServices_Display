@@ -29,7 +29,6 @@
     // Extract unique age categories using a Set (JavaScript native)
     const ageKeys = Array.from(new Set(data.map(d => d.age)));
 
-    console.log('Age keys:', ageKeys); // Debugging output
 
     if (ageKeys.length === 0) {
       console.error("No age categories found in data!");
@@ -52,7 +51,6 @@
       .rangeRound([height - marginBottom, marginTop]);
 
     // Check if color range is being set correctly
-    console.log('Color range:', d3.schemeBrBG[ageKeys.length]); // Debugging output
 
     const color = d3.scaleOrdinal()
       .domain(ageKeys)

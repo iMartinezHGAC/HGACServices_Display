@@ -65,13 +65,13 @@
   })
 </script>
 
-<svg width={width} height={height} class="px-2">
-  <path fill="none" stroke="currentColor" stroke-width="1.5" d={line(data)} />
-  <g bind:this={gx} transform="translate(0, {height - marginBottom})" />
-  <g bind:this={gy} transform="translate({marginLeft}, 0)" />
-  <g fill="white" stroke="currentColor" stroke-width="1.5">
-    {#each data as d,i  }
-      <circle cx={x(i)} cy={y(d)} r="2.5" fill="orange" stroke="orange"/>
-    {/each}
-  </g>
-</svg>
+  <svg width={width} height={height}>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" d={line(data)} />
+    <g bind:this={gx} transform="translate(0, {height - marginBottom})" />
+    <g bind:this={gy} transform="translate({marginLeft}, 0)" />
+    <g fill="white" stroke="currentColor" stroke-width="1.5">
+      {#each data as d,i  }
+        <circle cx={x(i)} cy={y(d)} r="2.5" fill="orange" stroke="orange"/>
+      {/each}
+    </g>
+  </svg>

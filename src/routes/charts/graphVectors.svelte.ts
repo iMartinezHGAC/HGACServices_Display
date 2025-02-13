@@ -15,7 +15,7 @@ export function graphsState() {
 
   function useAddGraph(newGraph: HTMLDivElement) {
     if(doesGraphExist(newGraph))
-      console.log("Graph already in state")
+      console.error("Graph already in state")
     else
       addGraph(newGraph)
   }
