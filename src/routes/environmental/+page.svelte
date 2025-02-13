@@ -82,6 +82,22 @@
     }
  ])
 
+  const volunteers_stack = tot_volunteer_count.map((item, index)=> ({
+    juris: item.juris,
+    u18: vol_under_18[index].value,
+    scouts: vol_scouts[index].value,
+    adults: item.value - vol_under_18[index].value - vol_scouts[index].value
+  }))
+
+
+  /*
+    stack bar data 3 stacks
+      u18_vols
+      scout_vols
+      adult_vols = u18_vols - scout_vols
+
+  */
+
 function convertToCamelCase(input: string): string {
     // Split the string by space, then map over the words
     const words = input.split(' ');

@@ -29,7 +29,7 @@
   const uniqueCats = new Set(data.map((d) => d.juris))
   const intraLegendSpacing = width/(uniqueCats.size)-marginRight;
 
-  let vector;
+  let vector: SVGSVGElement;
   //let tooltip;
   const rawKeys = Object.keys(Object.values(data)[0])
   const keys =  rawKeys.slice(1)  
@@ -41,49 +41,6 @@
   const maxValueInStack = $derived(stackedData[1].reduce((max, item) => 
     Math.max(max, item[1]), Number.MIN_SAFE_INTEGER
   ))
-
-  $inspect("Stacked: ", stackedData)
-  /*
- onMount(() => {
-    tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('pointer-events', 'none');
-    // Return the color scale as part of the chart's properties (for the legend).
-    return { scales: { color } };
-  });
-   // Add the color legend
-    const legend = d3.select(vector).append('g')
-      .attr('transform', `translate(${marginLeft}, ${height})`);
-
-    // Add color swatches and labels
-    legend.selectAll('rect')
-      .data(ageKeys)
-      .join('rect')
-      .attr('x', (d,i) => i * (legendItemHeight+intraLegendSpacing))
-      .attr('y', 20) // Vertical spacing between legend items
-      .attr('width', legendItemWidth)
-      .attr('height', legendItemHeight)
-      .attr('fill', d => color(d))
-      .attr('transform', `translate(${legendMargin})`);
-
-    legend.selectAll('text')
-      .data(ageKeys)
-      .join('text')
-      .attr('transform', `translate(${legendMargin*2})`)
-      .attr('x', (d,i) => i * (legendItemWidth+intraLegendSpacing))
-      .attr('y', legendItemHeight * 1.56) // Vertical spacing between legend items
-      .attr('dy', '0.35em')
-      .attr('font-size', '1rem')
-      .attr('font-weight', '600')
-      .attr('font-family', 'Metropolis')
-      .attr('fill', 'black')
-      .text(d => d); // Use the age category name as the label
-
-    */
-
 
 const x = $derived(d3.scaleBand()
       .domain(uniqueCats)
@@ -143,18 +100,29 @@ onMount(()=> {
         bind:this={vector}
   >
     <g>
-      {#each stackedData[1] as data,i}
-        {console.log(`Stackedbar Data: ${data}\nY data: ${y(data[0])}`)}
+      {#each stackedData[1] as data}
+        {#each {length: data.length }, i}
+          {#if i===0}
+            <rect
+              x={x(data.data.juris)}
+              y={y(data[i])}
+              height={height-y(data[i])}
+              width={x.bandwidth()}
+              fill={colors(i)}
+            >
+            </rect> 
+          {:else}
+            <rect
+              x={x(data.data.juris)}
+              y={y(data[i])}
+              height={y(data[i-1])-(y(data[i]))}
+              width={x.bandwidth()}
+              fill={colors(i)}
+            >
+            </rect> 
+          {/if}
+        {/each}
         <!----
-        <rect
-          x={x(data.data.juris)}
-          y={y(data[0])}
-          height={height-y(data[0])}
-          width={x.bandwidth()}
-          fill={colors(0)}
-        >
-        </rect>       
-        ---->
         <rect
           x={x(data.data.juris)}
           y={y(data[1])}
@@ -171,6 +139,7 @@ onMount(()=> {
           fill={colors(1)}
         >
         </rect>
+        ---->
       {/each}
     </g>
 
@@ -186,11 +155,11 @@ onMount(()=> {
           class={`stroke-black transform translate-x-8`}
         >
         </rect>
-        <text x={i*(legendItemHeight+intraLegendSpacing)} y={legendItemHeight*2.65} 
-            class="font-metropolis text-xl transform translate-x-16">
-          <tspan>
-              {key}
-          </tspan>
+        <text 
+          x={i*(legendItemHeight+intraLegendSpacing)} 
+          y={legendItemHeight*2.65} 
+          class="font-metropolis text-xl transform translate-x-16">
+          <tspan>{key}</tspan>
         </text>
       {/each}
     </g>
