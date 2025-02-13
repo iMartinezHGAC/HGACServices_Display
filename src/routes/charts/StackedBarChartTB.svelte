@@ -99,13 +99,13 @@ const y = $derived(d3.scaleLinear()
 onMount(()=> {
   d3.select(vector)
     .append('g')
-    .attr('transform', `translate(0,${height - marginBottom})`)
+    .attr('transform', `translate(0,${height + marginBottom})`)
     .call(d3.axisBottom(x).tickSizeOuter(0))
     .call(g => g.selectAll('.domain').remove())
     .selectAll('text')
     .attr('font-weight', '500')
     .attr('font-family', 'Metropolis')
-    .attr('font-size', '1.2rem')
+    .attr('font-size', '1.3rem')
     .attr('fill', 'black')
 
   // Append the vertical axis
@@ -123,7 +123,7 @@ onMount(()=> {
   d3.select(vector)
     .append('text')
     .attr('x', yLabel.length) // Rotate and place the label
-    .attr('y', -40) // Vertical position
+    .attr('y', -30) // Vertical position
     .attr('text-anchor', 'start')
     .attr('font-size', '1.8rem')
     .attr('font-weight', '700')
@@ -175,7 +175,7 @@ onMount(()=> {
     </g>
 
     <!-------------------- Legend --------------------->
-    <g transform={`translate(${marginLeft}, ${height-10})`}>
+    <g transform={`translate(${marginLeft}, ${height+(marginBottom*2)})`}>
       {#each keys as key,i}
         <rect 
           x={i*(legendItemHeight+intraLegendSpacing)} 
@@ -194,7 +194,6 @@ onMount(()=> {
         </text>
       {/each}
     </g>
-      // Append the horizontal axis
   </svg>
 </div>
 <!--
