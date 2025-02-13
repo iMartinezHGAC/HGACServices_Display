@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { PageData} from "../$types";
-	import StackedBarChartTb from "../charts/StackedBarChartTB.svelte";
+	import StackedBarChart from "../charts/StackedBarChart.svelte";
 	import Indicator from "../components/indicator.svelte";
   import StatDisplay from "../components/statDisplay.svelte";
-  import {fly} from "svelte/transition"
   import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte"
   const {data}: {data: PageData } = $props() 
 
@@ -62,13 +61,13 @@ const stackbar_data: stackedTrash[] = [
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>
   </div>
-  <div class="w-full h-auto bg-hgac-slate text-slate-200 flex items-center justify-center rounded-b-xl">
+  <div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
     <div class="grid grid-cols-2">
       <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
-        <StackedBarChartTb data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
+        <StackedBarChart data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
       </div>
       <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
-        <StackedBarChartTb data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
+        <StackedBarChart data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
       </div>
     </div>
   </div>

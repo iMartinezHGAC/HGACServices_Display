@@ -28,10 +28,10 @@ function handleSetChosen(tabName: string) {
       {/if}
 {/snippet}
 
-<div class="flexy h-1/8 w-screen bg-hgac-slate shadow-lg shadow-slate-500">
+<div class="flexy h-1/8 w-screen bg-slate-800 shadow-lg shadow-slate-500">
   <div class="flex justify-start items-center w-1/4">
     <img src={county_logo} alt="harris" class="h-24 p-2">
-    <p class="px-6 text-2xl w-3/4 font-extrabold font-metropolis small-caps text-slate-200 select-none">{human_readable}</p>
+    <p class="px-6 text-2xl w-3/4 font-extrabold font-[Metropolis] small-caps text-slate-200 select-none">{human_readable}</p>
   </div>
   <div class="flexy absolute top-12">
       {@render tabSnippet("/overview", "Overview", "gray")}

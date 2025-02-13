@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '../app.css';
   import '@fontsource/staatliches';
   import '@fontsource/poppins';
   import '@fontsource/yeseva-one';
@@ -10,6 +9,7 @@
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
+	import '../app.css';
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
 </script>
 

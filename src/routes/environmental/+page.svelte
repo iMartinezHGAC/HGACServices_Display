@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
 	import Card from "../components/card.svelte";
-  import { onMount, type Component } from "svelte"
-
+  import { type Component } from "svelte"
 	import type { PageData } from './$types';
-	import BarChartTb from "../charts/BarChartTB.svelte";
 	import type { RecordModel } from "pocketbase";
-	import { disableScrollHandling } from "$app/navigation";
+
+	import StackedBarChart from "../charts/StackedBarChart.svelte";
+	import BarChartTb from "../charts/BarChartTB.svelte";
 
 	let { data}: { data: PageData } = $props();
 
@@ -44,6 +44,14 @@
   let vol_scouts= $derived(makeBarData(data.trashbash as Trashbash[], "vol_scouts" as tbKey))
   let miles_cleaned = $derived(makeBarData(data.trashbash as Trashbash[], "miles_cleaned" as tbKey))
 
+  const volunteers_stack = tot_volunteer_count.map((item, index)=> ({
+    juris: item.juris,
+    u18: vol_under_18[index].value,
+    scouts: vol_scouts[index].value,
+    adults: item.value - vol_under_18[index].value - vol_scouts[index].value
+  }))
+
+
   const cardTB: chartType[] = $derived([
     {
       chartTitle: "Trash Pounds",
@@ -66,6 +74,12 @@
       Chart: BarChartTb,
     },
     {
+      chartTitle: "Volunteers",
+      chartData: volunteers_stack,
+      Chart: StackedBarChart,
+    }
+    /*
+    {
       chartTitle: "Under 18 Volunteers",
       chartData: vol_under_18,
       Chart: BarChartTb,
@@ -80,23 +94,8 @@
       chartData: tot_volunteer_count,
       Chart: BarChartTb,
     }
+    */
  ])
-
-  const volunteers_stack = tot_volunteer_count.map((item, index)=> ({
-    juris: item.juris,
-    u18: vol_under_18[index].value,
-    scouts: vol_scouts[index].value,
-    adults: item.value - vol_under_18[index].value - vol_scouts[index].value
-  }))
-
-
-  /*
-    stack bar data 3 stacks
-      u18_vols
-      scout_vols
-      adult_vols = u18_vols - scout_vols
-
-  */
 
 function convertToCamelCase(input: string): string {
     // Split the string by space, then map over the words

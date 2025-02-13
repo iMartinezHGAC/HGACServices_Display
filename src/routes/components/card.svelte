@@ -1,6 +1,6 @@
 <script lang="ts">
   import CardHeader from "../fragments/cardHeader.svelte";
-  import { setContext, type Component } from "svelte"
+  import { type Component } from "svelte"
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
 	import type { RecordModel } from "pocketbase";

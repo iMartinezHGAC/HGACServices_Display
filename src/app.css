@@ -1,27 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer components {
-  .card-style {
-    @apply
-    flexy bg-white rounded-lg w-10/12 h-3/4
-  }
+@utility flexy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-@layer utilities {
-  .flexy {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .small-caps {
-    font-variant: small-caps;
-  }
-  .all-small-caps {
-    font-variant: all-small-caps;
-  }
-  .titling-caps {
-    font-variant: titling-caps;
-  }
+@utility small-caps {
+  font-variant: small-caps;
+}
+@utility all-small-caps {
+  font-variant: all-small-caps;
+}
+@utility titling-caps {
+  font-variant: titling-caps;
 }

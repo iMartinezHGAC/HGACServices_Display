@@ -105,11 +105,3 @@
     -->
   </g>
 </svg>
-
-<style>
-  svg {
-    @apply
-    w-full h-auto m-6
-  }
-</style>
-
