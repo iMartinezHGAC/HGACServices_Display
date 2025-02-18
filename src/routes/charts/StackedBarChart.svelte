@@ -27,7 +27,7 @@
   const marginRight = 20;
   const marginBottom = 20;
   const marginLeft = 70;
-  const yLabelMargin = 50;
+  const yLabelMargin = 35;
   const legendMargin = 30;
   const legendItemHeight = 20;
   const legendItemWidth = 20;
@@ -36,18 +36,30 @@
   const colors = d3.scaleLinear([0,1,2,3,4], colorSet);
   // get unique data categories
   const uniqueCats = new Set(data.map((d) => d.juris))
+  // calculate the required spacing between legends
   const intraLegendSpacing = width/(uniqueCats.size)+marginRight;
+  // get the number of values whose data will be represented as a bar
   const numOfValues = Object.entries(data)[0].length
 
   //let tooltip;
+  // Get the keys of each object entry
   const rawKeys = Object.keys(Object.values(data)[0])
+  // remove the Jurisdiction key
   const keys =  rawKeys.slice(1)  
-  const jurisdictions = rawKeys[0]
+
+  // Use the remaining keys to create a d3 stack
   const stack = d3.stack()
     .keys(keys)
+  // create an object array of all values and their data
   const stackedData = stack(data)[numOfValues-1].map(data =>data.data)
 
-  const getMaxValueInObjArray = (arr: object[]) => {
+
+
+  /*
+  * getMaxValueInObjArray
+  * 
+  */
+  function getMaxValueInObjArray(arr: object[]) {
     return arr.reduce((max: number, item: object) => {
       for (const key in item) {
         if(key !== 'juris') {
