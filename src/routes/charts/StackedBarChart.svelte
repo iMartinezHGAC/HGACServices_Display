@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
-	import LinePlot from './LinePlot.svelte';
   import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
+	import { graphsState } from './graphVectors.svelte';
 
   type stackedTrash = {
     juris: string,
@@ -9,6 +9,15 @@
     current_funds: number,
   }
 
+  // import state
+  const graphState = graphsState()
+
+  let vector: HTMLDivElement;
+
+  // when parent Export to PDF button is clicked, add this vector to the array of vectors to be exported
+  export function handleAdd() {
+    graphState.add(vector)
+  }
   let {data = [], yLabel = "", colorSet}: {data: stackedTrash[], yLabel: string, colorSet: string[]} = $props(); // Data passed as a prop
 
   // Chart dimensions
@@ -30,7 +39,6 @@
   const intraLegendSpacing = width/(uniqueCats.size)+marginRight;
   const numOfValues = Object.entries(data)[0].length
 
-  let vector: SVGSVGElement;
   //let tooltip;
   const rawKeys = Object.keys(Object.values(data)[0])
   const keys =  rawKeys.slice(1)  
@@ -72,20 +80,19 @@ const y = $derived(d3.scaleLinear()
   let previousSum: number = 0
 </script>
 
-<div class="bg-white rounded-xl p-16">
+<div class="bg-white rounded-xl p-16" bind:this={vector}>
   <svg 
         width={width}
         height={height*1.4}
         viewBox={`0, ${0}, ${width}, ${height*1}`}
         class={'z-10 w-full h-full'}
-        bind:this={vector}
   >
     <!------------------------ Create stacked bars ---------------------->
     <g>
       {#each stackedData as {juris, ...rest}}
         {#each Object.entries(rest) as [key, value],i}
           {previousSum = Object.values(rest).slice(0,i).reduce((acc,val)=> acc+val,0)}
-          {console.log(juris, key, value, previousSum, i)}
+          <!--{console.log(juris, key, value, previousSum, i)}-->
               <rect
                 x={x(juris.toString())}
                 y={y(value)}
