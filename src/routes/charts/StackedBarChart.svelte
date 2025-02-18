@@ -99,24 +99,6 @@ const y = $derived(d3.scaleLinear()
         viewBox={`0, ${0}, ${width}, ${height*1}`}
         class={'z-10 w-full h-full'}
   >
-    <!------------------------ Create stacked bars ---------------------->
-    <g>
-      {#each stackedData as {juris, ...rest}}
-        {#each Object.entries(rest) as [key, value],i}
-          {previousSum = Object.values(rest).slice(0,i).reduce((acc,val)=> acc+val,0)}
-          <!--{console.log(juris, key, value, previousSum, i)}-->
-              <rect
-                x={x(juris.toString())}
-                y={y(value)}
-                height={height-y(value)}
-                width={x.bandwidth()}
-                fill={colors(i)}
-              >
-              </rect> 
-        {/each}
-      {/each}
-    </g>
-
     <!-- x-axis -->
     <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
       {#each x.domain() as d}
@@ -138,11 +120,30 @@ const y = $derived(d3.scaleLinear()
 
       {#each y.ticks(5) as tick}
         <g transform={`translate(0,${y(tick)})`}>
-          <line x2={width - marginRight - marginLeft} stroke="black" stroke-width={2} stroke-dasharray={1.8} transform="translate(0,0)"/>
+          <line x2={width - marginRight - marginLeft} class="stroke-black stroke-2" stroke-dasharray={4} stroke-opacity={0.8}/>
           <text x={-10} dy=".32em" text-anchor="middle" class={`text-3xl font-[Metropolis] transform -translate-x-8`}>{tick}</text>
         </g>
       {/each}
     </g> 
+    <!------------------------ Create stacked bars ---------------------->
+    <g>
+      {#each stackedData as {juris, ...rest}}
+        {#each Object.entries(rest) as [key, value],i}
+          {previousSum = Object.values(rest).slice(0,i).reduce((acc,val)=> acc+val,0)}
+          {console.log(`Juris: ${juris}, Cat: ${key},\nValue: ${value}, Accum: ${previousSum}, \ny-Val: ${y(value)}, y-Accum: ${y(previousSum)},\ni`)}
+              <rect
+                x={x(juris.toString())}
+                y={y(previousSum+value)}
+                height={height-y(value)}
+                width={x.bandwidth()}
+                fill={colors(i)}
+              >
+              </rect> 
+        {/each}
+      {/each}
+    </g>
+
+
     <!-------------------- Legend --------------------->
     <g transform={`translate(${marginLeft}, ${height+(marginBottom*2)})`}>
       {#each keys as key,i}
