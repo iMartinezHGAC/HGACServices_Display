@@ -53,11 +53,11 @@ const exampleMetric: CustomMetric = {
         {projectName}
       </p>
     <div class="flex items-center justify-start w-full ">
-      <p class="font-medium text-xl font-metropolis">
+      <p class="font-medium text-xl font-[Metropolis]">
         {location}
       </p>
       {#if funding}
-        <p class="flex pl-8 font-medium text-xl font-metropolis">
+        <p class="flex pl-8 font-medium text-xl font-[Metropolis]">
           Funding: ${funding}
         </p>
       {/if}
@@ -78,7 +78,7 @@ const exampleMetric: CustomMetric = {
         {customMetric.metricName}: {customMetric.metricValue}
       </p>
     {/if}
-    <p class="w-full font-metropolis">
+    <p class="w-full font-[Metropolis]">
       {bodyText}
     </p>
 

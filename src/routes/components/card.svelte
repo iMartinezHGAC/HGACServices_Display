@@ -55,15 +55,16 @@
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
   //$inspect(linkUrls)
+  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
 
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex bg-slate-700">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
     <CardBlurbTb text={blurb}/>
-    <button onclick={handleExportClick} class="px-2 bg-green-200 font-staatliches font-medium active:bg-green-300">Export to PDF</button>
+    <button onclick={handleExportClick} class="px-2 bg-green-200 font-[Staatliches] font-medium active:bg-green-300">Export to PDF</button>
   </div>
-  <div class="grid grid-cols-2 gap-2 items-center justify-center px-12 mt-8">
+  <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
       {#each charts as {chartTitle, chartData, Chart},i}
         {#if i<2}
           <div class="card-style">
@@ -71,7 +72,7 @@
           </div>
         {:else if i>=2 && accordionFlag}
           <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
+            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}  colorSet={groupColors}/>
           </div>
         {/if}
       {/each}

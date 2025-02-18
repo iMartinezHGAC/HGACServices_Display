@@ -48,8 +48,10 @@
     juris: item.juris,
     u18: vol_under_18[index].value,
     scouts: vol_scouts[index].value,
-    adults: item.value - vol_under_18[index].value - vol_scouts[index].value
+    adults: item.value - vol_under_18[index].value - vol_scouts[index].value < 0 ? 0 : item.value - vol_under_18[index].value - vol_scouts[index].value 
   }))
+
+  console.log(volunteers_stack)
 
 
   const cardTB: chartType[] = $derived([
@@ -119,7 +121,7 @@ const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, c
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
-  <div class="flex text-slate-200 font-metropolis font-medium">
+  <div class="flex text-slate-200 font-[Metropolis] font-medium">
     <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded w-56 bg-slate-600 text-slate-200 focus:bg-slate-800 hover:bg-slate-700 hover:text-white ">{cardName}</a>
   </div>
 {/snippet}

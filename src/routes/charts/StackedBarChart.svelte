@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import * as d3 from 'd3';
 	import LinePlot from './LinePlot.svelte';
+  import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
 
   type stackedTrash = {
     juris: string,
@@ -13,7 +13,7 @@
 
   // Chart dimensions
   let width = 1000;
-  let height = 600;
+  let height = 700;
   const marginTop = 10;
   const marginRight = 20;
   const marginBottom = 20;
@@ -27,7 +27,8 @@
   const colors = d3.scaleLinear([0,1,2,3,4], colorSet);
   // get unique data categories
   const uniqueCats = new Set(data.map((d) => d.juris))
-  const intraLegendSpacing = width/(uniqueCats.size)-marginRight;
+  const intraLegendSpacing = width/(uniqueCats.size)+marginRight;
+  const numOfValues = Object.entries(data)[0].length
 
   let vector: SVGSVGElement;
   //let tooltip;
@@ -36,12 +37,27 @@
   const jurisdictions = rawKeys[0]
   const stack = d3.stack()
     .keys(keys)
-  const stackedData = stack(data)
+  const stackedData = stack(data)[numOfValues-1].map(data =>data.data)
 
-  const maxValueInStack = $derived(stackedData[1].reduce((max, item) => 
-    Math.max(max, item[1]), Number.MIN_SAFE_INTEGER
-  ))
+  const getMaxValueInObjArray = (arr: object[]) => {
+    return arr.reduce((max: number, item: object) => {
+      for (const key in item) {
+        if(key !== 'juris') {
+          if(item[key] > max) {
+            max = item[key]
+          }
+        }
+      }
+      return max
+    }, -Infinity)
+  }
 
+  const maxVal = getMaxValueInObjArray(stackedData)
+  console.log("Max value: ", maxVal)
+ 
+
+
+  //console.log(`StackedData: ${stackedData[2]}`)
 const x = $derived(d3.scaleBand()
       .domain(uniqueCats)
       .range([marginLeft, width - marginRight])
@@ -49,111 +65,84 @@ const x = $derived(d3.scaleBand()
   )
 
 const y = $derived(d3.scaleLinear()
-    .domain([0, maxValueInStack])
+    .domain([0, maxVal])
     .rangeRound([height - marginBottom, marginTop])
   )
 
-onMount(()=> {
-  d3.select(vector)
-    .append('g')
-    .attr('transform', `translate(0,${height + marginBottom})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0))
-    .call(g => g.selectAll('.domain').remove())
-    .selectAll('text')
-    .attr('font-weight', '500')
-    .attr('font-family', 'Metropolis')
-    .attr('font-size', '1.3rem')
-    .attr('fill', 'black')
-
-  // Append the vertical axis
-  d3.select(vector)
-    .append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y).ticks(null, "s"))
-    .call(g => g.selectAll('.domain').remove())
-    .selectAll('text')
-    .attr('font-family', 'Metropolis')
-    .attr('fill', 'black')
-    .attr('font-size', '1.3rem');
-
-  // Y-LABEL
-  d3.select(vector)
-    .append('text')
-    .attr('x', yLabel.length) // Rotate and place the label
-    .attr('y', -30) // Vertical position
-    .attr('text-anchor', 'start')
-    .attr('font-size', '1.8rem')
-    .attr('font-weight', '700')
-    .attr('font-family', 'Metropolis')
-    .attr('fill', 'currentColor')
-    .attr('fill', 'black')
-    .text(yLabel);
-})
+  let previousSum: number = 0
 </script>
 
-<div class="bg-slate-200 w-auto h-auto flex items-center justify-center rounded-lg">
+<div class="bg-white rounded-xl p-16">
   <svg 
         width={width}
-        height={height}
-        viewBox={`0, 0, ${width}, ${height}`}
-        class={'z-10 w-5/6 h-6/6'}
+        height={height*1.4}
+        viewBox={`0, ${0}, ${width}, ${height*1}`}
+        class={'z-10 w-full h-full'}
         bind:this={vector}
   >
+    <!------------------------ Create stacked bars ---------------------->
     <g>
-      {#each stackedData[1] as data}
-        {#each {length: data.length }, i}
-          {#if i===0}
-            <rect
-              x={x(data.data.juris)}
-              y={y(data[i])}
-              height={height-y(data[i])}
-              width={x.bandwidth()}
-              fill={colors(i)}
-            >
-            </rect> 
-          {:else}
-            <rect
-              x={x(data.data.juris)}
-              y={y(data[i])}
-              height={y(data[i-1])-(y(data[i]))}
-              width={x.bandwidth()}
-              fill={colors(i)}
-            >
-            </rect> 
-          {/if}
+      {#each stackedData as {juris, ...rest}}
+        {#each Object.entries(rest) as [key, value],i}
+          {previousSum = Object.values(rest).slice(0,i).reduce((acc,val)=> acc+val,0)}
+          {console.log(juris, key, value, previousSum, i)}
+              <rect
+                x={x(juris.toString())}
+                y={y(value)}
+                height={height-y(value)}
+                width={x.bandwidth()}
+                fill={colors(i)}
+              >
+              </rect> 
         {/each}
       {/each}
     </g>
 
+    <!-- x-axis -->
+    <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
+      {#each x.domain() as d}
+        <g transform={`translate(${x(d) - yLabelMargin},${marginBottom}) rotate(45 0 0)`}>
+        <text class="font-[Metropolis] text-lg transform translate-y-6" text-anchor="start">{shrinkLongNames(d)}</text>
+        </g>
+      {/each}
+    </g>
+   <!-- Y-axis group -->
+    <g transform={`translate(${marginLeft},0)`} class="y-axis">
+      <text 
+        x={`-${marginLeft}`} 
+        y={`-${marginTop}`} 
+        text-anchor="left"
+        class="text-5xl font-bold font-[Metropolis] text-start items-start fill-slate-700"
+      >
+        {yLabel}
+      </text>
+
+      {#each y.ticks(5) as tick}
+        <g transform={`translate(0,${y(tick)})`}>
+          <line x2={width - marginRight - marginLeft} stroke="black" stroke-width={2} stroke-dasharray={1.8} transform="translate(0,0)"/>
+          <text x={-10} dy=".32em" text-anchor="middle" class={`text-3xl font-[Metropolis] transform -translate-x-8`}>{tick}</text>
+        </g>
+      {/each}
+    </g> 
     <!-------------------- Legend --------------------->
     <g transform={`translate(${marginLeft}, ${height+(marginBottom*2)})`}>
       {#each keys as key,i}
         <rect 
-          x={i*(legendItemHeight+intraLegendSpacing)} 
-          y={35} 
+          x={(width/2)-(i*(legendItemHeight*3+intraLegendSpacing))} 
+          y={-height-(marginTop)} 
           width={legendItemWidth} 
           height={legendItemHeight} 
           fill={colors(i)}
-          class={`stroke-black transform translate-x-8`}
+          class={`stroke-black transform`}
         >
         </rect>
         <text 
-          x={i*(legendItemHeight+intraLegendSpacing)} 
-          y={legendItemHeight*2.65} 
-          class="font-metropolis text-xl transform translate-x-16">
+          x={(width/2)-(i*(legendItemHeight*3+intraLegendSpacing))} 
+          y={-height+(marginTop)} 
+          class="font-[Metropolis] text-3xl transform translate-x-8">
           <tspan>{key}</tspan>
         </text>
       {/each}
     </g>
   </svg>
 </div>
-<!--
-<style>
-  .tooltip {
-    @apply
-    absolute invisible bg-black text-white px-2 py-1 rounded text-sm
-  }
-</style>
-
--->
-

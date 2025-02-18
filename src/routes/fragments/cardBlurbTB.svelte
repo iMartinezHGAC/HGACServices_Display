@@ -14,7 +14,7 @@
   //$inspect(links)
 </script>
 <div>
-  <p class="prose-md text-white font-metropolis font-semibold py-8 px-6">
+  <p class="prose-md text-white font-[Metropolis] font-semibold py-8 px-6">
     {plainText}
   </p>
 

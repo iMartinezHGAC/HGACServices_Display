@@ -12,7 +12,7 @@
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
-  <div class="text-slate-200 font-metropolis font-medium">
+  <div class="text-slate-200 font-[Metropolis] font-medium">
     {cardName}
   </div>
 {/snippet}

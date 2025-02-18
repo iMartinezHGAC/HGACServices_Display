@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
 	import { graphsState } from './graphVectors.svelte';
+  import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
   let vector: HTMLDivElement
   // Props
   let {data = [],
@@ -117,7 +118,7 @@
     <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
       {#each x.domain() as d}
         <g transform={`translate(${x(d) -marginLeft/3},0) rotate(45 0 0)`}>
-          <text class="font-metropolis text-lg transform translate-y-6" text-anchor="start">{d}</text>
+        <text class="font-[Metropolis] text-lg transform translate-y-6" text-anchor="start">{shrinkLongNames(d)}</text>
         </g>
       {/each}
     </g>
@@ -128,14 +129,14 @@
         x={`${(0)}`} 
         y={`${0}`} 
         text-anchor="left"
-        class="text-3xl font-bold font-metropolis text-start items-start fill-slate-700"
+        class="text-3xl font-bold font-[Metropolis] text-start items-start fill-slate-700"
       >
         {yLabel}
       </text>
 
       {#each y.ticks(5) as tick}
         <g transform={`translate(0,${y(tick)})`}>
-          <line x2={width - marginRight - marginLeft} stroke="black" transform="translate(20,0)"/>
+          <line x2={width - marginRight - marginLeft} stroke="black" stroke-width={1.4} stroke-dasharray={2.5} transform="translate(20,0)"/>
           <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
         </g>
       {/each}
@@ -151,10 +152,4 @@
     {/each}
   </svg>
 </div>
-<style>
-  svg {
-    @apply
-    w-full
-  }
-</style>
 

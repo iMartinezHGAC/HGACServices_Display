@@ -12,8 +12,6 @@ let human_readable = $derived(jurisdiction
   .map(word=> word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() )
   .join(" "))
 
-
-
 function handleSetChosen(tabName: string) {
   chosenTab = tabName
 }
@@ -28,7 +26,7 @@ function handleSetChosen(tabName: string) {
       {/if}
 {/snippet}
 
-<div class="flexy h-1/8 w-screen bg-slate-800 shadow-lg shadow-slate-500">
+<div class="flexy h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500">
   <div class="flex justify-start items-center w-1/4">
     <img src={county_logo} alt="harris" class="h-24 p-2">
     <p class="px-6 text-2xl w-3/4 font-extrabold font-[Metropolis] small-caps text-slate-200 select-none">{human_readable}</p>
