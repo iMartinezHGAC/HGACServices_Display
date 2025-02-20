@@ -1,6 +1,5 @@
 <script lang="ts">
 
-
   type headerProps = {
     projectName: string,
     color: string

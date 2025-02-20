@@ -35,10 +35,10 @@ function handleSetChosen(tabName: string) {
       {@render tabSnippet("/overview", "Overview", "gray")}
       {@render tabSnippet("/transportation", "Transportation", "blue")}
       {@render tabSnippet("/environmental", "Environmental", "green")}
-      {@render tabSnippet("/workforce", "Workforce", "purple")}
+      {@render tabSnippet("/workforce", "Economic_Development", "purple")}
       {@render tabSnippet("/crimjust", "Public Safety", "yellow")}
-      {@render tabSnippet("/community", "Community", "gray")}
-      {@render tabSnippet("/aging", "Aging", "gray")}
+      {@render tabSnippet("/community", "Community Planning", "gray")}
+      {@render tabSnippet("/aging", "Emergency Preparedness", "red")}
   </div>
   <div class="flex-grow"></div>
   <img src={logo} alt="HGAC" class="h-24 right-4">

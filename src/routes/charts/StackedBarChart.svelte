@@ -152,8 +152,8 @@ const y = $derived(d3.scaleLinear()
     <g transform={`translate(${marginLeft}, ${height+(marginBottom*2)})`}>
       {#each keys as key,i}
         <rect 
-          x={(width/2)-(i*(legendItemHeight*3+intraLegendSpacing))} 
-          y={-height-(marginTop)} 
+          x={(width/1.7)-(i*(legendItemHeight*3+intraLegendSpacing))} 
+          y={-height-marginTop*8} 
           width={legendItemWidth} 
           height={legendItemHeight} 
           fill={colors(i)}
@@ -161,8 +161,8 @@ const y = $derived(d3.scaleLinear()
         >
         </rect>
         <text 
-          x={(width/2)-(i*(legendItemHeight*3+intraLegendSpacing))} 
-          y={-height+(marginTop)} 
+          x={(width/1.7)-(i*(legendItemHeight*3+intraLegendSpacing))} 
+          y={-height-marginTop*6} 
           class="font-[Metropolis] text-3xl transform translate-x-8">
           <tspan>{key}</tspan>
         </text>

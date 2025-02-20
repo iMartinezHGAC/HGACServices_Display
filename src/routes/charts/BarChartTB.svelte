@@ -2,6 +2,7 @@
   import * as d3 from 'd3';
 	import { graphsState } from './graphVectors.svelte';
   import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
+
   let vector: HTMLDivElement
   // Props
   let {data = [],

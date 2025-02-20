@@ -63,8 +63,8 @@
   <div class="flex bg-slate-700">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
     <CardBlurbTb text={blurb}/>
-    <button onclick={handleExportClick} class="px-2 bg-slate-600 bg-none font-[Staatliches] font-medium active:bg-green-300 cursor-pointer">
-      <Printer classStyle="stroke-white fill-white w-24 h-16"/>
+    <button onclick={handleExportClick} class="group px-2 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-green-300 cursor-pointer">
+      <Printer classStyle="stroke-white fill-white w-12 h-8 opacity-50 group-hover:opacity-100"/>
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">

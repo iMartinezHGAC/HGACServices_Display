@@ -18,6 +18,7 @@
     else if(color ==="green") return base+" bg-[#7AB66F] text-slate-700"
     else if(color ==="yellow") return base+" bg-yellow-100 text-slate-700"
     else if(color ==="purple") return base+" bg-neutral-500 text-slate-200"
+    else if(color ==="red") return base+" bg-red-900 text-slate-200"
     else if(color ==="chosen") return base+" bg-slate-700 text-slate-200"
     else return base
   })
