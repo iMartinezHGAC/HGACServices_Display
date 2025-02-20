@@ -51,8 +51,6 @@
     adults: item.value - vol_under_18[index].value - vol_scouts[index].value < 0 ? 0 : item.value - vol_under_18[index].value - vol_scouts[index].value 
   }))
 
-  console.log(volunteers_stack)
-
 
   const cardTB: chartType[] = $derived([
     {

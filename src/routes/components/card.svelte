@@ -4,6 +4,7 @@
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
 	import type { RecordModel } from "pocketbase";
+	import Printer from "$lib/assets/printer.svelte";
 
   
   type chartType = {
@@ -62,7 +63,9 @@
   <div class="flex bg-slate-700">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
     <CardBlurbTb text={blurb}/>
-    <button onclick={handleExportClick} class="px-2 bg-green-200 font-[Staatliches] font-medium active:bg-green-300">Export to PDF</button>
+    <button onclick={handleExportClick} class="px-2 bg-slate-600 bg-none font-[Staatliches] font-medium active:bg-green-300 cursor-pointer">
+      <Printer classStyle="stroke-white fill-white w-24 h-16"/>
+    </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
       {#each charts as {chartTitle, chartData, Chart},i}

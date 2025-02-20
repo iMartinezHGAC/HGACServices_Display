@@ -55,25 +55,29 @@
 
 
 
+
+  function accumulator(acc: number, val: unknown): number {
+    if(typeof val === 'number') {
+      return acc+val
+    }
+    return acc
+  }
+
   /*
   * getMaxValueInObjArray
   * 
   */
   function getMaxValueInObjArray(arr: object[]) {
     return arr.reduce((max: number, item: object) => {
-      for (const key in item) {
-        if(key !== 'juris') {
-          if(item[key] > max) {
-            max = item[key]
-          }
-        }
+      let sum = Object.values(item).splice(1).reduce(accumulator,0)
+      if(sum > max) {
+        max = sum
       }
       return max
     }, -Infinity)
   }
 
   const maxVal = getMaxValueInObjArray(stackedData)
-  console.log("Max value: ", maxVal)
  
 
 
@@ -129,8 +133,8 @@ const y = $derived(d3.scaleLinear()
     <g>
       {#each stackedData as {juris, ...rest}}
         {#each Object.entries(rest) as [key, value],i}
-          {previousSum = Object.values(rest).slice(0,i).reduce((acc,val)=> acc+val,0)}
-          {console.log(`Juris: ${juris}, Cat: ${key},\nValue: ${value}, Accum: ${previousSum}, \ny-Val: ${y(value)}, y-Accum: ${y(previousSum)},\ni`)}
+          {previousSum = Object.values(rest).slice(0,i).reduce(accumulator,0)}
+          <!--{console.log(`Juris: ${juris}, Cat: ${key},\nValue: ${value}, Accum: ${previousSum}, \ny-Val: ${y(value)}, y-Accum: ${y(previousSum)},\ni`)}-->
               <rect
                 x={x(juris.toString())}
                 y={y(previousSum+value)}
