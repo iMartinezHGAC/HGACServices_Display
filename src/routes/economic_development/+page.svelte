@@ -13,6 +13,6 @@
 </script>
 
 <div class="flex w-screen h-screen items-center justify-center bg-slate-200">
-  <SunburstChart width={800} data={test_data}/>
+  <SunburstChart width={600} data={test_data}/>
 </div>
 
