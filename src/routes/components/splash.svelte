@@ -16,6 +16,8 @@ function handleSetChosen(tabName: string) {
   chosenTab = tabName
 }
 
+  console.log(jurisdiction)
+
 </script>
 
 {#snippet tabSnippet(path: string, tabText: string, color: string)}

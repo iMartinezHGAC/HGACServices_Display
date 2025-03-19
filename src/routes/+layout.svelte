@@ -11,10 +11,15 @@
 
 	import '../app.css';
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
+  let jurisdiction = $state("null")
+  if(data.routeID === '/a8se97t2') {
+    jurisdiction = "harris_county"
+  }
+  console.log(data.routeID)
 </script>
 
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
-  <Splash chosenTab={data.routeID} jurisdiction="harris_county"/>
+  <Splash chosenTab={data.routeID} jurisdiction={jurisdiction}/>
   {@render children()}
 </main>
