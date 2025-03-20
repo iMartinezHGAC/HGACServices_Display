@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { PageData} from "../$types";
-	import StackedBarChart from "../charts/StackedBarChart.svelte";
-	import Indicator from "../components/indicator.svelte";
-  import StatDisplay from "../components/statDisplay.svelte";
+	import type { PageData} from "../../$types"
+	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
+	import Indicator from "$routes/components/indicator.svelte";
+  import StatDisplay from "$routes/components/statDisplay.svelte";
   import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte"
   const {data}: {data: PageData } = $props() 
 

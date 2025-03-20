@@ -9,9 +9,12 @@
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
-	import '../app.css';
+	import '../app.css'
+	import { jurisState } from '../state/jurisState.svelte';
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
   let jurisdiction = $state("null")
+  const jurisId = jurisState()
+  jurisId.setUUID(data.routeID)
   if(data.routeID === '/a8se97t2') {
     jurisdiction = "harris_county"
   }

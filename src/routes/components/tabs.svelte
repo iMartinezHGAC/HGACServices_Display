@@ -1,12 +1,17 @@
 <script lang="ts">
+  import {jurisState} from "../../state/jurisState.svelte"
+
   type tabProps = {
     tabText: string,
     color: string,
     setChosen: (tabName: string) => void
   }
 
+  const jurisId = jurisState()
+
   let {tabText, color="gray", setChosen}: tabProps = $props()
-  let route = $derived("/" + tabText.toLowerCase())
+  let route = $derived( jurisId.uuid + "/" + tabText.toLowerCase())
+  $inspect(route)
 
   function chooseEvent() {
     setChosen(tabText)

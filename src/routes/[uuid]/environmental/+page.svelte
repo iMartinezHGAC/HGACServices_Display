@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
-	import Card from "../components/card.svelte";
+	import Card from "$routes/components/card.svelte";
   import { type Component } from "svelte"
 	import type { PageData } from './$types';
 	import type { RecordModel } from "pocketbase";
 
-	import StackedBarChart from "../charts/StackedBarChart.svelte";
-	import BarChartTb from "../charts/BarChartTB.svelte";
+	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
+	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 
 	let { data}: { data: PageData } = $props();
 
