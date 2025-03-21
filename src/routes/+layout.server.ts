@@ -1,12 +1,12 @@
 import { redirect } from "@sveltejs/kit"
 import type { LayoutServerLoad } from "./$types"
 
-export const load: LayoutServerLoad = async ({url}) => {
-  url.pathname
+export const load: LayoutServerLoad = async ({url, params}) => {
   if(url.pathname === "/") {
     redirect(302, '/overview')
   }
   return {
-    routeID: url.pathname
+    uuid: params.uuid,
+    routeID: url.pathname,
   }
 }

@@ -11,11 +11,14 @@
 
 	import '../app.css'
 	import { jurisState } from '../state/jurisState.svelte';
+
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
+
   let jurisdiction = $state("null")
+
   const jurisId = jurisState()
-  jurisId.setUUID(data.routeID)
-  if(data.routeID === '/a8se97t2') {
+  jurisId.setUUID(data.uuid)
+  if(data.uuid === 'a8se97t2') {
     jurisdiction = "harris_county"
   }
   console.log(data.routeID)
@@ -23,6 +26,8 @@
 
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
+  {#if data.uuid}
   <Splash chosenTab={data.routeID} jurisdiction={jurisdiction}/>
+  {/if}
   {@render children()}
 </main>

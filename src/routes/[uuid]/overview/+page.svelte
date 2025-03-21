@@ -63,10 +63,10 @@ const stackbar_data: stackedTrash[] = [
   </div>
   <div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
     <div class="grid grid-cols-2">
-      <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
+      <div class="transform scale-90 bg-slate-50 pt-6 pb-4 rounded-lg">
         <StackedBarChart data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
       </div>
-      <div class="transform scale-90 bg-slate-200 pt-6 pb-4 rounded-lg">
+      <div class="transform scale-90 bg-slate-50 pt-6 pb-4 rounded-lg">
         <StackedBarChart data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
       </div>
     </div>

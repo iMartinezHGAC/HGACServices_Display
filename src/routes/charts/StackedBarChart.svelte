@@ -96,7 +96,7 @@ const y = $derived(d3.scaleLinear()
   let previousSum: number = 0
 </script>
 
-<div class="bg-white rounded-xl p-16" bind:this={vector}>
+<div class="rounded-xl p-16" bind:this={vector}>
   <svg 
         width={width}
         height={height*1.4}
@@ -115,7 +115,7 @@ const y = $derived(d3.scaleLinear()
     <g transform={`translate(${marginLeft},0)`} class="y-axis">
       <text 
         x={`-${marginLeft}`} 
-        y={`-${marginTop}`} 
+        y={`-${marginTop+60}`} 
         text-anchor="left"
         class="text-5xl font-bold font-[Metropolis] text-start items-start fill-slate-700"
       >
