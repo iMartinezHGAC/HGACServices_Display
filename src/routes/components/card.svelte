@@ -47,11 +47,19 @@
   */
 
   //$inspect(props.projectLinks)
-  let linkUrls = $derived(project.expand!.links.map(
-    (item: any) => item.url_string)
+  let linkUrls = $derived.by(()=> {
+    if(project.expand && project.expand.links) {
+    return project.expand.links.map(
+      (item: any) => item.url_string)
+    } else return [""]
+  }
   )
 
-  let blurb = $derived(project.expand!.blurb.program_blurb)
+  let blurb = $derived.by(() => {
+    if(project.expand && project.expand.blurb) {
+      return project.expand.blurb.program_blurb
+    } else return ""
+  })
 
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";

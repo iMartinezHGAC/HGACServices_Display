@@ -22,9 +22,9 @@ function handleSetChosen(tabName: string) {
 
 {#snippet tabSnippet(path: string, tabText: string, color: string)}
       {#if chosenTab === path}
-        <Tabs tabText={tabText} color="chosen" setChosen={handleSetChosen}/>
+        <Tabs tabText={tabText} path={path} color="chosen" setChosen={handleSetChosen}/>
       {:else}
-        <Tabs tabText={tabText} color={color} setChosen={handleSetChosen}/>
+        <Tabs tabText={tabText} path={path} color={color} setChosen={handleSetChosen}/>
       {/if}
 {/snippet}
 
@@ -34,13 +34,15 @@ function handleSetChosen(tabName: string) {
     <p class="px-6 text-2xl w-3/4 font-extrabold font-[Metropolis] small-caps text-slate-200 select-none">{human_readable}</p>
   </div>
   <div class="flexy absolute top-12">
-      {@render tabSnippet("/overview", "Overview", "gray")}
-      {@render tabSnippet("/transportation", "Transportation", "blue")}
-      {@render tabSnippet("/environmental", "Environmental", "green")}
-      {@render tabSnippet("/workforce", "Economic_Development", "purple")}
-      {@render tabSnippet("/crimjust", "Public Safety", "yellow")}
-      {@render tabSnippet("/community", "Community Planning", "gray")}
-      {@render tabSnippet("/aging", "Emergency Preparedness", "red")}
+      {@render tabSnippet("overview", "Overview", "gray")}
+      {@render tabSnippet("community", "Community Planning", "blue")}
+      {@render tabSnippet("emergency", "Emergency Preparedness", "red")}
+      {@render tabSnippet("economic_development", "Economic Development", "orange")}
+      {@render tabSnippet("environmental", "Environmental", "green")}
+      {@render tabSnippet("public_safety", "Public Safety", "dblue")}
+      {@render tabSnippet("transportation", "Transportation", "purple")}
+      {@render tabSnippet("aging", "Aging", "pink")}
+      {@render tabSnippet("workforce", "Workforce", "teal")}
   </div>
   <div class="flex-grow"></div>
   <img src={logo} alt="HGAC" class="h-24 right-4">

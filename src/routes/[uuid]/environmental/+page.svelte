@@ -97,6 +97,68 @@
     */
  ])
 
+
+  const cardWQ: chartType[] = $derived([
+    {
+      chartTitle: "Permitted OSSF Count",
+      chartData: trash_pounds,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Unpermitted OSSF Count",
+      chartData: tires,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "SAB Count",
+      chartData: miles_cleaned,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "WWTF Count",
+      chartData: recycled_pounds,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "SEB Complete Count",
+      chartData: volunteers_stack,
+      Chart: StackedBarChart,
+    },
+    {
+      chartTitle: "SEB Complete Cost",
+      chartData: volunteers_stack,
+      Chart: StackedBarChart,
+    },
+    {
+      chartTitle: "SEB Waitlist Count",
+      chartData: volunteers_stack,
+      Chart: StackedBarChart,
+    },
+    {
+      chartTitle: "SEB Active Count",
+      chartData: volunteers_stack,
+      Chart: StackedBarChart,
+    },
+
+    /*
+    {
+      chartTitle: "Under 18 Volunteers",
+      chartData: vol_under_18,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Scouts Volunteers",
+      chartData: vol_scouts,
+      Chart: BarChartTb,
+    },
+    {
+      chartTitle: "Total Volunteers",
+      chartData: tot_volunteer_count,
+      Chart: BarChartTb,
+    }
+    */
+ ])
+
 function convertToCamelCase(input: string): string {
     // Split the string by space, then map over the words
     const words = input.split(' ');
@@ -141,7 +203,7 @@ const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, c
       <div class="flexy" id="waterQualityManagementPlan">
         <Card 
           project={wqmp} 
-          charts={cardTB}
+          charts={cardWQ}
         />   
       </div>
       <div class="flexy" id="solidWasteManagement">

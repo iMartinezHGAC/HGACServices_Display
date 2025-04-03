@@ -14,7 +14,7 @@
 
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
 
-  let jurisdiction = $state("null")
+  let jurisdiction = $state("Harris County")
 
   const jurisId = jurisState()
   jurisId.setUUID(data.uuid)
