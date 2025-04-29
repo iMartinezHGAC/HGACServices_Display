@@ -25,7 +25,7 @@ let {
 
 </script>
 
-<div class="flex items-center justify-start flex-col h-full pr-24">
+<div class="flex items-center justify-start flex-col h-full pr-24 pb-8">
   {#if above}
     <p class="font-[Metropolis] text-3xl text-slate-800 w-full flexy pb-4">
       {aboveText}
