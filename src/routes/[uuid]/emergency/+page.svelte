@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
 	import Card from "$routes/components/card.svelte";
+	import CardEm from "$routes/components/card_indicators.svelte";
   import { type Component } from "svelte"
 	import type { PageData } from './$types';
 	import type { RecordModel } from "pocketbase";
 
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
+	import Indicator from "$routes/components/indicator.svelte";
 
 	let { data}: { data: PageData } = $props();
 
@@ -19,6 +21,9 @@
   let wqmp = $derived(data.post[22])
   let sw = $derived(data.post[23])
   let cr = $derived(data.post[24])
+
+  let calls = data.emergency[0].calls_count
+  let texts = data.emergency[0].texts_count
 
   type chartType = {
     chartTitle: string,
@@ -68,34 +73,14 @@ function toCamelCase(input: string): string {
 
   const cardTB: chartType[] = $derived([
     {
-      chartTitle: "Tow Count",
-      chartData: trash_pounds,
-      Chart: BarChartTb,
+      chartTitle: "Calls",
+      chartData: calls,
+      Chart: Indicator,
     },
     {
-      chartTitle: "Clearance Time",
-      chartData: tires,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Dollars",
-      chartData: miles_cleaned,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Map Assistance",
-      chartData: recycled_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Map Actions",
-      chartData: recycled_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "T-Star Incidents",
-      chartData: recycled_pounds,
-      Chart: BarChartTb,
+      chartTitle: "Texts",
+      chartData: texts,
+      Chart: Indicator,
     },
     /*
     {
@@ -214,7 +199,7 @@ const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, c
   <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:400, duration:300 }}>
     <div class="flexy flex-col">
       <div class="flexy" id={toCamelCase(tb.program_name)}>
-        <Card 
+        <CardEm
           project={tb} 
           charts={cardTB}
         />   

@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({locals}) => {
   const entries = await locals.pb.collection('05_trash_bash').getFullList({
     expand: 'collection_site_id'
   })
+  const emergency = await locals.pb.collection('25_911').getFullList()
 
   const mostRecent = entries.reduce((maxDate: Date, entry: any) => {
     const currentDate = new Date(entry.date)
@@ -30,6 +31,6 @@ export const load: PageServerLoad = async ({locals}) => {
 	return {
 		post: await locals.pb.collection('programs').getFullList({expand: 'blurb, links'}),
     trashbash: mostRecentEntries,
-    solidWaste: await locals.pb.collection('01_solid_waste').getFullList()
+    emergency: emergency,
   }
 }

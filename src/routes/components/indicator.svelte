@@ -21,17 +21,17 @@ let {
   symbol_post = "",
 }: propTypes = $props()
 
+  $inspect("Above text: ", aboveText)
 
 </script>
 
-<div class="flex items-center justify-start flex-col h-full bg-slate-700 pr-24 pt-0">
+<div class="flex items-center justify-start flex-col h-full pr-24">
   {#if above}
-  <p class="font-[Staatliches] text-2xl text-slate-200 w-full flexy pb-12">
-    {aboveText}
-  </p>
+    <p class="font-[Metropolis] text-3xl text-slate-800 w-full flexy pb-4">
+      {aboveText}
+    </p>
   {/if}
-  <div class="w-64 h-64 flexy flex-col text-center rounded-xl font-[Metropolis] text-slate-100 pt-4 border-2 border-slate-950 shadow-md shadow-slate-950">
-
+  <div class="w-64 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-slate-700 text-slate-100 pt-4 border-2 border-slate-950 shadow-md shadow-slate-950">
     <div class="flexy flex-row font-bold text-center">
       <div class="flexy text-[5rem]">
         <p class="items-end text-[7rem]">{symbol_pre}</p>
