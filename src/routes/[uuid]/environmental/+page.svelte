@@ -226,6 +226,24 @@ function convertToCamelCase(input: string): string {
           charts={cardTB}
         />   
       </div>
+      <div class="flexy" id="volunteerWaterQualityMonitoring">
+        <Card 
+          project={testo} 
+          charts={cardTB}
+        />   
+      </div>
+      <div class="flexy" id="watershedBasedPlanning">
+        <Card 
+          project={teste} 
+          charts={cardTB}
+        />   
+      </div>
+      <div class="flexy" id="waterInnovationStrategiesOfExcellenceAwardsProgram">
+        <Card 
+          project={wi} 
+          charts={cardTB}
+        />   
+      </div>
     </div>
   </div>
 </div>
