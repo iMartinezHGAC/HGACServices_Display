@@ -4,26 +4,38 @@ import county_logo from "$lib/assets/harris_county.svg"
 import Tabs from "./tabs.svelte";
 
 let {chosenTab, jurisdiction}: {chosenTab: string, jurisdiction: string} = $props()
-let humanChosenTab = $derived(chosenTab.slice(1))
-//$inspect(humanChosenTab)
+let humanChosenTab = $derived(chosenTab.slice(0))
+//$inspect('chosen', humanChosenTab)
 
 let human_readable = $derived(jurisdiction
   .split("_")
   .map(word=> word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() )
   .join(" "))
 
-function handleSetChosen(tabName: string) {
-  chosenTab = tabName
+
+function toSnakeCase(tabName: string) {
+  return tabName.split(' ').join('_')
 }
 
-  console.log(jurisdiction)
+function getEndOfPath(tabName: string) {
+  const segments = tabName.split('/').filter(segment => segment !== '')
+  return segments[segments.length - 1] || ''
+}
+
+function handleSetChosen(tabName: string) {
+  chosenTab = toSnakeCase(getEndOfPath(tabName).toLowerCase())
+}
+
+  //console.log(jurisdiction)
 
 </script>
 
 {#snippet tabSnippet(path: string, tabText: string, color: string)}
       {#if chosenTab === path}
+        {console.log(`true for path: ${path} and ${chosenTab}`)}
         <Tabs tabText={tabText} path={path} color="chosen" setChosen={handleSetChosen}/>
       {:else}
+        {console.log(`not true for path: ${path} and chosen: ${chosenTab}`)}
         <Tabs tabText={tabText} path={path} color={color} setChosen={handleSetChosen}/>
       {/if}
 {/snippet}

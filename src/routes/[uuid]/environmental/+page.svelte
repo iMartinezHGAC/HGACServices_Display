@@ -22,7 +22,7 @@
   let testo = data.post[5]
   let teste = data.post[6]
   let wi = data.post[28]
-  console.log("testo", testo, teste, wi)
+  //console.log("testo", testo, teste, wi)
 
   const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name, testo.program_name, teste.program_name, wi.program_name])
   /*

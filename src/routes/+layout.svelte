@@ -21,13 +21,24 @@
   if(data.uuid === 'a8se97t2') {
     jurisdiction = "harris_county"
   }
-  console.log(data.routeID)
+
+
+  function toSnakeCase(tabName: string) {
+    return tabName.split(' ').join('_')
+  }
+
+  function getEndOfPath(tabName: string) {
+    const segments = tabName.split('/').filter(segment => segment !== '')
+    return segments[segments.length - 1] || ''
+  }
+
+  let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()))
 </script>
 
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
   {#if data.uuid}
-  <Splash chosenTab={data.routeID} jurisdiction={jurisdiction}/>
+  <Splash chosenTab={routePath} jurisdiction={jurisdiction}/>
   {/if}
   {@render children()}
 </main>
