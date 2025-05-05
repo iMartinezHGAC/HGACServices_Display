@@ -39,14 +39,7 @@
     return "Show fewer metrics"
   })
 
-  /*
-  let timeFlag = $state(false)
-  function toggleTime(timeline: boolean) {
-    timeFlag = timeline
-  }
-  */
 
-  //$inspect(props.projectLinks)
   let linkUrls = $derived.by(()=> {
     if(project.expand && project.expand.links) {
     return project.expand.links.map(

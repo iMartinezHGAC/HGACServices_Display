@@ -19,6 +19,15 @@
   let wqmp = $derived(data.post[2])
   let sw = $derived(data.post[0])
   let cr = $derived(data.post[1])
+  let testo = data.post[5]
+  let teste = data.post[6]
+  let wi = data.post[28]
+  console.log("testo", testo, teste, wi)
+
+  const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name, testo.program_name, teste.program_name, wi.program_name])
+  /*
+volunteer water quality monitoring, water inovation, watershed based  planning
+  */
 
   type chartType = {
     chartTitle: string,
@@ -176,7 +185,6 @@ function convertToCamelCase(input: string): string {
 }
 
 
-const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name])
 
 </script>
 

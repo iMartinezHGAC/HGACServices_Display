@@ -3,7 +3,7 @@
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import Indicator from "$routes/components/indicator.svelte";
   import StatDisplay from "$routes/components/statDisplay.svelte";
-  import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte"
+  import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte";
   const {data}: {data: PageData } = $props() 
 
   $inspect(data)
@@ -35,7 +35,7 @@ const stackbar_data: stackedTrash[] = [
   ];
 
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
-  const blurb = "Blurb, if any, for communications (will probably only be here for large jurisdictions)"
+  const blurb = ""
 </script>
 
 <div class="flex-col w-11/12 h-full z-10 overflow-y-auto">
