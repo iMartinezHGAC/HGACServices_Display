@@ -10,24 +10,12 @@
 
 	let { data}: { data: PageData } = $props();
 
-  let tb = $derived.by(()=> {
-    if(data)
-       return data.post[4]
-    return {} as RecordModel 
-  }
-  )
-  let wqmp = $derived(data.post[2])
-  let sw = $derived(data.post[0])
-  let cr = $derived(data.post[1])
-  let testo = data.post[5]
-  let teste = data.post[6]
-  let wi = data.post[28]
-  //console.log("testo", testo, teste, wi)
 
-  const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name, testo.program_name, teste.program_name, wi.program_name])
-  /*
-volunteer water quality monitoring, water inovation, watershed based  planning
-  */
+  const desiredIndices: number[] = [4,2,0,1,5,6,24,26,28]
+  const programs = desiredIndices.map((index: number) => data.post[index])
+  console.log(programs.map(program => program.program_name.split(' ').join('')))
+
+  const cardNames=$derived(programs.map(program => program.program_name))
 
   type chartType = {
     chartTitle: string,
@@ -87,23 +75,6 @@ volunteer water quality monitoring, water inovation, watershed based  planning
       chartData: volunteers_stack,
       Chart: StackedBarChart,
     }
-    /*
-    {
-      chartTitle: "Under 18 Volunteers",
-      chartData: vol_under_18,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Scouts Volunteers",
-      chartData: vol_scouts,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Total Volunteers",
-      chartData: tot_volunteer_count,
-      Chart: BarChartTb,
-    }
-    */
  ])
 
 
@@ -148,40 +119,15 @@ volunteer water quality monitoring, water inovation, watershed based  planning
       chartData: volunteers_stack,
       Chart: StackedBarChart,
     },
-
-    /*
-    {
-      chartTitle: "Under 18 Volunteers",
-      chartData: vol_under_18,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Scouts Volunteers",
-      chartData: vol_scouts,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Total Volunteers",
-      chartData: tot_volunteer_count,
-      Chart: BarChartTb,
-    }
-    */
  ])
+
+const charts = [cardTB, cardWQ]
 
 function convertToCamelCase(input: string): string {
     // Split the string by space, then map over the words
     const words = input.split(' ');
-
-    // Convert the first word to lowercase and the rest to lowercase as well
-    const formattedWords = words.map((word, index) => {
-        if (index === 0) {
-            return word.toLowerCase(); // First word becomes lowercase
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(); // Capitalize subsequent words
-    });
-
     // Join all words together to form a single string
-    return "#" +formattedWords.join('');
+    return "#" +words.join('');
 }
 
 
@@ -202,48 +148,21 @@ function convertToCamelCase(input: string): string {
   </div>
   <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:400, duration:300 }}>
     <div class="flexy flex-col">
-      <div class="flexy" id="trashBash">
-        <Card 
-          project={tb} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id="waterQualityManagementPlan">
-        <Card 
-          project={wqmp} 
-          charts={cardWQ}
-        />   
-      </div>
-      <div class="flexy" id="solidWasteManagement">
-        <Card 
-          project={sw} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id="cleanRiversProgram">
-        <Card 
-          project={cr} 
-          charts={cardTB}
-        />   
-      </div>
-      <div class="flexy" id="volunteerWaterQualityMonitoring">
-        <Card 
-          project={testo} 
-          charts={cardTB}
-        />   
-      </div>
-      <div class="flexy" id="watershedBasedPlanning">
-        <Card 
-          project={teste} 
-          charts={cardTB}
-        />   
-      </div>
-      <div class="flexy" id="waterInnovationStrategiesOfExcellenceAwardsProgram">
-        <Card 
-          project={wi} 
-          charts={cardTB}
-        />   
-      </div>
+      {#each programs as program, i}
+        <div class="flexy" id={program.program_name.split(' ').join('')}>
+          {#if i === 1}
+            <Card 
+              project={program} 
+              charts={cardWQ}
+            />
+          {:else}
+            <Card 
+              project={program} 
+              charts={cardTB}
+            />
+          {/if}
+        </div>      
+      {/each}
     </div>
   </div>
 </div>
