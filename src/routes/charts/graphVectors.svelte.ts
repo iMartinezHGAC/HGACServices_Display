@@ -3,7 +3,6 @@ let graphs: HTMLDivElement[] = $state([])
 
 export function graphsState() {
 
-  $inspect(graphs)
   function doesGraphExist(checkedGraph: HTMLDivElement) {
     if(graphs.find(graph => graph === checkedGraph) === undefined) return false 
     return true
