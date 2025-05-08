@@ -6,8 +6,6 @@
   import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte";
   const {data}: {data: PageData } = $props() 
 
-  $inspect(data)
-
 type stackedTrash = {
   juris: string,
   historical_funds: number,

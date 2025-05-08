@@ -13,11 +13,15 @@
 	import { jurisState } from '../state/jurisState.svelte';
 
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
+  $inspect('client layout uuid', data.uuid)
 
   let jurisdiction = $state("Harris County")
 
   const jurisId = jurisState()
-  jurisId.setUUID(data.uuid)
+  if(data.uuid !== undefined && data.uuid) {
+    console.log("CALLED setUUID", data.uuid)
+    jurisId.setUUID(data.uuid)
+  }
   if(data.uuid === 'a8se97t2') {
     jurisdiction = "harris_county"
   }
@@ -38,7 +42,7 @@
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
   {#if data.uuid}
-  <Splash chosenTab={routePath} jurisdiction={jurisdiction}/>
+    <Splash chosenTab={routePath} jurisdiction={jurisdiction}/>
   {/if}
   {@render children()}
 </main>

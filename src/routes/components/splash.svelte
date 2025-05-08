@@ -1,6 +1,7 @@
 <script lang="ts">
 import logo from "$lib/assets/HGAC_logo.svg"
 import county_logo from "$lib/assets/harris_county.svg"
+	import { jurisState } from "jurisStore";
 import Tabs from "./tabs.svelte";
 
 let {chosenTab, jurisdiction}: {chosenTab: string, jurisdiction: string} = $props()
@@ -26,17 +27,16 @@ function handleSetChosen(tabName: string) {
   chosenTab = toSnakeCase(getEndOfPath(tabName).toLowerCase())
 }
 
+const jurisId = jurisState()
   //console.log(jurisdiction)
 
 </script>
 
 {#snippet tabSnippet(path: string, tabText: string, color: string)}
       {#if chosenTab === path}
-        {console.log(`true for path: ${path} and ${chosenTab}`)}
-        <Tabs tabText={tabText} path={path} color="chosen" setChosen={handleSetChosen}/>
+        <Tabs tabText={tabText} path={path} color="chosen" setChosen={handleSetChosen} uuid={jurisId.uuid}/>
       {:else}
-        {console.log(`not true for path: ${path} and chosen: ${chosenTab}`)}
-        <Tabs tabText={tabText} path={path} color={color} setChosen={handleSetChosen}/>
+        <Tabs tabText={tabText} path={path} color={color} setChosen={handleSetChosen} uuid={jurisId.uuid}/>
       {/if}
 {/snippet}
 

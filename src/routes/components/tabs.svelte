@@ -5,13 +5,13 @@
     tabText: string,
     path: string,
     color: string,
+    uuid: string,
     setChosen: (tabName: string) => void
   }
 
-  const jurisId = jurisState()
 
-  let {tabText, path, color="gray", setChosen}: tabProps = $props()
-  let route = $derived( jurisId.uuid + "/" + path)
+  let {tabText, path, color="gray", setChosen, uuid}: tabProps = $props()
+  let route = $derived( uuid + "/" + path)
   //$inspect('full route', route)
 
   function chooseEvent() {

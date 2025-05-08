@@ -10,7 +10,6 @@
 
 	let { data}: { data: PageData } = $props();
 
-  $inspect(data.post)
   let tb = $derived.by(()=> {
     if(data)
        return data.post[25]
