@@ -26,16 +26,16 @@ let {
 </script>
 
 <div class="flex items-center justify-start flex-col h-full pr-24 pb-8">
-  {#if above}
-    <p class="font-[Metropolis] text-3xl text-slate-800 w-full flexy pb-4">
-      {aboveText}
-    </p>
-  {/if}
-  <div class="w-64 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-slate-700 text-slate-100 pt-4 border-2 border-slate-950 shadow-md shadow-slate-950">
+  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-slate-700 to-slate-600 text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950">
+    {#if above}
+      <p class="font-[Metropolis] text-[clamp(1rem,8vw,2.2rem)] small-caps font-extrabold text-slate-100 w-full flexy pb-4">
+        {aboveText}
+      </p>
+    {/if}
     <div class="flexy flex-row font-bold text-center">
-      <div class="flexy text-[5rem]">
+      <div class="flexy text-[clamp(1rem,4vw,4rem)]">
         <p class="items-end text-[7rem]">{symbol_pre}</p>
-        {numericValue}
+        <p class="font-[Metropolis]">{numericValue} </p>
         <p class="items-end text-[8rem]">{symbol_post}</p>
       </div>
     </div>

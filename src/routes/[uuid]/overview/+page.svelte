@@ -54,7 +54,7 @@ const stackbar_data: stackedTrash[] = [
       colors={groupColors}
     />
     <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
-    <StatDisplay header="Participation" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
+    <StatDisplay header="Residents Served" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
     <div class="bg-slate-700 flexy h-full w-1/4">
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>

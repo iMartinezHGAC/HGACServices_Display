@@ -13,7 +13,7 @@
   })
   //$inspect(links)
 </script>
-<div>
+<div class="w-2/3">
   <p class="prose-md text-white font-[Metropolis] font-semibold py-8 px-6">
     {plainText}
   </p>

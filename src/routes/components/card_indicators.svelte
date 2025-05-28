@@ -47,14 +47,18 @@
   }
   */
 
-  //$inspect(props.projectLinks)
   let linkUrls = $derived.by(()=> {
     if(project.expand && project.expand.links) {
-    return project.expand.links.map(
-      (item: any) => item.url_string)
-    } else return [""]
-  }
-  )
+      return project.expand.links.map(({display_text, url_string}:{display_text: string, url_string: string}) => (
+        {
+          display_text,
+          url_string
+        })
+      )
+    } else return []
+  })
+
+  $inspect('links',linkUrls)
 
   let blurb = $derived.by(() => {
     if(project.expand && project.expand.blurb) {
@@ -65,7 +69,6 @@
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
 	import Indicator from "./indicator.svelte";
-  //$inspect(linkUrls)
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
 

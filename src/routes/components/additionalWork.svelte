@@ -33,7 +33,11 @@ const exampleMetric: CustomMetric = {
     <AdditionalWorkBody
       projectName="Dog Poop Pickup" 
       expanded={false}  
-      bodyText="Lorem ipsum odor amet, consectetuer adipiscing elit. Pretium inceptos sagittis nisl primis molestie sociosqu. Vivamus quisque senectus dui morbi efficitur. Condimentum vehicula eros gravida turpis blandit iaculis. Aenean convallis risus sodales sem pellentesque vestibulum. Nullam hendrerit morbi dictum eleifend orci ultrices vestibulum felis purus. Tincidunt amet sit inceptos mollis enim fringilla. Tristique cras lorem magna tempor tincidunt urna. Blandit risus quisque ac varius ipsum."
+      bodyText="Lorem ipsum odor amet, consectetuer adipiscing elit. Pretium inceptos sagittis nisl primis molestie sociosqu. Vivamus quisque senectus dui morbi efficitur. Condimentum vehicula eros gravida turpis blandit iaculis. Aenean convallis risus sodales sem pellentesque vestibulum.
+ Nullam hendrerit morbi dictum eleifend orci ultrices vestibulum felis purus. Tincidunt amet sit inceptos mollis enim fringilla. Tristique cras lorem magna tempor tincidunt urna. Blandit risus quisque ac varius ipsum.
+ Nullam hendrerit morbi dictum eleifend orci ultrices vestibulum felis purus. Tincidunt amet sit inceptos mollis enim fringilla. Tristique cras lorem magna tempor tincidunt urna. Blandit risus quisque ac varius ipsum.
+ Nullam hendrerit morbi dictum eleifend orci ultrices vestibulum felis purus. Tincidunt amet sit inceptos mollis enim fringilla. Tristique cras lorem magna tempor tincidunt urna. Blandit risus quisque ac varius ipsum.
+      "
       location="Waller County"
       dates={["12-31-24", "01-02-25"]} 
       funding={50}

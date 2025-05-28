@@ -19,7 +19,7 @@
   onMount(()=> {
     requestAnimationFrame(()=> {
       const lineCount = paragraph.clientHeight/lineHeight
-      if(lineCount > 2) clamped = true
+      if(lineCount > 4) clamped = true
     })
   })
 
@@ -91,12 +91,17 @@
     </p>
   {/if}
   <div> 
-    <p 
+    <p
       bind:this={paragraph}
-      onclick={()=> (expanded = !expanded)}
       class={`w-full font-[Metropolis] transition-opacity duration-300 ease-in-out overflow-hidden ${ clamped && !expanded ? 'line-clamp-2 opacity-80 mask-gradient-fade' : ''}`} 
     >
       {bodyText}
     </p>
+    <span 
+      class="font-extrabold text-lg small-caps font-[Metropolis] cursor-pointer select-none"
+      onclick={()=> (expanded = !expanded)}
+    >
+      {expanded? "Show less" : clamped ? "Show more" : ""}
+    </span>
   </div>
 </div>

@@ -26,7 +26,13 @@ export default {
         'hgac-green': '#7AB66F',
         'hgac-lightblue': '#25B5AF',
         'hgac-orange': '#EF9021'
-      }
+      },
+      fontSize: {
+        'fluid': 'clamp(1rem,4vw,1.5rem)'
+      },
+      spacing: {
+        'fluid': 'clamp(1rem,5vw,3rem)'
+      },
     }
 	},
 
