@@ -3,22 +3,17 @@
 	import Card from "$routes/components/card.svelte";
   import { type Component } from "svelte"
 	import type { PageData } from './$types';
-	import type { RecordModel } from "pocketbase";
 
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 
 	let { data}: { data: PageData } = $props();
 
-  let tb = $derived.by(()=> {
-    if(data)
-       return data.post[30]
-    return {} as RecordModel 
-  }
-  )
-  let wqmp = $derived(data.post[31])
-  let sw = $derived(data.post[32])
-  let cr = $derived(data.post[33])
+  const desiredIndices: number[] = [30,31,32,33]
+  const programs = desiredIndices.map((index: number) => data.post[index])
+  console.log(programs.map(program => program.program_name.split(' ').join('')))
+  const cardNames=$derived(programs.map(program => program.program_name))
+
 
   type chartType = {
     chartTitle: string,
@@ -90,23 +85,7 @@ function toCamelCase(input: string): string {
       chartData: volunteers_stack,
       Chart: StackedBarChart,
     }
-    /*
-    {
-      chartTitle: "Under 18 Volunteers",
-      chartData: vol_under_18,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Scouts Volunteers",
-      chartData: vol_scouts,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Total Volunteers",
-      chartData: tot_volunteer_count,
-      Chart: BarChartTb,
-    }
-    */
+
  ])
 
 
@@ -151,24 +130,6 @@ function toCamelCase(input: string): string {
       chartData: volunteers_stack,
       Chart: StackedBarChart,
     },
-
-    /*
-    {
-      chartTitle: "Under 18 Volunteers",
-      chartData: vol_under_18,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Scouts Volunteers",
-      chartData: vol_scouts,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Total Volunteers",
-      chartData: tot_volunteer_count,
-      Chart: BarChartTb,
-    }
-    */
  ])
 
 function convertToCamelCase(input: string): string {
@@ -187,9 +148,6 @@ function convertToCamelCase(input: string): string {
     return "#" +formattedWords.join('');
 }
 
-
-const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name])
-
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
@@ -206,30 +164,21 @@ const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, c
   </div>
   <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:400, duration:300 }}>
     <div class="flexy flex-col">
-      <div class="flexy" id={toCamelCase(tb.program_name)}>
-        <Card 
-          project={tb} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id={toCamelCase(wqmp.program_name)}>
-        <Card 
-          project={wqmp} 
-          charts={cardWQ}
-        />   
-      </div>
-      <div class="flexy" id={toCamelCase(sw.program_name)}>
-        <Card 
-          project={sw} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id={toCamelCase(cr.program_name)}>
-        <Card 
-          project={cr} 
-          charts={cardTB}
-        />   
-      </div>
+      {#each programs as program, i}
+        <div class="flexy" id={program.program_name.split(' ').join('')}>
+          {#if i === 1}
+            <Card 
+              project={program} 
+              charts={cardWQ}
+            />
+          {:else}
+            <Card 
+              project={program} 
+              charts={cardTB}
+            />
+          {/if}
+        </div>      
+      {/each}
     </div>
   </div>
 </div>

@@ -1,10 +1,5 @@
 import type { PageServerLoad } from './$types';
-// trashbash
-// solid waste
-// wqm
-// clean rivers
-// vwqm
-// OPTIONAL: watershed based planning
+
 import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
 
 

@@ -12,12 +12,25 @@
     chartData: object,
     Chart: Component,
   }
+
+  type CustomMetric = {
+    metricName: string,
+    metricValue: string | number,
+  }
+  type adWorkType = {
+    bodyText: string,
+    projectName: string
+    projectTimeframe?: string,
+    customMetrics?: CustomMetric[],
+    funding?: number,
+  }
   interface cardProps {
     project: RecordModel,
-    charts: chartType[]
+    charts: chartType[],
+    additionalWork: adWorkType
   }
 
-  const {project, charts}: cardProps = $props()
+  const {project, charts, additionalWork}: cardProps = $props()
 
   const graphState = graphsState()
 
@@ -94,11 +107,13 @@
     {accordionText}
   </button>  
   <div class="flexy">
-    <AdditionalWork 
-      bodyText={"Lorem Ipsum"} 
-      projectName={"Dog Poop Pickup"} 
-      funding={40} 
-      projectTimeframe={""} 
-    />
+    {#if additionalWork}
+      <AdditionalWork 
+        bodyText={"Lorem Ipsum"} 
+        projectName={"Dog Poop Pickup"} 
+        funding={40} 
+        projectTimeframe={""} 
+      />
+    {/if}
   </div>
 </div>
