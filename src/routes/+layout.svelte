@@ -13,7 +13,6 @@
 	import { jurisState } from '../state/jurisState.svelte';
 
   let {data, children}: {data: LayoutData, children: Snippet} = $props()
-  $inspect('client layout uuid', data.uuid)
 
   let jurisdiction = $state("Harris County")
 

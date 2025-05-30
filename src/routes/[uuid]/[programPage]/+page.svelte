@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+  import {page} from "$app/stores"
   import {navigating} from '$app/state'
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
@@ -8,14 +9,14 @@
 
   console.log("page state",routedFromLeft)
 
+
+
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
-	import { makeBarData } from "$routes/helpers/chartFormatters";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
 
 	let { data}: { data: PageData } = $props();
-  $inspect(data)
 
   const programs: ProgramType[] = data.post
   const tablesData = data.tablesData
@@ -29,6 +30,9 @@
         }))    
     }
   }
+  $effect(()=> {
+    console.log(`Program changed to: ${$page.params.program}`);
+  })
 
   let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"], "from_date" ,"orders_count"))
   let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"], "from_date", "orders_dollars"))

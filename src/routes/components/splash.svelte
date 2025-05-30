@@ -1,10 +1,16 @@
 <script lang="ts">
 import logo from "$lib/assets/HGAC_logo.svg"
 import county_logo from "$lib/assets/harris_county.svg"
-	import { jurisState } from "jurisStore";
+import { jurisState } from "jurisStore";
 import Tabs from "./tabs.svelte";
 
-let {chosenTab, jurisdiction, dashboard_groups}: {chosenTab: string, jurisdiction: string, dashboard_groups: string[]} = $props()
+interface props {
+  chosenTab: string,
+  jurisdiction: string,
+  dashboard_groups: DashboardType[]
+}
+
+let {chosenTab, jurisdiction, dashboard_groups}: props = $props()
 
 let human_readable = $derived(jurisdiction
   .split("_")
@@ -46,8 +52,9 @@ const jurisId = jurisState()
   <div class="flex-grow"></div>
   <div class="flex items-end justify-start flex-wrap overflow-y-auto">
     {#each dashboard_groups as dash }
-      {@render tabSnippet(dash, "Overview", "gray")}
+      {@render tabSnippet(dash.tab_name, dash.tab_name,dash.tab_color)}
     {/each}
+    <!--
       {@render tabSnippet("community", "Community Planning", "blue")}
       {@render tabSnippet("emergency", "Emergency Preparedness", "red")}
       {@render tabSnippet("economic_development", "Economic Development", "orange")}
@@ -56,6 +63,7 @@ const jurisId = jurisState()
       {@render tabSnippet("transportation", "Transportation", "purple")}
       {@render tabSnippet("aging", "Aging", "pink")}
       {@render tabSnippet("buy", "Business Services", "biznis")}
+    -->
   </div>
   <div class="flex-grow"></div>
   <img src={logo} alt="HGAC" class="h-24 right-4">
