@@ -1,45 +1,31 @@
 <script lang="ts">
-	import { fly } from "svelte/transition";
-	import Card from "$routes/components/card.svelte";
-	import CardEm from "$routes/components/card_indicators.svelte";
-  import { type Component } from "svelte"
 	import type { PageData } from './$types';
-	import type { RecordModel } from "pocketbase";
+  import {navigating} from '$app/state'
 
+  const routedFrom = navigating.from?.route.id?.split('/')[2]
+  const routedTo = navigating.to?.route.id?.split('/')[2]
+  const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
+
+  console.log("page state",routedFromLeft)
+
+	import Indicator from "$routes/components/indicator.svelte";
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
-	import Indicator from "$routes/components/indicator.svelte";
+	import { makeBarData } from "$routes/helpers/chartFormatters";
+	import CardBody from "$routes/components/card_body.svelte";
+	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
 
 	let { data}: { data: PageData } = $props();
 
-  let tb = $derived.by(()=> {
-    if(data)
-       return data.post[21]
-    return {} as RecordModel 
-  }
-  )
-  let wqmp = $derived(data.post[22])
-  let sw = $derived(data.post[23])
-  let cr = $derived(data.post[24])
 
+  const desiredIndices: number[] = [21,22,23,24]
+  const programs = desiredIndices.map((index: number) => data.post[index])
+  console.log(programs.map(program => program.program_name.split(' ').join('')))
+
+  const cardNames=$derived(programs.map(program => program.program_name))
   let calls = data.emergency[0].calls_count
   let texts = data.emergency[0].texts_count
-
-  type chartType = {
-    chartTitle: string,
-    chartData: object,
-    Chart: Component,
-  }
-
   type tbKey = keyof Trashbash
-
-  function makeBarData(dataset: Trashbash[], key: tbKey) {
-    if(dataset) {
-    return dataset.map((item: Trashbash) => ({
-        juris: item.expand.collection_site_id.site_name,
-        value: item[key]
-      }))    }
-  }
 
   let trash_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "trash_pounds"))
   let tires  = $derived(makeBarData(data.trashbash as Trashbash[], "tires"))
@@ -56,31 +42,18 @@
     adults: item.value - vol_under_18[index].value - vol_scouts[index].value < 0 ? 0 : item.value - vol_under_18[index].value - vol_scouts[index].value 
   }))
 
-
-function toCamelCase(input: string): string {
-  return input
-    .trim()                           // Remove leading/trailing spaces
-    .split(/\s+/)                     // Split on any whitespace
-    .filter(word => word.length > 0)  // Remove empty strings
-    .map((word, index) => 
-      index === 0 
-        ? word.toLowerCase() 
-        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    )
-    .join('');
-}
-
-
-  const cardTB: chartType[] = $derived([
+  const charts: ChartType[] = $derived([
     {
       chartTitle: "Calls",
       chartData: calls,
       Chart: Indicator,
+      chartType: "indicator"
     },
     {
       chartTitle: "Texts",
       chartData: texts,
       Chart: Indicator,
+      chartType: "indicator"
     },
     /*
     {
@@ -163,65 +136,10 @@ function toCamelCase(input: string): string {
     */
  ])
 
-function convertToCamelCase(input: string): string {
-    // Split the string by space, then map over the words
-    const words = input.split(' ');
-
-    // Convert the first word to lowercase and the rest to lowercase as well
-    const formattedWords = words.map((word, index) => {
-        if (index === 0) {
-            return word.toLowerCase(); // First word becomes lowercase
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(); // Capitalize subsequent words
-    });
-
-    // Join all words together to form a single string
-    return "#" +formattedWords.join('');
-}
-
-
-const cardNames=$derived([tb.program_name, wqmp.program_name, sw.program_name, cr.program_name])
+const cardData: CardDataType[] = programs.map((program: ProgramType)=> {
+    return {program, charts}
+  })
 
 </script>
 
-{#snippet formattedEntryText(cardName: string)}
-  <div class="flex text-slate-200 font-[Metropolis] font-medium">
-    <a href={convertToCamelCase(cardName)} class="px-6 py-4 rounded w-56 bg-slate-600 text-slate-200 focus:bg-slate-800 hover:bg-slate-700 hover:text-white ">{cardName}</a>
-  </div>
-{/snippet}
-
-<div class="flex w-screen">
-  <div class="left-0 top-24 w-56 h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20" transition:fly={{y:200, duration: 300}}>
-    {#each cardNames as cardName}
-      {@render formattedEntryText(cardName)}
-    {/each}
-  </div>
-  <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:400, duration:300 }}>
-    <div class="flexy flex-col">
-      <div class="flexy" id={toCamelCase(tb.program_name)}>
-        <CardEm
-          project={tb} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id={toCamelCase(wqmp.program_name)}>
-        <Card 
-          project={wqmp} 
-          charts={cardWQ}
-        />   
-      </div>
-      <div class="flexy" id={toCamelCase(sw.program_name)}>
-        <Card 
-          project={sw} 
-          charts={cardTB}
-        />   
-      </div>      
-      <div class="flexy" id={toCamelCase(cr.program_name)}>
-        <Card 
-          project={cr} 
-          charts={cardTB}
-        />   
-      </div>
-    </div>
-  </div>
-</div>
+<CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft}/>

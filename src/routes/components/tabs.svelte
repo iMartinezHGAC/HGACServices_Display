@@ -28,6 +28,7 @@
     else if(color ==="pink") return base+" bg-[#D2B48C] text-slate-700"
     else if(color ==="teal") return base+" bg-[#B0E0E6] text-slate-700"
     else if(color ==="purple") return base+" bg-[#A0522D] text-slate-200"
+    else if(color ==="biznis") return base+" bg-[#A0522D] text-slate-200"
     else if(color ==="chosen") return base+" bg-slate-700 text-slate-200"
     else return base
 

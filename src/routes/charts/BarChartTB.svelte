@@ -10,7 +10,7 @@
     height = 500, 
     yLabel = ""
     } = $props();
-  const marginTop = 20;
+  const marginTop = 30;
   const marginRight = 100;
   const marginBottom = 140;
   const marginLeft = 65;
@@ -21,6 +21,8 @@
 
   // import state
   const graphState = graphsState()
+
+  let postScript = ''
 
 
   // when parent Export to PDF button is clicked, add this vector to the array of vectors to be exported
@@ -103,6 +105,19 @@
   })
   */
 
+  function truncateYAxisValue(value: number) {
+    if(value > 999999) {
+      postScript = "M"
+      return value/1000000
+    }
+    else if (value > 1000) {
+      postScript = "K"
+      return value/1000
+    }
+    else return value
+
+  }
+
 </script>
 <div 
       class="flexy"
@@ -119,7 +134,7 @@
     <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
       {#each x.domain() as d}
         <g transform={`translate(${x(d) -marginLeft/3},0) rotate(45 0 0)`}>
-        <text class="font-[Metropolis] text-lg transform translate-y-6" text-anchor="start">{shrinkLongNames(d)}</text>
+        <text class="font-[Metropolis] text-[0.8rem] transform translate-y-6" text-anchor="start">{shrinkLongNames(d)}</text>
         </g>
       {/each}
     </g>
@@ -138,7 +153,7 @@
       {#each y.ticks(5) as tick}
         <g transform={`translate(0,${y(tick)})`}>
           <line x2={width - marginRight - marginLeft} stroke="black" stroke-width={1.4} stroke-dasharray={2.5} transform="translate(20,0)"/>
-          <text x={-10} dy=".32em" text-anchor="middle">{tick}</text>
+          <text x={-10} dy=".32em" text-anchor="middle">{truncateYAxisValue(tick)} {postScript}</text>
         </g>
       {/each}
     </g> 

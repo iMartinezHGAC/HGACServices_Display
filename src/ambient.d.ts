@@ -58,3 +58,48 @@ type donutType = {
   name: string,
   value: number,
 }
+
+interface ChartType {
+  chartTitle: string,
+  chartData: object,
+  Chart: Component,
+  // chartType?: string,
+  x_axis: string,
+  x_axis_label: string,
+  y_axis: string,
+  y_axis_label: string,
+  sort?: string,
+  colors?: string[] | number[],
+}
+
+interface ProgramBlurb {
+  collectionId: string;
+  collectionName: string;
+  created: string;
+  id: string;
+  program_blurb: string;
+  // Add any other potential properties from the blurb
+}
+
+interface ProgramExpand {
+  blurb: ProgramBlurb;
+  links: any[]; // or more specifically typed if possible
+}
+
+interface ProgramType {
+  active_directory_group: string;
+  blurb?: string;
+  collectionId: string;
+  collectionName: string;
+  expand?: ProgramExpand;
+  id: string;
+  links: any[]; // or more specifically typed if possible
+  parent_table: string;
+  program_name: string;
+  dashboard_group?: string;
+}
+
+interface CardDataType {
+  program: ProgramType,
+  charts: ChartType[]
+}

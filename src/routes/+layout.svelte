@@ -26,7 +26,6 @@
     jurisdiction = "harris_county"
   }
 
-
   function toSnakeCase(tabName: string) {
     return tabName.split(' ').join('_')
   }
@@ -42,7 +41,7 @@
 
 <main class="fixed flex flex-col w-screen h-screen justify-start items-center bg-cover bg-slate-200">
   {#if data.uuid}
-    <Splash chosenTab={routePath} jurisdiction={jurisdiction}/>
+    <Splash chosenTab={routePath} jurisdiction={jurisdiction} dashboard_groups={data.dashboard_groups}/>
   {/if}
   {@render children()}
 </main>

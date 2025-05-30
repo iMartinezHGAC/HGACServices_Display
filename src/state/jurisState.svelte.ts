@@ -6,7 +6,6 @@ function isJurisdictionId(id: string) {
 }
 
 export function jurisState() {
-  $inspect('juris uuid from store', juris_uuid).with(console.trace)
   // CRUD
   function setUUID(id: string) {
     console.log('ID passed to setUUID: ', id)

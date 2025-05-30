@@ -1,36 +1,20 @@
 <script lang="ts">
   import CardHeader from "../fragments/cardHeader.svelte";
-  import { type Component } from "svelte"
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
-	import type { RecordModel } from "pocketbase";
 	import Printer from "$lib/assets/printer.svelte";
 
+  import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
+	import { graphsState } from "../charts/graphVectors.svelte";
+	import Indicator from "./indicator.svelte";
   
-  type chartType = {
-    chartTitle: string,
-    chartData: object,
-    Chart: Component,
-  }
-
-  type CustomMetric = {
-    metricName: string,
-    metricValue: string | number,
-  }
-  type adWorkType = {
-    bodyText: string,
-    projectName: string
-    projectTimeframe?: string,
-    customMetrics?: CustomMetric[],
-    funding?: number,
-  }
   interface cardProps {
-    project: RecordModel,
-    charts: chartType[],
-    additionalWork: adWorkType
+    project: ProgramType,
+    charts: ChartType[]
+    additionalWork: boolean
   }
 
-  const {project, charts, additionalWork}: cardProps = $props()
+  const {project, charts, additionalWork = false}: cardProps = $props()
 
   const graphState = graphsState()
 
@@ -52,7 +36,6 @@
     return "Show fewer metrics"
   })
 
-
   let linkUrls = $derived.by(()=> {
     if(project.expand && project.expand.links) {
       return project.expand.links.map(({display_text, url_string}:{display_text: string, url_string: string}) => (
@@ -62,8 +45,7 @@
         })
       )
     } else return []
-  }
-  )
+  })
 
   let blurb = $derived.by(() => {
     if(project.expand && project.expand.blurb) {
@@ -71,8 +53,6 @@
     } else return ""
   })
 
-  import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
-	import { graphsState } from "../charts/graphVectors.svelte";
   $inspect(linkUrls)
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
@@ -86,7 +66,12 @@
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
-      {#each charts as {chartTitle, chartData, Chart},i}
+      {#each charts as {chartTitle, chartData, chartType, Chart},i}
+      {#if chartType === "indicator"}
+          <div class="card-style">
+            <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData}/>
+          </div>
+      {:else}
         {#if i<2}
           <div class="card-style">
             <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
@@ -96,6 +81,7 @@
             <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}  colorSet={groupColors}/>
           </div>
         {/if}
+      {/if}
       {/each}
     {#if accordionFlag}
       <!-- bar: volunteer count-->
@@ -106,14 +92,14 @@
       onclick={()=> {accordionFlag = !accordionFlag}}>
     {accordionText}
   </button>  
-  <div class="flexy">
-    {#if additionalWork}
+  {#if additionalWork}
+    <div class="flexy">
       <AdditionalWork 
         bodyText={"Lorem Ipsum"} 
         projectName={"Dog Poop Pickup"} 
         funding={40} 
         projectTimeframe={""} 
       />
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
