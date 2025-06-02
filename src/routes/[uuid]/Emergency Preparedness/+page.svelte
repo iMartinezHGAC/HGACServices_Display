@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-  import {page} from "$app/stores"
   import {navigating} from '$app/state'
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
@@ -10,7 +9,6 @@
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { invalidate } from '$app/navigation';
 
 	let { data}: { data: PageData } = $props();
 
@@ -22,23 +20,18 @@
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-  $inspect(programNames[0])
 
   function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
-    if(dataset) {
+    if(dataset && dataset.length > 1) {
       return dataset.map((item: T) => ({
           juris: item[key1],
           value: item[key2]
         }))    
     }
   }
-  let slug = $page.params.programPage
-  $effect(()=> {
-    console.log(`Program changed to: ${slug}`);
-  })
 
-  let trash_pounds = $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
+  let trash_pounds = $derived(makeBar(tablesData[programNames[0]].items, "from_date" ,"orders_count"))
+  let tires = $derived(makeBar(tablesData[programNames[0]].items, "from_date", "orders_dollars"))
 
   const charts: ChartType[] = $derived([
     {

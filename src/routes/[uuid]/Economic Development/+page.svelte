@@ -1,120 +1,68 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+  import {page} from "$app/stores"
   import {navigating} from '$app/state'
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
   const routedTo = navigating.to?.route.id?.split('/')[2]
-
   const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
 
-  console.log("page state",routedFromLeft)
-
-	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
-	import { makeBarData } from "$routes/helpers/chartFormatters";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
 
 	let { data}: { data: PageData } = $props();
 
-  const desiredIndices: number[] = [30,31,32,33]
-  const programs: ProgramType[] = desiredIndices.map((index: number) => data.post[index]) as ProgramType[]
-  console.log(programs)
+  const programs: ProgramType[] = data.post
+  const tablesData = data.tablesData
   const cardNames=$derived(programs.map(program => program.program_name))
+  const programNames=$derived(
+    programs
+    .map(program => program.parent_table)
+    .filter(str => str !== '')
+  )
+  $inspect(tablesData)
 
-  type tbKey = keyof Trashbash
+  function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
+    if(dataset && dataset.length > 1) {
+      return dataset.map((item: T) => ({
+          juris: item[key1],
+          value: item[key2]
+        }))    
+    }
+  }
+  let slug = $page.params.programPage
+  $effect(()=> {
+    console.log(`Program changed to: ${slug}`);
+  })
 
-  let trash_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "trash_pounds"))
-  let tires  = $derived(makeBarData(data.trashbash as Trashbash[], "tires"))
-  let recycled_pounds = $derived(makeBarData(data.trashbash as Trashbash[], "recycled_pounds" as tbKey))
-  let tot_volunteer_count = $derived(makeBarData(data.trashbash as Trashbash[], "tot_volunteer_count" as tbKey))
-  let vol_under_18= $derived(makeBarData(data.trashbash as Trashbash[], "vol_under_18" as tbKey))
-  let vol_scouts= $derived(makeBarData(data.trashbash as Trashbash[], "vol_scouts" as tbKey))
-  let miles_cleaned = $derived(makeBarData(data.trashbash as Trashbash[], "miles_cleaned" as tbKey))
-
-  const volunteers_stack = tot_volunteer_count.map((item, index)=> ({
-    juris: item.juris,
-    u18: vol_under_18[index].value,
-    scouts: vol_scouts[index].value,
-    adults: item.value - vol_under_18[index].value - vol_scouts[index].value < 0 ? 0 : item.value - vol_under_18[index].value - vol_scouts[index].value 
-  }))
+  let trash_pounds = $derived(makeBar(tablesData[programNames[0]].items, "from_date" ,"orders_count"))
+  let tires = $derived(makeBar(tablesData[programNames[0]].items, "from_date", "orders_dollars"))
 
   const charts: ChartType[] = $derived([
     {
-      chartTitle: "Meal Congregate",
+      chartTitle: "Orders Count",
       chartData: trash_pounds,
       Chart: BarChartTb,
     },
     {
-      chartTitle: "Persons Congregate",
+      chartTitle: "Orders Dollars",
       chartData: tires,
       Chart: BarChartTb,
     },
-    {
-      chartTitle: "Cost Congregate",
-      chartData: miles_cleaned,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Meals Home",
-      chartData: recycled_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Persons Home",
-      chartData: volunteers_stack,
-      Chart: StackedBarChart,
-    }
  ])
 
-
-  const charts2: ChartType[] = $derived([
-    {
-      chartTitle: "Permitted OSSF Count",
-      chartData: trash_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Unpermitted OSSF Count",
-      chartData: tires,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "SAB Count",
-      chartData: miles_cleaned,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "WWTF Count",
-      chartData: recycled_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "SEB Complete Count",
-      chartData: volunteers_stack,
-      Chart: StackedBarChart,
-    },
-    {
-      chartTitle: "SEB Complete Cost",
-      chartData: volunteers_stack,
-      Chart: StackedBarChart,
-    },
-    {
-      chartTitle: "SEB Waitlist Count",
-      chartData: volunteers_stack,
-      Chart: StackedBarChart,
-    },
-    {
-      chartTitle: "SEB Active Count",
-      chartData: volunteers_stack,
-      Chart: StackedBarChart,
-    },
- ])
-
-const cardData: CardDataType[] = programs.map((program: ProgramType)=> {
+const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
     return {program, charts}
-  })
+  }))
+
+$inspect(cardData)
 
 </script>
 
-<CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft}/>
+{#if data.post}
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+{:else}
+  <div>Loading...</div>
+  
+{/if}
