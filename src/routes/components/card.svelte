@@ -15,6 +15,7 @@
   }
 
   const {project, charts, additionalWork = false}: cardProps = $props()
+  console.log("PROJECT IN CARD", project)
 
   const graphState = graphsState()
 

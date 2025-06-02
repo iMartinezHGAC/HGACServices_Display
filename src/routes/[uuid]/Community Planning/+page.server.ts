@@ -46,6 +46,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 
 export const load: PageServerLoad = async ({locals, params}) => {
   const programData = await locals.pb.collection('programs').getFullList({
+    expand: 'links,blurb',
     filter: `dashboard_tabs.tab_name = "Community Planning"`,
   })
   let tableNames: string[] = []

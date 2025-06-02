@@ -48,6 +48,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 
 export const load: PageServerLoad = async ({locals, params}) => {
   const programData = await locals.pb.collection('programs').getFullList({
+    expand: 'links,blurb',
     filter: `dashboard_tabs.tab_name = "Transportation"`,
   })
   let tableNames: string[] = []
@@ -55,7 +56,8 @@ export const load: PageServerLoad = async ({locals, params}) => {
 
   let tablesData: TableDataResult
   try {
-  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
+  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {
+    })
   } catch(err) {
     console.error(err)
   }
