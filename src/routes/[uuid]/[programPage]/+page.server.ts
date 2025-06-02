@@ -45,6 +45,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 export const load: PageServerLoad = async ({locals, params}) => {
   console.log("Page in server", params.programPage)
   const programData = await locals.pb.collection('programs').getFullList({
+    expand: 'links,blurb',
     filter: `dashboard_tabs.tab_name = "${params.programPage}"`,
   })
   let tableNames: string[] = []
