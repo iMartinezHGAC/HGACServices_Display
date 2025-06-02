@@ -7,20 +7,22 @@
   const routedTo = navigating.to?.route.id?.split('/')[2]
   const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
 
-  console.log("page state",routedFromLeft)
-
-
-
-	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
+	import { invalidate } from '$app/navigation';
 
 	let { data}: { data: PageData } = $props();
 
   const programs: ProgramType[] = data.post
   const tablesData = data.tablesData
   const cardNames=$derived(programs.map(program => program.program_name))
+  const programNames=$derived(
+    programs
+    .map(program => program.parent_table)
+    .filter(str => str !== '')
+  )
+  $inspect(programNames[0])
 
   function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
     if(dataset) {
@@ -30,12 +32,13 @@
         }))    
     }
   }
+  let slug = $page.params.programPage
   $effect(()=> {
-    console.log(`Program changed to: ${$page.params.program}`);
+    console.log(`Program changed to: ${slug}`);
   })
 
-  let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"], "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"], "from_date", "orders_dollars"))
+  let trash_pounds = $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
+  let tires = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
 
   const charts: ChartType[] = $derived([
     {
@@ -50,10 +53,17 @@
     },
  ])
 
-const cardData: CardDataType[] = programs.map((program: ProgramType)=> {
+const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
     return {program, charts}
-  })
+  }))
+
+$inspect(cardData)
 
 </script>
 
-<CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+{#if data.post}
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+{:else}
+  <div>Loading...</div>
+  
+{/if}

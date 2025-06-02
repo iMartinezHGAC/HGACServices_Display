@@ -55,16 +55,16 @@ const stackbar_data: stackedTrash[] = [
     />
     <StatDisplay header="Services" data={Services} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
     <StatDisplay header="Residents Served" data={Participation} index={0} preSymbol="" postSymbol="" colors={groupColors}/>
-    <div class="bg-slate-700 flexy h-full w-1/4">
+    <div class="bg-slate-700 flexy h-full w-1/4 pt-12">
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
     </div>
   </div>
   <div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
     <div class="grid grid-cols-2">
-      <div class="transform scale-90 bg-slate-50 pt-6 pb-4 rounded-lg">
+      <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
         <StackedBarChart data={stackbar_data} yLabel="Historic & Current Funds" colorSet={["blue", "skyblue"]}/>
       </div>
-      <div class="transform scale-90 bg-slate-50 pt-6 pb-4 rounded-lg">
+      <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
         <StackedBarChart data={stackbar_services} yLabel="Historic & Curent Services" colorSet={groupColors}/>
       </div>
     </div>

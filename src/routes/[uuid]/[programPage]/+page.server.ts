@@ -18,7 +18,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
     sort: '',
     expand: '',
     filter: '',
-    perPage: 200,
+    perPage: 50,
   }
 
   const mergedOptions = {...defaultOptions, ...options}
@@ -26,18 +26,16 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 
   for ( const tableName of tableNames) {
     try {
-      const records = await pb.collection(tableName).getFullList({
+      const records = await pb.collection("33_hgac_coop_purchasing").getFullList({
         sort: mergedOptions.sort,
         expand: mergedOptions.expand,
         filter: mergedOptions.filter,
         perPage: mergedOptions.perPage,
       })
-      /* const mostRecentEntries = records.filter((entry: any)=> {
-        return new Date(entry.from_date).getTime() === new Date('2025-01-01').getTime()
-      }) */
       results[tableName] = records 
     } catch (err) {
       results[tableName] = {error: err instanceof Error ? err.message : "Unknown error"}
+        results[tableName] = await pb.collection("33_hgac_coop_purchasing").getFullList({perPage: 40})
       console.error(err)
     }
   }
@@ -45,14 +43,19 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 }
 
 export const load: PageServerLoad = async ({locals, params}) => {
+  console.log("Page in server", params.programPage)
   const programData = await locals.pb.collection('programs').getFullList({
     filter: `dashboard_tabs.tab_name = "${params.programPage}"`,
-    expand: 'blurb, links, dashboard_tabs',
   })
-  const tableNames = programData.map((program: ProgramType) => program.parent_table)
+  let tableNames: string[] = []
+  tableNames = await programData.map((program: ProgramType) => program.parent_table)
 
-  const tablesData = await fetchTables(locals.pb, tableNames, {expand: 'jurisdiction'})
-
+  let tablesData: TableDataResult
+  try {
+  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
+  } catch(err) {
+    console.error(err)
+  }
   /*
   const entries = await locals.pb.collection('05_trash_bash').getFullList({
     expand: 'collection_site_id'
