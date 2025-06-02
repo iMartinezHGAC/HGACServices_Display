@@ -13,7 +13,7 @@ interface TableDataResult<T = any> {
   [tableName: string]: T | {error: string}
 }
 
-const getRandomLimit = (): number => Math.floor(Math.random() * 100) + 25;
+const getRandomLimit = (): number => Math.floor(Math.random() * 100) + 100;
 
 async function fetchTables(pb: PocketBase, tableNames: string[], options: TableFetchOptions): Promise<TableDataResult> {
   const defaultOptions: TableFetchOptions = {

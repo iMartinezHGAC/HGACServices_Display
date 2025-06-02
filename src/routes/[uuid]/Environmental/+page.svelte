@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-  import {page} from "$app/stores"
   import {navigating} from '$app/state'
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
@@ -21,7 +20,6 @@
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-  $inspect(tablesData)
 
   function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
     if(dataset && dataset.length > 1) {
@@ -31,10 +29,6 @@
         }))    
     }
   }
-  let slug = $page.params.programPage
-  $effect(()=> {
-    console.log(`Program changed to: ${slug}`);
-  })
 
   let trash_pounds = $derived(makeBar(tablesData[programNames[0]].items, "from_date" ,"orders_count"))
   let tires = $derived(makeBar(tablesData[programNames[0]].items, "from_date", "orders_dollars"))
@@ -61,7 +55,7 @@ $inspect(cardData)
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={true}/>
 {:else}
   <div>Loading...</div>
   
