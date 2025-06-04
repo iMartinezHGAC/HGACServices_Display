@@ -88,6 +88,12 @@
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
       {@render renderAllCharts(charts)}
+
+    {#if accordionFlag}
+      <!-- bar: volunteer count-->
+    {/if}
+  </div>  
+
     {#if charts.length > 2}
       <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
           onclick={()=> {accordionFlag = !accordionFlag}}>
@@ -96,11 +102,6 @@
     {:else}
       <span></span>
     {/if}
-
-    {#if accordionFlag}
-      <!-- bar: volunteer count-->
-    {/if}
-  </div>  
   {#if additionalWork}
     <div class="flexy">
       <AdditionalWork 
