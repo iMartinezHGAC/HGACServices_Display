@@ -13,7 +13,6 @@ interface TableDataResult<T = any> {
   [tableName: string]: T | {error: string}
 }
 
-const getRandomLimit = (): number => Math.floor(Math.random() * 100) + 25;
 
 async function fetchTables(pb: PocketBase, tableNames: string[], options: TableFetchOptions): Promise<TableDataResult> {
   const defaultOptions: TableFetchOptions = {
@@ -26,19 +25,22 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
   const mergedOptions = {...defaultOptions, ...options}
   const results: TableDataResult = {}
 
+
   for ( const tableName of tableNames) {
     try {
-      const limit: number = getRandomLimit();
+
+      const lower_limit: number = Math.floor(Math.random() * 3);
+      const upper_limit: number = Math.floor(Math.random() * 300) + 100;
       let records
       if(tableName === "33_hgac_coop_purchasing") {
-        records = await pb.collection(tableName).getList(1,limit,{
+        records = await pb.collection(tableName).getList(lower_limit,upper_limit,{
           sort: mergedOptions.sort,
           expand: mergedOptions.expand,
           filter: mergedOptions.filter,
           perPage: mergedOptions.perPage,
         })
       } else {
-        records = await pb.collection(tableName).getFullList({
+        records = await pb.collection(tableName).getList(1,1,{
           sort: mergedOptions.sort,
           expand: mergedOptions.expand,
           filter: mergedOptions.filter,
