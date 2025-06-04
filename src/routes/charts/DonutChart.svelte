@@ -92,7 +92,7 @@
             y="1.2em" 
             class="text-lg font-bold fill-black"
           >
-            {preSymbol + formatValue(arcData.data.value)}
+            {""}
           </tspan>
         </text>
       {/each}
