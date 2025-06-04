@@ -9,6 +9,7 @@
 	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
+  import {snakeToHuman} from "$routes/helpers/caseConversion"
 
 	let { data}: { data: PageData } = $props();
 
@@ -32,27 +33,10 @@
   }
 
 
+
 let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
 let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
 
-
-// Define the structure of an item object with flexible keys
-interface Item {
-  [key: string]: any; // Allows any key-value pair
-}
-
-// Define the structure of the main object
-interface DataObject {
-  [key: string]: {
-    items: Item[];
-    page: number,
-    perPage: number,
-    totalItems: number,
-    totalPages: number,
-  };
-}
-
-// List of fields to exclude
 const EXCLUDED_FIELDS = [
   "collectionId",
   "collectionName",
@@ -62,62 +46,70 @@ const EXCLUDED_FIELDS = [
   "to_date",
 ];
 // Function to get unique field names, excluding specified fields
-function getUniqueFieldNamesExcluding(data: unknown): string[] {
-  const uniqueKeys = new Set<string>();
-
-  // Check if data is an array
-  if (!Array.isArray(data)) {
-    console.error("Error: Input data is not an array:", data);
-    return [];
-  }
-
-  // Iterate through each object in data
-  for (const obj of data) {
-    // Get the first key (e.g., "01_start")
-    const key = Object.keys(obj)[0];
-    if (!key || !obj[key] || !Array.isArray(obj[key].items)) {
-      console.warn(`Warning: Invalid structure for object, missing key or items array:`, obj);
-      continue;
+const getColumnNames = (data) => {
+  const columnNamesByCollection = {};
+ 
+  Object.keys(data).forEach(collectionName => {
+    // Check if items exist and is not empty
+    if (data[collectionName].items && data[collectionName].items.length > 0) {
+      // Get columns from the first item, filtering out excluded fields
+      const columns = Object.keys(data[collectionName].items[0])
+        .filter(field => !EXCLUDED_FIELDS.includes(field));
+      
+      columnNamesByCollection[collectionName] = columns;
     }
+  });
+ 
+  return columnNamesByCollection;
+};
 
-    // Iterate through each item in the items array
-    for (const item of obj[key].items) {
-      if (typeof item !== 'object' || item === null) {
-        console.warn(`Warning: Invalid item, not an object:`, item);
-        continue;
-      }
+const getExtendedCharts = (columnNames, trash_pounds, tires) => {
+  const extendedCharts = [];
+ 
+  Object.entries(columnNames).forEach(([collection, columns]) => {
+    columns.forEach((column, index) => {
+      const chartData = index % 2 === 0 ? trash_pounds : tires;
+      
+      extendedCharts.push({
+        chartTitle: column,
+        chartData: chartData,
+        Chart: BarChartTb,
+      });
+    });
+  });
+ 
+  return extendedCharts;
+};
+  // Usage
+const columnNames = getColumnNames(tablesData);
+const charts = $derived(
+  getExtendedCharts(columnNames, trash_pounds, tires)
+);
 
-      // Get keys and filter out excluded fields
-      for (const itemKey of Object.keys(item)) {
-        if (!EXCLUDED_FIELDS.includes(itemKey)) {
-          uniqueKeys.add(itemKey);
-        }
-      }
-    }
-  }
+$inspect("charts", charts)
 
-  return Array.from(uniqueKeys);
-}
-  console.log("unique names?", getUniqueFieldNamesExcluding(tablesData))
+const cardData: CardDataType[] = $derived(
+  programs.map((program: ProgramType) => {
+    // Find the collection that matches the program's active_directory_group
+    const matchingCollection = Object.keys(columnNames).find(
+      collection => collection.toLowerCase().includes(program.active_directory_group)
+    );
+ 
+    // Get charts for this collection's columns
+    const programCharts = matchingCollection 
+      ? charts.filter(chart => 
+          columnNames[matchingCollection].includes(chart.chartTitle)
+        )
+      : charts;
+ 
+    return {
+      program,
+      charts: programCharts
+    };
+  })
+);
 
-  const charts: ChartType[] = $derived([
-    {
-      chartTitle: "Orders Count",
-      chartData: trash_pounds,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Orders Dollars",
-      chartData: tires,
-      Chart: BarChartTb,
-    },
- ])
-
-const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
-    return {program, charts}
-  }))
-
-$inspect(cardData)
+$inspect("card data", cardData)
 
 </script>
 

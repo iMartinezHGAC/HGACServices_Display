@@ -7,6 +7,7 @@
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
 	import Indicator from "./indicator.svelte";
+  import {snakeToHuman} from "$routes/helpers/caseConversion"
   
   interface cardProps {
     project: ProgramType,
@@ -62,7 +63,7 @@
     {#if chartType === "indicator"}
       <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData as number}/>
     {:else}
-      <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
+      <Chart data={chartData} width={800} height={580} yLabel={snakeToHuman(chartTitle)} bind:this={cardInstances[i]}/>
     {/if}
   </div>
 {/snippet}
