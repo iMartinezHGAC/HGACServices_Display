@@ -81,9 +81,9 @@
   <g class="font-metropolis text-sm" text-anchor="middle">
     {#each arcs as arcData}
       <text transform={`translate(${arc.centroid(arcData)})`}>
-        <tspan x="0" y="0em" class="text-5xl font-semibold fill-black stroke-black stroke-[8px]">
+        <tspan x="0" y="0em" class="text-5xl font-semibold fill-black stroke-black stroke-[8px] select-none">
           {preSymbol + formatValue(arcData.data.value) }
-          <tspan x="-0.4rem" y="0em" class="absolute text-5xl font-semibold fill-white stroke-none">
+          <tspan x="-0.4rem" y="0em" class="absolute text-5xl font-semibold fill-white stroke-none select-none">
             {preSymbol + formatValue(arcData.data.value)}
           </tspan>
         </tspan>
@@ -94,7 +94,7 @@
   <!-- total value of the data -->
   <g>
 
-    <text x="0" y="1rem" text-anchor="middle" class="font-metropolis text-[5.0rem] font-extrabold fill-white transform translate-y-4" >
+    <text x="0" y="1rem" text-anchor="middle" class="font-metropolis text-[5.0rem] font-extrabold fill-white transform translate-y-4 select-none" >
       {preSymbol + total.toLocaleString()}
     </text>
     <!-- 

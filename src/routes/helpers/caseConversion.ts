@@ -7,3 +7,10 @@ export function toCamelCase(input: string): string {
   // Join all words together to form a single string
   return "#" +words.join('');
 }
+
+export function snakeToHuman(input: string): string {
+  return input
+    .split("_")
+    .map(word=> word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() )
+    .join(" ")
+}

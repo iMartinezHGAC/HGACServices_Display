@@ -2,6 +2,8 @@
 import logo from "$lib/assets/HGAC_logo.svg"
 import county_logo from "$lib/assets/harris_county.svg"
 import { jurisState } from "jurisStore";
+
+import { snakeToHuman } from "$routes/helpers/caseConversion"
 import Tabs from "./tabs.svelte";
 
 interface props {
@@ -12,11 +14,7 @@ interface props {
 
 let {chosenTab, jurisdiction, dashboard_groups}: props = $props()
 
-let human_readable = $derived(jurisdiction
-  .split("_")
-  .map(word=> word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() )
-  .join(" "))
-
+let human_readable = $derived(snakeToHuman(jurisdiction))
 
 function toSnakeCase(tabName: string) {
   return tabName.split(' ').join('_')
@@ -36,11 +34,11 @@ const jurisId = jurisState()
 
 </script>
 
-{#snippet tabSnippet(path: string, tabText: string, color: string)}
-      {#if chosenTab === path}
-        <Tabs tabText={tabText} path={path} color="chosen" setChosen={handleSetChosen} uuid={jurisId.uuid}/>
+{#snippet tabSnippet(dash: DashboardType)}
+      {#if chosenTab === dash.tab_name}
+        <Tabs tabText={dash.tab_name} path={dash.tab_name} color="chosen" setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
       {:else}
-        <Tabs tabText={tabText} path={path} color={color} setChosen={handleSetChosen} uuid={jurisId.uuid}/>
+        <Tabs tabText={dash.tab_name} path={dash.tab_name} color={dash.tab_color} setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
       {/if}
 {/snippet}
 
@@ -52,18 +50,8 @@ const jurisId = jurisState()
   <div class="flex-grow"></div>
   <div class="flex items-end justify-start flex-wrap overflow-y-auto">
     {#each dashboard_groups as dash }
-      {@render tabSnippet(dash.tab_name, dash.tab_name,dash.tab_color)}
+      {@render tabSnippet(dash)}
     {/each}
-    <!--
-      {@render tabSnippet("community", "Community Planning", "blue")}
-      {@render tabSnippet("emergency", "Emergency Preparedness", "red")}
-      {@render tabSnippet("economic_development", "Economic Development", "orange")}
-      {@render tabSnippet("environmental", "Environmental", "green")}
-      {@render tabSnippet("public_safety", "Public Safety", "dblue")}
-      {@render tabSnippet("transportation", "Transportation", "purple")}
-      {@render tabSnippet("aging", "Aging", "pink")}
-      {@render tabSnippet("buy", "Business Services", "biznis")}
-    -->
   </div>
   <div class="flex-grow"></div>
   <img src={logo} alt="HGAC" class="h-24 right-4">

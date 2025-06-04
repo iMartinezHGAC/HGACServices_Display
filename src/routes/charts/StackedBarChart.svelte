@@ -2,6 +2,7 @@
   import * as d3 from 'd3';
   import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
 	import { graphsState } from './graphVectors.svelte';
+  import { snakeToHuman } from "$routes/helpers/caseConversion"
 
   type stackedTrash = {
     juris: string,
@@ -117,7 +118,7 @@ const y = $derived(d3.scaleLinear()
         x={`-${marginLeft}`} 
         y={`-${marginTop+60}`} 
         text-anchor="left"
-        class="text-5xl font-bold font-[Metropolis] text-start items-start fill-slate-700"
+        class="text-5xl font-bold font-[Metropolis] text-start items-start fill-slate-700 select-none"
       >
         {yLabel}
       </text>
@@ -125,7 +126,7 @@ const y = $derived(d3.scaleLinear()
       {#each y.ticks(5) as tick}
         <g transform={`translate(0,${y(tick)})`}>
           <line x2={width - marginRight - marginLeft} class="stroke-black stroke-2" stroke-dasharray={4} stroke-opacity={0.8}/>
-          <text x={-10} dy=".32em" text-anchor="middle" class={`text-3xl font-[Metropolis] transform -translate-x-8`}>{tick}</text>
+          <text x={-10} dy=".32em" text-anchor="middle" class={`text-3xl font-[Metropolis] transform -translate-x-8 select-none`}>{tick}</text>
         </g>
       {/each}
     </g> 
@@ -157,14 +158,14 @@ const y = $derived(d3.scaleLinear()
           width={legendItemWidth} 
           height={legendItemHeight} 
           fill={colors(i)}
-          class={`stroke-black transform`}
+          class={`stroke-black transform select-none`}
         >
         </rect>
         <text 
           x={(width/1.7)-(i*(legendItemHeight*3+intraLegendSpacing))} 
           y={-height-marginTop*6} 
-          class="font-[Metropolis] text-3xl transform translate-x-8">
-          <tspan>{key}</tspan>
+          class="font-[Metropolis] text-3xl transform translate-x-8 select-none">
+          <tspan>{snakeToHuman(key)}</tspan>
         </text>
       {/each}
     </g>

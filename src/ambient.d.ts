@@ -114,5 +114,6 @@ interface DashboardType {
   id: string,
   sort_order: number,
   tab_name: string,
+  tab_text_light_mode: boolean,
   updated: Date,
 }
