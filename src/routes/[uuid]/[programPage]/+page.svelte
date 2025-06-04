@@ -37,18 +37,21 @@
     console.log(`Program changed to: ${slug}`);
   })
 
+  let order_count= $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
+  let order_dollars = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
+
   let trash_pounds = $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
   let tires = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
 
   const charts: ChartType[] = $derived([
     {
       chartTitle: "Orders Count",
-      chartData: trash_pounds,
+      chartData: order_count,
       Chart: BarChartTb,
     },
     {
       chartTitle: "Orders Dollars",
-      chartData: tires,
+      chartData: order_dollars,
       Chart: BarChartTb,
     },
  ])

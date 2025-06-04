@@ -8,6 +8,22 @@ type graphProp = {
   marginLeft: number
 }
 
+interface GroupData {
+  Group: string;
+  Current_Funds: number;
+  Current_Services: number;
+  Current_Total_Participation: number;
+  Historical_Funds: {
+    [year: string]: number;
+  };
+  Historical_Services: {
+    [year: string]: number;
+  };
+}
+
+type ServiceKey = 'Current_Funds' | 'Current_Services' | 'Current_Total_Participation' | 
+                  'Historical_Funds' | 'Historical_Services';
+
 type collection_site_id = {
   collectionId?: string, 
   collectionName?: string,

@@ -8,6 +8,7 @@
     juris: string,
     historical_funds: number,
     current_funds: number,
+    tab3: number,
   }
 
   // import state
@@ -26,28 +27,32 @@
   let height = 700;
   const marginTop = 10;
   const marginRight = 20;
-  const marginBottom = 20;
-  const marginLeft = 70;
-  const yLabelMargin = 35;
+  const marginBottom =0;
+  const marginLeft = 90;
+  const yLabelMargin = 45;
   const legendMargin = 30;
   const legendItemHeight = 20;
   const legendItemWidth = 20;
 
   //const colors = d3.scaleSequential([0.5,0.5], d3.interpolateBlues)
-  const colors = d3.scaleLinear([0,1,2,3,4], colorSet);
+  const colors = d3.scaleLinear(
+      Array.from({length: colorSet.length}, (_, i) => i), 
+      colorSet
+  );
   // get unique data categories
   const uniqueCats = new Set(data.map((d) => d.juris))
   // calculate the required spacing between legends
   const intraLegendSpacing = width/(uniqueCats.size)+marginRight;
   // get the number of values whose data will be represented as a bar
   const numOfValues = Object.entries(data)[0].length
-
   //let tooltip;
   // Get the keys of each object entry
   const rawKeys = Object.keys(Object.values(data)[0])
   // remove the Jurisdiction key
   const keys =  rawKeys.slice(1)  
 
+  const maxKeyLength = Math.max(...keys.map(key => snakeToHuman(key).length));
+  console.log('max length', maxKeyLength)
   // Use the remaining keys to create a d3 stack
   const stack = d3.stack()
     .keys(keys)
@@ -100,12 +105,12 @@ const y = $derived(d3.scaleLinear()
 <div class="rounded-xl p-16" bind:this={vector}>
   <svg 
         width={width}
-        height={height*1.4}
-        viewBox={`0, ${0}, ${width}, ${height*1}`}
+        height={height*1.5}
+        viewBox={`0, ${0}, ${width}, ${height*1.2}`}
         class={'z-10 w-full h-full'}
   >
     <!-- x-axis -->
-    <g transform={`translate(${marginLeft+0}, ${height - marginBottom})`} class="x-axis">
+    <g transform={`translate(${marginLeft+yLabelMargin}, ${height - marginBottom})`} class="x-axis">
       {#each x.domain() as d}
         <g transform={`translate(${x(d) - yLabelMargin},${marginBottom}) rotate(45 0 0)`}>
         <text class="font-[Metropolis] text-lg transform translate-y-6" text-anchor="start">{shrinkLongNames(d)}</text>
@@ -150,24 +155,26 @@ const y = $derived(d3.scaleLinear()
 
 
     <!-------------------- Legend --------------------->
-    <g transform={`translate(${marginLeft}, ${height+(marginBottom*2)})`}>
-      {#each keys as key,i}
-        <rect 
-          x={(width/1.7)-(i*(legendItemHeight*3+intraLegendSpacing))} 
-          y={-height-marginTop*8} 
-          width={legendItemWidth} 
-          height={legendItemHeight} 
-          fill={colors(i)}
-          class={`stroke-black transform select-none`}
-        >
-        </rect>
-        <text 
-          x={(width/1.7)-(i*(legendItemHeight*3+intraLegendSpacing))} 
-          y={-height-marginTop*6} 
-          class="font-[Metropolis] text-3xl transform translate-x-8 select-none">
-          <tspan>{snakeToHuman(key)}</tspan>
-        </text>
-      {/each}
+    <g transform={`translate(${marginLeft/3}, ${1650})`}>
+{#each keys as key, i}
+  {@const rowIndex = Math.floor(i / 3)}
+  {@const colIndex = i % 3}
+  <rect 
+    x={(colIndex * (legendItemHeight + maxKeyLength*13.5))} 
+    y={-height-marginTop*8 - (rowIndex * (legendItemHeight + 20))} 
+    width={legendItemWidth} 
+    height={legendItemHeight} 
+    fill={colors(i)}
+    class={`stroke-black transform select-none`}
+  >
+  </rect>
+  <text 
+    x={(colIndex * (legendItemHeight + maxKeyLength*13.5))} 
+    y={-height-marginTop*6 - (rowIndex * (legendItemHeight + 20))} 
+    class="font-[Metropolis] text-2xl transform translate-x-8 select-none">
+    <tspan>{snakeToHuman(key)}</tspan>
+  </text>
+{/each}
     </g>
   </svg>
 </div>

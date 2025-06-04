@@ -20,14 +20,20 @@ function toSnakeCase(tabName: string) {
   return tabName.split(' ').join('_')
 }
 
+function toEverettCase(tabName: string) {
+  return tabName.split(' ').join('%20')
+}
+
 function getEndOfPath(tabName: string) {
   const segments = tabName.split('/').filter(segment => segment !== '')
   return segments[segments.length - 1] || ''
 }
 
 function handleSetChosen(tabName: string) {
-  chosenTab = toSnakeCase(getEndOfPath(tabName).toLowerCase())
+  chosenTab = getEndOfPath(tabName)
 }
+
+$inspect("chosen tab", chosenTab)
 
 
 const jurisId = jurisState()
@@ -35,8 +41,8 @@ const jurisId = jurisState()
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
-      {#if chosenTab === dash.tab_name}
-        <Tabs tabText={dash.tab_name} path={dash.tab_name} color="chosen" setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
+      {#if chosenTab === toEverettCase(dash.tab_name).toLowerCase()}
+        <Tabs tabText={dash.tab_name} path={dash.tab_name} color="#334155" setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
       {:else}
         <Tabs tabText={dash.tab_name} path={dash.tab_name} color={dash.tab_color} setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
       {/if}

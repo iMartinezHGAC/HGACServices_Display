@@ -1,23 +1,31 @@
 <script lang="ts">
 	import DonutChart from "../charts/DonutChart.svelte";
-
+  type DonutType = {
+    name: string,
+    value: number,
+  }
   type donutDisplayType = {
     header: string,
-    data: {name: string, value:number}[],
-    index: number,
+    data: DonutType[],
     colors: string[],
     preSymbol?: string,
     postSymbol?: string,
   }
 
-let {header, data, index, preSymbol="", postSymbol="", colors}: donutDisplayType = $props()
+let {header, data, preSymbol="", postSymbol="", colors}: donutDisplayType = $props()
 
 </script>
 
-
-<div class="flexy flex-col h-full bg-slate-700 p-0 pt-0">
+<div class="flex items-center flex-col h-full w-1/4 bg-slate-700 p-0 pt-0">
   <p class="font-[Staatliches] text-2xl text-slate-200 mb-4">
     {header}
   </p>
-  <DonutChart data={data} width={800} height={800} index={index} preSymbol={preSymbol} postSymbol={postSymbol} colors={colors}/>
+  <span class="scale-100">
+    <DonutChart 
+      data={data}
+      width={300}
+      height={300}
+    />
+  </span>
 </div>
+
