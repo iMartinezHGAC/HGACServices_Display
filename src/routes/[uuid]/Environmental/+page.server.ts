@@ -29,17 +29,26 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
   for ( const tableName of tableNames) {
     try {
       const limit: number = getRandomLimit();
-      const records = await pb.collection("33_hgac_coop_purchasing").getList(1,limit,{
-        sort: mergedOptions.sort,
-        expand: mergedOptions.expand,
-        filter: mergedOptions.filter,
-        perPage: mergedOptions.perPage,
-      })
-      console.log("20 FIRST", records)
+      let records
+      if(tableName === "33_hgac_coop_purchasing") {
+        records = await pb.collection(tableName).getList(1,limit,{
+          sort: mergedOptions.sort,
+          expand: mergedOptions.expand,
+          filter: mergedOptions.filter,
+          perPage: mergedOptions.perPage,
+        })
+      } else {
+        records = await pb.collection(tableName).getFullList({
+          sort: mergedOptions.sort,
+          expand: mergedOptions.expand,
+          filter: mergedOptions.filter,
+          perPage: mergedOptions.perPage,
+        })
+      }
       results[tableName] = records 
     } catch (err) {
       results[tableName] = {error: err instanceof Error ? err.message : "Unknown error"}
-        results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1,50,{perPage: 40})
+      results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1,50,{perPage: 40})
       console.error(err)
     }
   }
@@ -53,6 +62,8 @@ export const load: PageServerLoad = async ({locals, params}) => {
   })
   let tableNames: string[] = []
   tableNames = await programData.map((program: ProgramType) => program.parent_table)
+  tableNames.unshift("33_hgac_coop_purchasing")
+  console.log("table names", tableNames)
 
   let tablesData: TableDataResult
   try {

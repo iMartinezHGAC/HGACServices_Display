@@ -15,7 +15,6 @@
   }
 
   const {project, charts, additionalWork = false}: cardProps = $props()
-  console.log("PROJECT IN CARD", project)
 
   const graphState = graphsState()
 
@@ -58,6 +57,26 @@
   const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
 
+{#snippet renderChart(chartTitle: string, chartData: object|number, chartType: string, Chart: Component, i: number)}
+  <div class="card-style">
+    {#if chartType === "indicator"}
+      <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData as number}/>
+    {:else}
+      <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet renderAllCharts(charts: ChartType[])}
+      {#each charts as {chartTitle, chartData, chartType, Chart},i}
+        {#if i<2}
+          {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
+        {:else if i>=2 && accordionFlag}
+          {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
+        {/if}
+    {/each}
+{/snippet}
+
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
   <div class="flex bg-slate-700">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
@@ -67,32 +86,20 @@
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
-      {#each charts as {chartTitle, chartData, chartType, Chart},i}
-      {#if chartType === "indicator"}
-          <div class="card-style">
-            <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData}/>
-          </div>
-      {:else}
-        {#if i<2}
-          <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}/>
-          </div>
-        {:else if i>=2 && accordionFlag}
-          <div class="card-style">
-            <Chart data={chartData} width={800} height={580} yLabel={chartTitle} bind:this={cardInstances[i]}  colorSet={groupColors}/>
-          </div>
-        {/if}
-      {/if}
-      {/each}
+      {@render renderAllCharts(charts)}
+    {#if charts.length > 2}
+      <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
+          onclick={()=> {accordionFlag = !accordionFlag}}>
+        {accordionText}
+      </button>  
+    {:else}
+      <span></span>
+    {/if}
+
     {#if accordionFlag}
       <!-- bar: volunteer count-->
-
     {/if}
   </div>  
-  <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
-      onclick={()=> {accordionFlag = !accordionFlag}}>
-    {accordionText}
-  </button>  
   {#if additionalWork}
     <div class="flexy">
       <AdditionalWork 

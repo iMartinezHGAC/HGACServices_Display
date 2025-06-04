@@ -70,6 +70,7 @@ interface ChartType {
   y_axis_label: string,
   sort?: string,
   colors?: string[] | number[],
+  chartType?: string,
 }
 
 interface ProgramBlurb {
