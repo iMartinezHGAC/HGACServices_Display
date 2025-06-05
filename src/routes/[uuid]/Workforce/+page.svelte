@@ -16,7 +16,7 @@
 
   const programs: ProgramType[] = data.post
   const tablesData: DataObject[] = data.tablesData as DataObject[]
-  $inspect(tablesData)
+  $inspect("table data", tablesData)
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
@@ -49,16 +49,24 @@ const EXCLUDED_FIELDS = [
 // Function to get unique field names, excluding specified fields
 const getColumnNames = (data) => {
   const columnNamesByCollection = {};
- 
   Object.keys(data).forEach(collectionName => {
     // Check if items exist and is not empty
     if (data[collectionName].items && data[collectionName].items.length > 0) {
+
       // Get columns from the first item, filtering out excluded fields
       const columns = Object.keys(data[collectionName].items[0])
         .filter(field => !EXCLUDED_FIELDS.includes(field));
-      
+
       columnNamesByCollection[collectionName] = columns;
-    }
+    } else if(data[collectionName]) {
+      console.log("hail mary", data[collectionName])
+
+      // Get columns from the first item, filtering out excluded fields
+      const columns = Object.keys(data[collectionName][0])
+        .filter(field => !EXCLUDED_FIELDS.includes(field));
+
+      columnNamesByCollection[collectionName] = columns;
+      }
   });
  
   return columnNamesByCollection;
@@ -70,7 +78,6 @@ const getExtendedCharts = (columnNames, trash_pounds, tires) => {
   Object.entries(columnNames).forEach(([collection, columns]) => {
     columns.forEach((column, index) => {
       const chartData = index % 2 === 0 ? trash_pounds : tires;
-      
       extendedCharts.push({
         chartTitle: column,
         chartData: chartData,

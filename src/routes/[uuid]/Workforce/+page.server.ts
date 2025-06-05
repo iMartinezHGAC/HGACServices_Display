@@ -41,7 +41,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
           perPage: mergedOptions.perPage,
         })
       } else {
-        records = await pb.collection(tableName).getList(1,1,{
+        records = await pb.collection(tableName).getFullList({
           sort: mergedOptions.sort,
           expand: mergedOptions.expand,
           filter: mergedOptions.filter,
@@ -50,8 +50,10 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
       }
       results[tableName] = records 
     } catch (err) {
+      const lower_limit: number = Math.floor(Math.random() * 3);
+      const upper_limit: number = Math.floor(Math.random() * 300) + 100;
       results[tableName] = {error: err instanceof Error ? err.message : "Unknown error"}
-      results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1,50,{perPage: 40})
+      results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1,upper_limit,{perPage: 40})
       console.error(err)
     }
   }
