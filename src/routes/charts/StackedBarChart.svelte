@@ -15,6 +15,38 @@
   const graphState = graphsState()
  
   let vector: HTMLDivElement;
+
+const colorMap: Record<string, string> = {
+  'workforce': '#0A5A51',
+  'public saftey': '#4480C0',
+  'emergency preparedness': '#B26363',
+  'business services': '#6D2E3E',
+  'community services': '#8B459F',
+  'transportation': '#69ABDE',
+  'environmental': '#628464',
+  'economic development': '#CC9917'
+};
+
+ 
+// Color selection function
+function getColor(key: string): string {
+  // Convert snake_case to lowercase for matching
+  const normalizedKey = key.toLowerCase();
+  
+  // Check for exact match
+  if (colorMap[normalizedKey]) {
+    return colorMap[normalizedKey];
+  }
+  
+  // Optional: Try partial matching
+  const matchedKey = Object.keys(colorMap).find(k => 
+    normalizedKey.includes(k) || k.includes(normalizedKey)
+  );
+  
+  // Return matched color or a default
+  return matchedKey ? colorMap[matchedKey] : '#CCCCCC';
+}
+
  
   // when parent Export to PDF button is clicked, add this vector to the array of vectors to be exported
   export function handleAdd() {
@@ -28,6 +60,7 @@
     colorSet?: string[]
   } = $props();
  
+  console.log(data)
   // Chart dimensions
   let width = 1000;
   let height = 700;
@@ -155,12 +188,13 @@
       <g>
         {#each stackedData() as categoryData, categoryIndex}
           {#each categoryData as barSegment, index}
+            {console.log("stacked data",categoryIndex)}
             <rect
               x={x(data[index].juris)}
               y={y(barSegment[1])}
               height={Math.max(0, y(barSegment[0]) - y(barSegment[1]))}
               width={x.bandwidth()}
-              fill={colors(categoryIndex)}
+              fill={getColor(keys()[categoryIndex])}
               on:mouseover={(event) => {
                 const segmentValue = barSegment[1] - barSegment[0];
                 d3.select(tooltip)
@@ -189,7 +223,7 @@
           {@const rowIndex = Math.floor(i / 3)}
           {@const colIndex = i % 3}
           <rect 
-            x={(colIndex * (legendItemHeight + 100))} 
+            x={(colIndex * (legendItemHeight + 300))} 
             y={-height-marginTop*8 - (rowIndex * (legendItemHeight + 20))} 
             width={legendItemWidth} 
             height={legendItemHeight} 
@@ -198,7 +232,7 @@
           >
           </rect>
           <text 
-            x={(colIndex * (legendItemHeight + 100))} 
+            x={(colIndex * (legendItemHeight + 300))} 
             y={-height-marginTop*6 - (rowIndex * (legendItemHeight + 20))} 
             class="font-[Metropolis] text-2xl transform translate-x-8 select-none">
             <tspan>{snakeToHuman(key)}</tspan>
