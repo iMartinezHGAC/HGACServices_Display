@@ -137,13 +137,7 @@ function getColor(key: string): string {
 
 
 <style>
-  #tooltip {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 100;
-  }
+
 </style>
  
 <div class="rounded-xl p-16" bind:this={vector}>
@@ -249,6 +243,6 @@ function getColor(key: string): string {
 <div 
   bind:this={tooltip} 
   id="tooltip" 
-  class="-translate-y-96 bg-slate-700 text-slate-100 p-3 rounded-md shadow-lg border border-slate-600"
+  class="absolute transition-all duration-150 ease-linear w-auto bg-slate-700 text-slate-100 p-3 rounded-md shadow-lg border border-slate-600"
 >
 </div>

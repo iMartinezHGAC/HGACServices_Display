@@ -70,12 +70,26 @@ const stackbar_data: stackedTrash[] = [
 
 
   const stackbar_services: stackedTrash[] = [
-    { juris: '2020', historical_services: 7, current_services: 5 },
-    { juris: '2021', historical_services: 11, current_services: 10 },
-    { juris: '2022', historical_services: 10, current_services: 8 },
-    { juris: '2023', historical_services: 3, current_services: 7 },
-    { juris: '2024', historical_services: 16, current_services: 16 },
-    // More data entries...
+  { 
+    juris: '2020', 
+    ...Object.fromEntries(tabNames.map((name, index) => [name, 7 + index * 1]))
+  },
+  { 
+    juris: '2021', 
+    ...Object.fromEntries(tabNames.map((name, index) => [name, 5 + index * 1]))
+  },
+  { 
+    juris: '2022', 
+    ...Object.fromEntries(tabNames.map((name, index) => [name, 4 + index * 2]))
+  },
+  { 
+    juris: '2023', 
+    ...Object.fromEntries(tabNames.map((name, index) => [name, 8 + index * 1]))
+  },
+  { 
+    juris: '2024', 
+    ...Object.fromEntries(tabNames.map((name, index) => [name, 7 + index * 1]))
+  }
   ];
 
   const blurb = ""
@@ -108,10 +122,10 @@ const stackbar_data: stackedTrash[] = [
 <div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
   <div class="grid grid-cols-2">
     <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
-      <StackedBarChart data={stackbar_data} yLabel="Funds" colorSet={tabColors}/>
+      <StackedBarChart data={stackbar_data} yLabel="Historical Funds" colorSet={tabColors}/>
     </div>
     <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
-      <StackedBarChart data={stackbar_services} yLabel="Services" colorSet={tabColors}/>
+      <StackedBarChart data={stackbar_services} yLabel="Historical Services" colorSet={tabColors}/>
     </div>
   </div>
 </div>
