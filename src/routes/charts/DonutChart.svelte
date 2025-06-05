@@ -24,6 +24,37 @@
     colors = ["#4A90E2", "#50E3C2", "#F5A623", "#B8E986", "#BD10E0"]
   }: Props = $props();
 
+const colorMap: Record<string, string> = {
+  'workforce': '#0A5A51',
+  'public safety': '#4480C0',
+  'emergency preparedness': '#B26363',
+  'business services': '#6D2E3E',
+  'community services': '#8B459F',
+  'transportation': '#69ABDE',
+  'environmental': '#628464',
+  'economic development': '#CC9917'
+};
+
+ 
+// Color selection function
+function getColor(key: string): string {
+  // Convert snake_case to lowercase for matching
+  const normalizedKey = key.toLowerCase();
+  
+  // Check for exact match
+  if (colorMap[normalizedKey]) {
+    return colorMap[normalizedKey];
+  }
+  
+  // Optional: Try partial matching
+  const matchedKey = Object.keys(colorMap).find(k => 
+    normalizedKey.includes(k) || k.includes(normalizedKey)
+  );
+  
+  // Return matched color or a default
+  return matchedKey ? colorMap[matchedKey] : '#CCCCCC';
+}
+
   // Format value function
   function formatValue(num: number): string {
     if (num >= 1000000) {
@@ -60,7 +91,9 @@
     .value((d: DonutType) => d.value);
 
   // Create color scale
-  const colorScale = d3.scaleOrdinal(colors);
+  const colorScale = d3.scaleOrdinal()
+    .domain(data.map(d => d.name))
+    .range(data.map(d => getColor(d.name)));
 
   // Reactive arcs
   let arcs = $derived(pie(data));

@@ -18,7 +18,7 @@
 
 const colorMap: Record<string, string> = {
   'workforce': '#0A5A51',
-  'public saftey': '#4480C0',
+  'public safety': '#4480C0',
   'emergency preparedness': '#B26363',
   'business services': '#6D2E3E',
   'community services': '#8B459F',
@@ -200,7 +200,7 @@ function getColor(key: string): string {
                 d3.select(tooltip)
                   .style("opacity", 1)
                   .html(`
-                    <strong>Jurisdiction:</strong> ${data[index].juris}<br>
+                    <strong>Year:</strong> ${data[index].juris}<br>
                     <strong>Category:</strong> ${snakeToHuman(keys()[categoryIndex])}<br>
                     <strong>Value:</strong> ${formatValue(segmentValue)}
                   `)
@@ -249,6 +249,6 @@ function getColor(key: string): string {
 <div 
   bind:this={tooltip} 
   id="tooltip" 
-  class="bg-slate-700 text-slate-100 p-3 rounded-md shadow-lg border border-slate-600"
+  class="-translate-y-96 bg-slate-700 text-slate-100 p-3 rounded-md shadow-lg border border-slate-600"
 >
 </div>
