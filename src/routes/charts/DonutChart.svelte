@@ -9,9 +9,9 @@
   interface Props {
     data: DonutType[], 
     width?: number,
-    height?: number
+    height?: number,
     colors?: string[],
-    preSymbol?: string
+    preSymbol?: string,
     postSymbol?: string
   }
 
@@ -22,67 +22,77 @@
     preSymbol = "", 
     postSymbol = "",
     colors = ["#4A90E2", "#50E3C2", "#F5A623", "#B8E986", "#BD10E0"]
-  }: Props = $props()
+  }: Props = $props();
 
-  // Format value function with more comprehensive formatting
+  // Format value function
   function formatValue(num: number): string {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M"
+      return (num / 1000000).toFixed(1) + "M";
     }
     if (num >= 10000) {
-      return (num / 1000).toFixed(1) + "K"
+      return (num / 1000).toFixed(1) + "K";
     }
     if (num >= 1000) {
-      return (num / 1000).toFixed(2) + "K"
+      return (num / 1000).toFixed(2) + "K";
     }
-    return num.toLocaleString()
+    return num.toLocaleString();
   }
 
   // Calculate total
-  let total = $derived(formatValue(d3.sum(data, (d: DonutType) => d.value)))
-  
+  let total = $derived(formatValue(d3.sum(data, (d: DonutType) => d.value)));
+
   // Donut chart parameters
   const radius = Math.min(width, height) / 2;
-  
-  // Set up the arc and pie chart generator
-  const arc = d3.arc<d3.PieArcDatum<DonutType>>()
-    .innerRadius(radius * 0.45)
-    .outerRadius(radius);
+
+  // Track hovered arc index
+  let hoveredIndex: number | null = null;
+
+  // Reactive arc generator
+  let arc = $derived(
+    d3.arc<d3.PieArcDatum<DonutType>>()
+      .innerRadius(radius * 0.45)
+      .outerRadius((d, i) => hoveredIndex === i ? radius * 1.1 : radius)
+  );
 
   const pie = d3.pie<DonutType>()
     .padAngle(1 / radius)
     .sort(null)
     .value((d: DonutType) => d.value);
 
-  // Create a linear scale for the color interpolation
+  // Create color scale
   const colorScale = d3.scaleOrdinal(colors);
 
-  let arcs = $derived(pie(data))
+  // Reactive arcs
+  let arcs = $derived(pie(data));
 </script>
 
 <div class="relative w-full h-full">
   <svg 
-    width={width} 
-    height={height} 
-    viewBox={`-${width/2}, -${height/2}, ${width}, ${height}`} 
+    {width} 
+    {height} 
+    viewBox={`-${width/2 *1.2}, -${height/2 *1.2}, ${width*1.2}, ${height*1.2}`} 
     class="w-full h-auto"
   >
     <!-- Slices of the donut -->
     <g>
-      {#each arcs as arcData, i}
+      {#each arcs as arcData, i (arcData.data.name)}
         <path
+          role="button"
+          aria-label="{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}"
           fill={colorScale(i.toString())}
           d={arc(arcData)}
-          class="transition-all duration-200 hover:opacity-80 cursor-pointer"
+          class="transition-all duration-200 hover:brightness-150 hover:scale-105 cursor-pointer"
+          onmouseenter={() => (hoveredIndex = i)}
+          onmouseleave={() => (hoveredIndex = null)}
         >
           <title>{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}</title>
         </path>
       {/each}
     </g>
 
-    <!-- labels for the slices -->
+    <!-- Labels for the slices -->
     <g class="font-metropolis text-sm" text-anchor="middle">
-      {#each arcs as arcData}
+      {#each arcs as arcData (arcData.data.name)}
         <text 
           transform={`translate(${arc.centroid(arcData)})`}
           class="pointer-events-none"
@@ -98,7 +108,7 @@
       {/each}
     </g>
 
-    <!-- total value of the data -->
+    <!-- Total value of the data -->
     <g>
       <text 
         x="0" 
@@ -113,12 +123,5 @@
 </div>
 
 <style>
-  /* Tooltip styling */
-  path title {
-    @apply hidden;
-  }
-
-  path:hover + title {
-    @apply block;
-  }
+  /* No specific tooltip styling needed since <title> is handled natively by browsers */
 </style>
