@@ -79,7 +79,7 @@
 {/snippet}
 
 <div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
-  <div class="flex bg-slate-700">
+  <div class="flex bg-slate-700 w-full">
     <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
     <CardBlurbTb text={blurb}/>
     <button onclick={handleExportClick} class="group px-2 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-green-300 cursor-pointer">

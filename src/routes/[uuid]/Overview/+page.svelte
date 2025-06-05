@@ -101,7 +101,7 @@ const stackbar_data: stackedTrash[] = [
     <StatDisplay header="Total Participation" data={chartData.Participation} colors={tabColors} />
 
     <div class="bg-slate-700 flexy h-full w-1/4 pt-12">
-      <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={""} numericValue={7}/>
+      <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={"Projects: 7"} numericValue={1230000000} symbol_pre={"$"}/>
     </div>
   </div>
 
