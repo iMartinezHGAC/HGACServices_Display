@@ -49,9 +49,9 @@ let {
 </script>
 
 <div class="flex items-center justify-start flex-col h-full pr-24 pb-8">
-  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-400 to-[#69ABDE] text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950">
+  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950">
     {#if above}
-      <p class="font-[Staatliches] text-[clamp(1rem,8vw,2rem)] small-caps font-extrabold text-slate-100 w-full flexy pb-4">
+      <p class="font-[Staatliches] text-3xl small-caps font-extrabold text-slate-100 w-full flexy pb-4 text-shadow text-shadow-sm">
         {aboveText}
       </p>
     {/if}
@@ -62,7 +62,7 @@ let {
       </div>
     </div>
     {#if belowText}
-      <div class="font-[Staatliches] text-lg flex flex-row items-center  justify-center">
+      <div class="font-[Staatliches] text-lg flex flex-row items-center justify-center">
         {belowText}
       </div>
     {/if}

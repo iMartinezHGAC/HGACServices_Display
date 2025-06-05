@@ -189,7 +189,7 @@ function getColor(key: string): string {
               height={Math.max(0, y(barSegment[0]) - y(barSegment[1]))}
               width={x.bandwidth()}
               fill={getColor(keys()[categoryIndex])}
-              on:mouseover={(event) => {
+              onmouseover={(event) => {
                 const segmentValue = barSegment[1] - barSegment[0];
                 d3.select(tooltip)
                   .style("opacity", 1)
@@ -201,7 +201,7 @@ function getColor(key: string): string {
                   .style("left", (event.pageX + 10) + "px")
                   .style("top", (event.pageY - 10) + "px");
               }}
-              on:mouseout={() => {
+              onmouseout={() => {
                 d3.select(tooltip)
                   .style("opacity", 0);
               }}
