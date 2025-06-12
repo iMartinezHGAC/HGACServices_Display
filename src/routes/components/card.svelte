@@ -27,7 +27,7 @@
     cardInstances.forEach((instance, i) => {
       instance.handleAdd()}
     )
-    exportChartToPDF(graphState.graph)
+    exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
   }
 
   let accordionFlag = $state(false);
