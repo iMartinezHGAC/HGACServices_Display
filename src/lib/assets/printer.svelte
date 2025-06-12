@@ -1,15 +1,37 @@
 <script lang="ts">
+  interface PropType {
+    id?: string; // Optional id prop for printerIcon
+  }
 
-interface propType {
-  classStyle: string
-}
-
-let {classStyle}: propType = $props()
-
+  let { id }: PropType = $props();
 </script>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
 
-<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-	 viewBox="0 0 32 32" xml:space="preserve" class={classStyle}>
-    <path d="M29.773 7.966h-3.772v-7.952h-20.001v7.952h-3.772c-1.229 0-2.229 1-2.229 2.229v13.559c0 1.23 1 2.229 2.228 2.229h3.772v6h20.001v-6h3.773c1.229 0 2.229-1 2.229-2.23v-13.559c0-1.229-1-2.229-2.229-2.229zM8 1.984h16.001v5.982h-16.001v-5.982zM24.001 29.985h-16.001v-11.012h16.001v11.012zM30.002 23.755c0 0.128-0.102 0.23-0.229 0.23h-3.773v-7.012h-20.001v7.012h-3.772c-0.126 0-0.229-0.102-0.229-0.23v-13.559c0-0.127 0.103-0.23 0.229-0.23h27.546c0.126 0 0.229 0.102 0.229 0.23zM26 11.982h-1c-0.552 0-1 0.448-1 1s0.448 1 1 1h1c0.552 0 1-0.448 1-1s-0.448-1-1-1z"></path>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg
+  {id}
+  fill="none"
+  height="32px"
+  width="32px"
+  version="1.1"
+  viewBox="0 0 32 32"
+  class="printer-icon"
+>
+  <path
+    d="M29.773 7.966h-3.772v-7.952h-20.001v7.952h-3.772c-1.229 0-2.229 1-2.229 2.229v13.559c0 1.23 1 2.229 2.228 2.229h3.772v6h20.001v-6h3.773c1.229 0 2.229-1 2.229-2.23v-13.559c0-1.229-1-2.229-2.229-2.229zM8 1.984h16.001v5.982h-16.001v-5.982zM24.001 29.985h-16.001v-11.012h16.001v11.012zM30.002 23.755c0 0.128-0.102 0.23-0.229 0.23h-3.773v-7.012h-20.001v7.012h-3.772c-0.126 0-0.229-0.102-0.229-0.23v-13.559c0-0.127 0.103-0.230 0.229-0.23h27.546c0.126 0 0.229 0.102 0.229 0.23zM26 11.982h-1c-0.552 0-1 0.448-1 1s0.448 1 1 1h1c0.552 0 1-0.448 1-1s-0.448-1-1-1z"
+  />
 </svg>
+
+<style>
+  .printer-icon {
+    width: 48px; /* Matches Tailwind w-12 */
+    height: 48px; /* Matches Tailwind h-8 */
+    fill: white; /* Matches fill-white */
+    stroke: white; /* Matches stroke-white */
+    opacity: 0.5; /* Matches opacity-50 */
+    transition: opacity 0.3s ease; /* Smooth hover transition */
+  }
+
+  .printer-icon:hover {
+    opacity: 1; /* Matches group-hover:opacity-100 */
+  }
+</style>

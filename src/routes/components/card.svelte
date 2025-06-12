@@ -15,18 +15,18 @@
     additionalWork: boolean
   }
 
+  let vector: HTMLDivElement
+  let adWorkVector: HTMLDivElement | null = $state(null)
+
   const {project, charts, additionalWork = false}: cardProps = $props()
 
   const graphState = graphsState()
 
-  let graphVectors: HTMLDivElement[]
-  let cardInstances = $state([])
-
   function handleExportClick() {
     graphState.clear()
-    cardInstances.forEach((instance, i) => {
-      instance.handleAdd()}
-    )
+    graphState.add(vector)
+    if(adWorkVector) graphState.add(adWorkVector)
+    console.log(graphState.graph)
     exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
   }
 
@@ -55,7 +55,6 @@
   })
 
   $inspect(linkUrls)
-  const groupColors = ["#025773", "#7AB66F", "#B4B4B4", "#FEF9C3", "#F1F5F9"]
 </script>
 
 {#snippet renderChart(chartTitle: string, chartData: object|number, chartType: string, Chart: Component, i: number)}
@@ -63,7 +62,7 @@
     {#if chartType === "indicator"}
       <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData as number}/>
     {:else}
-      <Chart data={chartData} width={800} height={580} yLabel={snakeToHuman(chartTitle)} bind:this={cardInstances[i]}/>
+      <Chart data={chartData} width={800} height={580} yLabel={snakeToHuman(chartTitle)}/>
     {/if}
   </div>
 {/snippet}
@@ -78,22 +77,34 @@
     {/each}
 {/snippet}
 
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md">
+<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" >
+  <div  bind:this={vector}>
   <div class="flex bg-slate-700 w-full">
-    <CardHeader projectName={project.program_name}  links={linkUrls} color="dark"/>
+  <div class="flex flex-col w-1/3">
+    <h1 class={"flex font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold pt-6 pb-4 pl-10 bg-slate-700 text-white justify-start small-caps"}>
+      {project.program_name}
+      <div class="flex flex-grow"></div>
+    </h1>
+    {#if linkUrls}
+      <div class="flex-col flex pl-10 pb-4">
+      {#each linkUrls as link }
+        <a href={link.url_string} id="programLink" aria-label="link" class="text-white font-[Metropolis] font-medium">{link.display_text}</a>
+      {/each}
+      </div>
+    {/if}
+  </div>
     <CardBlurbTb text={blurb}/>
-    <button onclick={handleExportClick} class="group px-2 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-green-300 cursor-pointer">
-      <Printer classStyle="stroke-white fill-white w-12 h-8 opacity-50 group-hover:opacity-100"/>
+    <button onclick={handleExportClick} id="printerIcon" class="group px-2 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-slate-800 cursor-pointer">
+      <Printer id="printerIcon"/>
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
       {@render renderAllCharts(charts)}
-
     {#if accordionFlag}
       <!-- bar: volunteer count-->
     {/if}
   </div>  
-
+</div>
     {#if charts.length > 2}
       <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
           onclick={()=> {accordionFlag = !accordionFlag}}>
@@ -103,13 +114,13 @@
       <span></span>
     {/if}
   {#if additionalWork}
-    <div class="flexy">
-      <AdditionalWork 
-        bodyText={"Lorem Ipsum"} 
-        projectName={"Dog Poop Pickup"} 
-        funding={40} 
-        projectTimeframe={""} 
-      />
-    </div>
+  <div class="flexy" bind:this={adWorkVector}>
+    <AdditionalWork 
+      bodyText={"Lorem Ipsum"} 
+      projectName={"Dog Poop Pickup"} 
+      funding={40} 
+      projectTimeframe={""} 
+    />
+  </div>
   {/if}
 </div>

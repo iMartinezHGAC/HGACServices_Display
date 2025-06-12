@@ -17,7 +17,7 @@
   {#if links}
     <div class="flex-col flex pl-10 pb-4">
     {#each links as link }
-      <a href={link.url_string} aria-label="link" class="text-white font-[Metropolis] font-medium">{link.display_text}</a>
+      <a href={link.url_string} id="programLink" aria-label="link" class="text-white font-[Metropolis] font-medium">{link.display_text}</a>
     {/each}
     </div>
   {/if}
