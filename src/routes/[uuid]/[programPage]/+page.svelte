@@ -34,10 +34,6 @@
   charts.push(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
   charts.push(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
 
-  function makeEchartBar<T = any>(dataset: T[], key: keyof T) {
-    if(dataset) return dataset.map((item: T) => item[key])
-  }
-
 
 const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
     return {program, charts}

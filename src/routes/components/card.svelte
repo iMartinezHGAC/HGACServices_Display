@@ -112,7 +112,6 @@
     {#if accordionFlag}
     {/if}
 </div>
-<!--
     {#if charts.length > 2}
       <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
           onclick={()=> {accordionFlag = !accordionFlag}}>
@@ -131,5 +130,4 @@
     />
   </div>
   {/if}
--->
 </div>
