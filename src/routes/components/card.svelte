@@ -3,28 +3,31 @@
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
 	import Printer from "$lib/assets/printer.svelte";
+	import Indicator from "./indicator.svelte";
+  import {snakeToHuman} from "$routes/helpers/caseConversion"
 
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
-	import Indicator from "./indicator.svelte";
-  import {snakeToHuman} from "$routes/helpers/caseConversion"
+	import type { number } from "echarts/core";
+	import RenderEchart from "./renderEchart.svelte";
   
   interface cardProps {
     project: ProgramType,
     charts: ChartType[]
     additionalWork: boolean
+    echartsList: echarts.EChartsOption[]
   }
 
-  let vector: HTMLDivElement
+  let vector = $state<HTMLElement>()
   let adWorkVector: HTMLDivElement | null = $state(null)
 
-  const {project, charts, additionalWork = false}: cardProps = $props()
-
+  const {project, charts, additionalWork = false, echartsList}: cardProps = $props()
   const graphState = graphsState()
+
 
   function handleExportClick() {
     graphState.clear()
-    graphState.add(vector)
+    graphState.add(vector as HTMLDivElement)
     if(adWorkVector) graphState.add(adWorkVector)
     console.log(graphState.graph)
     exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
@@ -55,8 +58,10 @@
   })
 
   $inspect(linkUrls)
+
 </script>
 
+<!--
 {#snippet renderChart(chartTitle: string, chartData: object|number, chartType: string, Chart: Component, i: number)}
   <div class="card-style">
     {#if chartType === "indicator"}
@@ -67,7 +72,9 @@
   </div>
 {/snippet}
 
+-->
 {#snippet renderAllCharts(charts: ChartType[])}
+  <!--
       {#each charts as {chartTitle, chartData, chartType, Chart},i}
         {#if i<2}
           {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
@@ -75,10 +82,10 @@
           {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
         {/if}
     {/each}
+  -->
 {/snippet}
 
-<div class="flex-col w-10/12 items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" >
-  <div  bind:this={vector}>
+<div class="flex-col w-full items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" >
   <div class="flex bg-slate-700 w-full">
   <div class="flex flex-col w-1/3">
     <h1 class={"flex font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold pt-6 pb-4 pl-10 bg-slate-700 text-white justify-start small-caps"}>
@@ -99,12 +106,13 @@
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
-      {@render renderAllCharts(charts)}
+    {#each echartsList as chart}
+      <RenderEchart chart={chart} />
+    {/each}
     {#if accordionFlag}
-      <!-- bar: volunteer count-->
     {/if}
-  </div>  
 </div>
+<!--
     {#if charts.length > 2}
       <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
           onclick={()=> {accordionFlag = !accordionFlag}}>
@@ -123,4 +131,5 @@
     />
   </div>
   {/if}
+-->
 </div>

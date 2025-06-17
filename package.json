@@ -44,6 +44,7 @@
 		"@fontsource/yeseva-one": "^5.1.1",
 		"@tailwindcss/vite": "^4.0.6",
 		"d3": "^7.9.0",
+		"echarts": "^5.6.0",
 		"html2canvas-pro": "^1.5.11",
 		"jspdf": "^2.5.2",
 		"pocketbase": "^0.25.1",

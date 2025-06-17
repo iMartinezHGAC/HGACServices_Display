@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
+	import { graphsState } from './graphVectors.svelte';
   import {shrinkLongNames} from "$lib/scripts/textFormatters.svelte"
 
   let vector: HTMLDivElement
@@ -19,6 +20,7 @@
   const barColors = ["#ffffff","#fff9d8"]
 
   // import state
+  const graphState = graphsState()
 
   let postScript = ''
 

@@ -7,10 +7,9 @@
   const routedTo = navigating.to?.route.id?.split('/')[2]
   const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
 
-	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { invalidate } from '$app/navigation';
+	import { makeBar } from '$routes/helpers/chartFormatters';
 
 	let { data}: { data: PageData } = $props();
 
@@ -22,39 +21,23 @@
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-  $inspect(programNames[0])
+  $inspect("debug tablesData ", programNames)
 
-  function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
-    if(dataset) {
-      return dataset.map((item: T) => ({
-          juris: item[key1],
-          value: item[key2]
-        }))    
-    }
+  const charts: echarts.EChartsOption[] = []
+  const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
+
+  const keys = Object.keys(tablesData[programNames[0]][0])
+  const usefulKeys = keys.filter(key => !exclusions.includes(key))
+  console.log(usefulKeys)
+  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
+
+  charts.push(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
+  charts.push(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
+
+  function makeEchartBar<T = any>(dataset: T[], key: keyof T) {
+    if(dataset) return dataset.map((item: T) => item[key])
   }
-  let slug = $page.params.programPage
-  $effect(()=> {
-    console.log(`Program changed to: ${slug}`);
-  })
 
-  let order_count= $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
-  let order_dollars = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
-
-  let trash_pounds = $derived(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
-
-  const charts: ChartType[] = $derived([
-    {
-      chartTitle: "Orders Count",
-      chartData: order_count,
-      Chart: BarChartTb,
-    },
-    {
-      chartTitle: "Orders Dollars",
-      chartData: order_dollars,
-      Chart: BarChartTb,
-    },
- ])
 
 const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
     return {program, charts}
@@ -65,7 +48,7 @@ $inspect(cardData)
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false} charts={charts}/>
 {:else}
   <div>Loading...</div>
   
