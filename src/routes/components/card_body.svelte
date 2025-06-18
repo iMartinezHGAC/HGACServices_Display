@@ -6,11 +6,12 @@
   interface cardProps {
     cardNames: any[],
     cardData: CardDataType[],
-    direction: boolean
-    adwork: boolean
+    direction: boolean,
+    adwork: boolean,
+    charts: echarts.EChartsOption[],
   }
 
-  const {cardNames, cardData, direction, adwork=false}: cardProps = $props()
+  const {cardNames, cardData, direction, adwork=false, charts}: cardProps = $props()
   let flyValue = $state(direction ? -400 : 400)
 </script>
 
@@ -36,6 +37,7 @@
             project={card.program} 
             charts={card.charts}
             additionalWork={adwork}
+            echartsList={charts}
           />
         </div>      
       {/each}

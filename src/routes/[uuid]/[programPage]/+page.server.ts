@@ -26,7 +26,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 
   for ( const tableName of tableNames) {
     try {
-      const records = await pb.collection("33_hgac_coop_purchasing").getFullList({
+      const records = await pb.collection(tableName).getFullList({
         sort: mergedOptions.sort,
         expand: mergedOptions.expand,
         filter: mergedOptions.filter,
