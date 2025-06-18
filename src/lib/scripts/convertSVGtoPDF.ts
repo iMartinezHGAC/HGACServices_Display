@@ -97,12 +97,6 @@ export default async function exportChartToPDF(vectors: HTMLDivElement[], title:
       if (index === 0) {
         const printerIcon = clonedElement.querySelector('#printerIcon') as HTMLElement;
         if (printerIcon) {
-          printerIcon.style.display = 'block';
-          printerIcon.style.width = '48px';
-          printerIcon.style.height = '48px';
-          printerIcon.style.fill = 'white';
-          printerIcon.style.stroke = 'white';
-          printerIcon.style.opacity = '0.5';
           await new Promise((resolve) => setTimeout(resolve, 100));
           const rect = printerIcon.getBoundingClientRect();
           const containerRect = clonedElement.getBoundingClientRect();
@@ -112,12 +106,6 @@ export default async function exportChartToPDF(vectors: HTMLDivElement[], title:
             width: rect.width,
             height: rect.height,
           };
-          console.log('printerIcon data:', {
-            ...printerIconData,
-            containerRect: { left: containerRect.left, top: containerRect.top, width: containerRect.width, height: containerRect.height },
-            printerIconStyles: printerIcon.style.cssText,
-            clonedElementHTML: clonedElement.outerHTML.substring(0, 500)
-          });
           printerIcon.style.display = 'none';
         } else {
           console.warn('printerIcon not found in first vector');
@@ -128,10 +116,6 @@ export default async function exportChartToPDF(vectors: HTMLDivElement[], title:
       let linkData: { href: string, x: number, y: number, width: number, height: number } | undefined;
       const programLink = clonedElement.querySelector('#programLink') as HTMLAnchorElement;
       if (programLink && programLink.href) {
-        programLink.style.display = 'inline-block';
-        programLink.style.minWidth = '50px';
-        programLink.style.minHeight = '20px';
-        programLink.style.padding = '2px';
         await new Promise((resolve) => setTimeout(resolve, 50));
         const rect = programLink.getBoundingClientRect();
         const containerRect = clonedElement.getBoundingClientRect();
@@ -232,10 +216,6 @@ export default async function exportChartToPDF(vectors: HTMLDivElement[], title:
         const pdfScale = contentWidth / canvas.width;
         const iconX = x + (printerIconData.x / canvasScale) * pdfScale;
         const iconY = y + (printerIconData.y / canvasScale) * pdfScale;
-        /*
-        const iconWidth = (printerIconData.width / canvasScale) * pdfScale;
-        const iconHeight = (printerIconData.height / canvasScale) * pdfScale;
-        */
         const iconWidth = 48
         const iconHeight = 48
 
@@ -268,11 +248,27 @@ export default async function exportChartToPDF(vectors: HTMLDivElement[], title:
       console.error('Error adding image or link to PDF:', error);
     }
 
+
     // Add new page for non-last elements, if needed
     if (index < vectors.length - 2 && (index + 1) % elementsPerPage === 0) {
       pdf.addPage();
     }
   }
+
+ //////////////////////////////////////////// ADD DATE ////////////////////////////////////////////////// 
+ // Get current date and format as MM-DD-YY
+  const today = new Date();
+  const formattedDate = `${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}-${today.getFullYear().toString().slice(-2)}`;
+ // Add date to PDF at position (10, 10)
+  const dateText = `${formattedDate}`;
+  const textWidth = pdf.getTextWidth(dateText);
+  const datePosX = pageWidth - textWidth - margin
+  const datePosY = pageHeight - bottomMargin
+  pdf.text(dateText, datePosX, datePosY)
+ //////////////////////////////////////////// ADD DATE ////////////////////////////////////////////////// 
+
+  // Save the PDF
+  pdf.save(`document-${formattedDate}.pdf`);
 
   // Clean up off-screen container
   document.body.removeChild(offScreenContainer);
