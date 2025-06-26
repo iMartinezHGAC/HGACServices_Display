@@ -1,29 +1,63 @@
+<svelte:head>
+    <!-- Development -->
+  <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+
+</svelte:head>
+
 <script lang="ts">
-	import StatDisplay from "./statDisplay.svelte";
   import transit from "$lib/assets/transit.svg"
+  import tippy from "tippy.js";
 
-interface propTypes {
-  above: boolean,
-  below: boolean,
-  aboveText: string,
-  belowText: string,
-  numericValue: number,
-  symbol_pre?: string,
-  symbol_post?: string, 
-}
+  const data = [
+    {
+      name: "Project 1",
+      value: 2100,
+    },
+    {
+      name: "Project 2",
+      value: 1100,
+    },
+    {
+      name: "Project 3",
+      value: 2800,
+    },
+    {
+      name: "Project 4",
+      value: 3100,
+    },
+    {
+      name: "Project 5",
+      value: 2800,
+    },
+  ]
 
-let {
-  above = false,
-  below = false,
-  aboveText = "",
-  belowText = "",
-  numericValue = 15,
-  symbol_pre = "",
-  symbol_post = "",
-}: propTypes = $props()
+  const dataNames = data.map(item => item.name)
+  const dataSumOfValues = data
+    .map(item => item.value)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+
+  interface propTypes {
+    above: boolean,
+    below: boolean,
+    aboveText: string,
+    belowText: string,
+    numericValue: number,
+    symbol_pre?: string,
+    symbol_post?: string, 
+  }
+
+  let {
+    above = false,
+    below = false,
+    aboveText = "",
+    belowText = "",
+    numericValue = 15,
+    symbol_pre = "",
+    symbol_post = "",
+  }: propTypes = $props()
 
   $inspect("Above text: ", aboveText)
-
   let postScript = ""
 
   //const fromColor = "#69ABDE"
@@ -46,10 +80,41 @@ let {
     else return value
   }
 
-</script>
+  let dataTable = $state<HTMLElement>()
 
-<div class="flex items-center justify-start flex-col h-full pr-24 pb-8">
-  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950">
+  function toTippy(element: HTMLElement) {
+    tippy(element, {
+      content: dataTable,
+      placement: "right-start",
+    })
+  }
+
+
+</script>
+<div class="opacity-0 scale-0" >
+  <div bind:this={dataTable}>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each data as {name, value}}
+          <tr>
+            <td>{name}</td>
+            <td class="px-4">${value}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="flex items-center justify-start flex-col h-full pr-24 pb-8" >
+  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950" {@attach toTippy}>
     {#if above}
       <p class="font-[Staatliches] text-3xl small-caps font-extrabold text-slate-100 w-full flexy pb-4 text-shadow text-shadow-sm">
         {aboveText}
@@ -57,13 +122,13 @@ let {
     {/if}
     <div class="flexy flex-row font-bold text-center">
       <div class="flexy text-[clamp(1rem,4vw,4rem)]">
-        <p class="font-[Metropolis] text-[4rem] font-bold">{symbol_pre}{truncateYAxisValue(numericValue)} {postScript} </p>
+        <p class="font-[Metropolis] text-[4rem] font-bold">{symbol_pre}{truncateYAxisValue(dataSumOfValues)} {postScript} </p>
         <p class="items-end text-[8rem]">{symbol_post}</p>
       </div>
     </div>
     {#if belowText}
       <div class="font-[Staatliches] text-lg flex flex-row items-center justify-center">
-        {belowText}
+        Projects: {data.length}
       </div>
     {/if}
   </div>

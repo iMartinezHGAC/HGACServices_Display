@@ -118,6 +118,7 @@ function getColor(key: string): string {
           onmouseenter={() => (hoveredIndex = i)}
           onmouseleave={() => (hoveredIndex = null)}
         >
+          <a href={arcData.data.name}></a>
           <title>{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}</title>
         </path>
       {/each}
