@@ -27,17 +27,20 @@ interface CardDataType {
     additionalWork: boolean
   }
 
-  let vector = $state<HTMLElement>()
-  let adWorkVector: HTMLDivElement | null = $state(null)
-
   const {project, charts, additionalWork = false}: cardProps = $props()
   const graphState = graphsState()
 
 
-  function handleExportClick() {
+  function toGraph(vector: HTMLDivElement) {
     graphState.clear()
     graphState.add(vector as HTMLDivElement)
-    if(adWorkVector) graphState.add(adWorkVector)
+  }
+
+  function toGraphWork(workVector: HTMLDivElement) {
+    if(workVector) graphState.add(workVector)
+  }
+
+  function handleExportClick() {
     console.log(graphState.graph)
     exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
   }
@@ -94,7 +97,7 @@ interface CardDataType {
   -->
 {/snippet}
 
-<div class="flex-col w-full items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" >
+<div class="flex-col w-full items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" {@attach toGraph}>
   <div class="flex bg-slate-700 w-full">
   <div class="flex flex-col w-1/3">
     <h1 class={"flex font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold pt-6 pb-4 pl-10 bg-slate-700 text-white justify-start small-caps"}>
@@ -110,7 +113,8 @@ interface CardDataType {
     {/if}
   </div>
     <CardBlurbTb text={blurb}/>
-    <button onclick={handleExportClick} id="printerIcon" class="group px-2 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-slate-800 cursor-pointer">
+    <span class="flex-grow"></span>
+    <button onclick={handleExportClick} id="printerIcon" class="group mr-8 bg-slate-700 bg-none font-[Staatliches] pt-8 flex items-start justify-start font-medium active:bg-slate-800 cursor-pointer">
       <Printer id="printerIcon"/>
     </button>
   </div>
@@ -131,7 +135,7 @@ interface CardDataType {
       <span></span>
     {/if}
   {#if additionalWork}
-  <div class="flexy" bind:this={adWorkVector}>
+  <div class="flexy" {@attach toGraphWork}>
     <AdditionalWork 
       bodyText={"Lorem Ipsum"} 
       projectName={"Dog Poop Pickup"} 

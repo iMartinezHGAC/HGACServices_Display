@@ -8,37 +8,7 @@
   const {data}: {data: PageData } = $props() 
 
 
-  const cheesedata = [
-    {
-      name: "Project 1",
-      value: 2100,
-    },
-    {
-      name: "Project 2",
-      value: 1100,
-    },
-    {
-      name: "Project 3",
-      value: 2800,
-    },
-    {
-      name: "Project 4",
-      value: 3100,
-    },
-    {
-      name: "Project 5",
-      value: 2800,
-    },
-  ]
-
-  const dataNames = cheesedata.map(item => item.name)
-  const dataSumOfValues = cheesedata
-    .map(item => item.value)
-    .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
-
-  let dataTable = $state<HTMLElement>()
-
-
+ 
 interface GroupData {
   Group: string;
   Current_Funds: number;
@@ -58,9 +28,9 @@ type stackedTrash = {
   current_funds: number,
 }
 
-  const fakeData: GroupData[] = data.fakeData
+const fakeData: GroupData[] = data.fakeData
 
-const groups = ["Transportation", "Environmental", "Workforce", "Public_Safety", "Community"];
+const groups = ["Economic Development", "Environmental", "Transportation", "Community Services", "Public Safety", "Business Services", "Workforce", ];
 
 const chartData = {
   CurrentFunding: convertAllToDonut(fakeData, groups, "Current_Funds"),
@@ -139,12 +109,11 @@ const stackbar_data: stackedTrash[] = [
 -->
 
 <div class="fixed flex top-24 w-11/12 h-screen flex-col overflow-auto">
-  <div class="grid grid-cols-2 h-screen sticky w-auto bg-slate-700 pt-6 px-auto place-items-center">
-    <StatDisplay header="Current Funding" data={chartData.CurrentFunding} colors={tabColors} />
+  <div class="grid grid-cols-2 min-h-screen sticky w-auto bg-slate-700 pt-4 pb-12 px-auto place-items-center">
+    <StatDisplay header="Current Funding" data={chartData.CurrentFunding} colors={tabColors} preSymbol="$"/>
     <StatDisplay header="Services" data={chartData.Services} colors={tabColors} />
     <StatDisplay header="Total Participation" data={chartData.Participation} colors={tabColors} />
-
-    <div class="bg-slate-700 h-full w-1/2 pt-12 flex place-items-center">
+    <div class="bg-slate-700 h-auto w-1/2 pt-12 flex justify-center pl-24">
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={"Projects: 7"} numericValue={1230000000} symbol_pre={"$"}/>
     </div>
   </div>
@@ -162,23 +131,3 @@ const stackbar_data: stackedTrash[] = [
 </div>
 
 
-<div class="opacity-0 scale-0" >
-  <div bind:this={dataTable}>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each cheesedata as {name, value}}
-          <tr>
-            <td>{name}</td>
-            <td class="px-4">${value}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
-</div>

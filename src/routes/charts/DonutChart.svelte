@@ -6,7 +6,8 @@
 </svelte:head>
 
 <script lang="ts">
-  import * as d3 from 'd3';
+  import { truncateNumber } from '$routes/helpers/chartFormatters';
+import * as d3 from 'd3';
 	import tippy from 'tippy.js';
 
   type DonutType = {
@@ -32,6 +33,8 @@
     colors = ["#4A90E2", "#50E3C2", "#F5A623", "#B8E986", "#BD10E0"]
   }: Props = $props();
 
+  console.log("donut data",data)
+
 const colorMap: Record<string, string> = {
   'workforce': '#0A5A51',
   'public safety': '#4480C0',
@@ -43,28 +46,8 @@ const colorMap: Record<string, string> = {
   'economic development': '#CC9917'
 };
 
-  const cheesedata = [
-    {
-      name: "Project 1",
-      value: 2100,
-    },
-    {
-      name: "Project 2",
-      value: 1100,
-    },
-    {
-      name: "Project 3",
-      value: 2800,
-    },
-    {
-      name: "Project 4",
-      value: 3100,
-    },
-    {
-      name: "Project 5",
-      value: 2800,
-    },
-  ]
+  const cheesedata = data
+
 
   const dataNames = cheesedata.map(item => item.name)
   const dataSumOfValues = cheesedata
@@ -72,7 +55,6 @@ const colorMap: Record<string, string> = {
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 
   let dataTable = $state<HTMLElement>()
-  $inspect("Table",dataTable)
 
 
 // Color selection function
@@ -154,7 +136,7 @@ function getColor(key: string): string {
         {#each cheesedata as {name, value}}
           <tr>
             <td>{name}</td>
-            <td class="px-4">${value}</td>
+            <td class="px-4">{preSymbol}{formatValue(value)}</td>
           </tr>
         {/each}
       </tbody>
@@ -171,7 +153,7 @@ function getColor(key: string): string {
   >
     <!-- Slices of the donut -->
     <g>
-      {#each arcs as arcData, i (arcData.data.name)}
+      {#each arcs as arcData, i(arcData.data.name)}
         <a href={`/a8se97t2/${arcData.data.name}`} aria-label="project-link" >
           <path
             role="button"
@@ -179,6 +161,8 @@ function getColor(key: string): string {
             fill={colorScale(i.toString())}
             d={arc(arcData)}
             class="transition-all duration-200 hover:brightness-150 hover:scale-105 cursor-pointer"
+            onmouseenter={()=>hoveredIndex = i}
+            onmouseleave={()=>hoveredIndex = null}
           >
           </path>
         </a>

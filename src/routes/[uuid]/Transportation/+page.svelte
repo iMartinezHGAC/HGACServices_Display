@@ -1,4 +1,3 @@
-
 <script lang="ts">
 interface CustomEchartType {
   parent_table: string,

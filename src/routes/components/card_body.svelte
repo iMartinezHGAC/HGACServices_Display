@@ -2,6 +2,8 @@
 	import { fly } from "svelte/transition";
   import {toCamelCase} from "../helpers/caseConversion"
 	import Card from "$routes/components/card.svelte";
+	import { graphsState } from "$routes/charts/graphVectors.svelte";
+	import exportChartToPDF from "$lib/scripts/convertSVGtoPDF";
 
 interface CustomEchartType {
   parent_table: string,
@@ -22,6 +24,15 @@ interface CardDataType {
 
   const {cardNames, cardData, direction, adwork=false}: cardProps = $props()
   let flyValue = $state(direction ? -400 : 400)
+
+  /* FUTURE EXPORT ALL
+
+  const graphState = graphsState()
+
+  function handleExportClick() {
+    exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
+  }
+  */
 </script>
 
 

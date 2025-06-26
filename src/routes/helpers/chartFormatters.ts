@@ -13,6 +13,20 @@ interface CardDataType {
   echarts: CustomEchartType[]
 }
 
+  // Format value function
+  function formatValue(num: number): string {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M";
+    }
+    if (num >= 10000) {
+      return (num / 1000).toFixed(1) + "K";
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(2) + "K";
+    }
+    return num.toLocaleString();
+  }
+
 export function makeBar<T = any>(
     parent_table: string,
     dataset: T[], 
@@ -30,7 +44,19 @@ export function makeBar<T = any>(
       xAxis: {
         data: dataset.map((item: T) => truncateDate(item[key1]))
       },
-      yAxis: {},
+      yAxis: {
+        axisLabel: {
+          formatter: function(value) {
+            if(value > 1000000) {
+              return (value/1000000)+ "M"
+            }
+            else if(value > 100000) {
+              return (value/1000)+ "K"
+            }
+            return value
+          }
+        }
+      },
       //@ts-ignore
       series: [
         {
@@ -41,7 +67,7 @@ export function makeBar<T = any>(
                 const value = item[key2];
                 return typeof value !== 'number' || value >= 0;
               })
-        .map((item: T) => item[key2])
+        .map((item: T) => item[key2]),
         }
       ],
     }

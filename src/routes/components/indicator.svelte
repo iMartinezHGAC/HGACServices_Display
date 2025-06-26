@@ -11,24 +11,28 @@
 
   const data = [
     {
-      name: "Project 1",
+      name: "Transportation Demand Modeling",
       value: 2100,
     },
     {
-      name: "Project 2",
+      name: "Transportation Planning Studies",
       value: 1100,
     },
     {
-      name: "Project 3",
+      name: "Gulf Coast Regional Tow and Go",
       value: 2800,
     },
     {
-      name: "Project 4",
+      name: "Transporation Improvement Plan",
       value: 3100,
     },
     {
-      name: "Project 5",
+      name: "Regional Transporation Plan",
       value: 2800,
+    },
+    {
+      name: "Clean Vehicles Program",
+      value: 8800,
     },
   ]
 
