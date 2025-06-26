@@ -10,18 +10,27 @@
 	import { graphsState } from "../charts/graphVectors.svelte";
 	import type { number } from "echarts/core";
 	import RenderEchart from "./renderEchart.svelte";
-  
+
+interface CustomEchartType {
+  parent_table: string,
+  echarts_data: echarts.EChartsOption,
+}
+
+interface CardDataType {
+  program: ProgramType,
+  echarts: CustomEchartType[]
+}
+
   interface cardProps {
     project: ProgramType,
-    charts: ChartType[]
+    charts: CustomEchartType[]
     additionalWork: boolean
-    echartsList: echarts.EChartsOption[]
   }
 
   let vector = $state<HTMLElement>()
   let adWorkVector: HTMLDivElement | null = $state(null)
 
-  const {project, charts, additionalWork = false, echartsList}: cardProps = $props()
+  const {project, charts, additionalWork = false}: cardProps = $props()
   const graphState = graphsState()
 
 
@@ -106,8 +115,9 @@
     </button>
   </div>
   <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
-    {#each echartsList as chart}
-      <RenderEchart chart={chart} />
+    {#each charts as chart}
+      {console.log(chart)}
+        <RenderEchart chart={chart.echarts_data} />
     {/each}
     {#if accordionFlag}
     {/if}

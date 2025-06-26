@@ -1,3 +1,5 @@
+import * as echarts from 'echarts'
+
 type graphProp = {
   data: object[],
   width: number,
@@ -116,9 +118,14 @@ interface ProgramType {
   dashboard_group?: string;
 }
 
+interface CustomEchartType {
+  parent_table: string,
+  charts: echarts.EChartsOption,
+}
+
 interface CardDataType {
   program: ProgramType,
-  charts: ChartType[]
+  echarts: CustomEchartType[]
 }
 
 interface DashboardType {

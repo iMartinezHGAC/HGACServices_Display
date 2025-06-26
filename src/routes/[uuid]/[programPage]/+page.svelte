@@ -1,4 +1,14 @@
 <script lang="ts">
+interface CustomEchartType {
+  parent_table: string,
+  echarts_data: echarts.EChartsOption,
+}
+
+interface CardDataType {
+  program: ProgramType,
+  echarts: CustomEchartType[]
+}
+
 	import type { PageData } from './$types';
   import {page} from "$app/stores"
   import {navigating} from '$app/state'
@@ -21,30 +31,31 @@
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-  $inspect("debug tablesData ", programNames)
 
-  const charts: echarts.EChartsOption[] = []
+  const charts: CustomEchartType[] = []
   const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
 
   const keys = Object.keys(tablesData[programNames[0]][0])
   const usefulKeys = keys.filter(key => !exclusions.includes(key))
-  console.log(usefulKeys)
   //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
 
-  charts.push(makeBar(tablesData[programNames[0]], "from_date" ,"orders_count"))
-  charts.push(makeBar(tablesData[programNames[0]], "from_date", "orders_dollars"))
 
+  charts.push(makeBar(programNames[0], tablesData[programNames[0]], "from_date" ,"orders_count"))
+  charts.push(makeBar(programNames[0], tablesData[programNames[0]], "from_date", "orders_dollars"))
+  charts.push(makeBar(programNames[1], tablesData[programNames[1]], "from_date" ,"accounts_count"))
 
 const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
-    return {program, charts}
+    const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
+    const data: CardDataType = {program: program, echarts: eCharts}
+    return data
   }))
 
-$inspect(cardData)
+$inspect("card data",cardData)
 
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false} charts={charts}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
 {:else}
   <div>Loading...</div>
   

@@ -32,6 +32,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
         filter: mergedOptions.filter,
         perPage: mergedOptions.perPage,
       })
+
       results[tableName] = records 
     } catch (err) {
       results[tableName] = {error: err instanceof Error ? err.message : "Unknown error"}
@@ -53,7 +54,7 @@ export const load: PageServerLoad = async ({locals, params}) => {
 
   let tablesData: TableDataResult
   try {
-  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
+  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {sort: "from_date"})
   } catch(err) {
     console.error(err)
   }
