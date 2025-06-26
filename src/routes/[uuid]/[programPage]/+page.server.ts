@@ -36,7 +36,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
       results[tableName] = records 
     } catch (err) {
       results[tableName] = {error: err instanceof Error ? err.message : "Unknown error"}
-        results[tableName] = await pb.collection("33_hgac_coop_purchasing").getFullList({perPage: 40})
+      results[tableName] = await pb.collection("33_hgac_coop_purchasing").getFullList({perPage: 40})
       console.error(err)
     }
   }
