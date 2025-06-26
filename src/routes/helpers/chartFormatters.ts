@@ -1,12 +1,27 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
+import type { ProgramType } from "../../ambient";
+
+
+interface CustomEchartType {
+  parent_table: string,
+  echarts_data: echarts.EChartsOption,
+}
+
+interface CardDataType {
+  program: ProgramType,
+  echarts: CustomEchartType[]
+}
 
 export function makeBar<T = any>(
+    parent_table: string,
     dataset: T[], 
     key1: keyof T, 
     key2: keyof T
-  ): echarts.EChartsOption {
+  ): CustomEchartType {
     return {
+    parent_table: parent_table,
+    echarts_data: {
       title: {
         text: snakeToHuman(key2 as string)
       },
@@ -21,9 +36,15 @@ export function makeBar<T = any>(
         {
         name: snakeToHuman(key2 as string),
         type: 'bar',
-        data: dataset.map((item: T) => item[key2])
+        data: dataset
+        .filter((item: T) => {
+                const value = item[key2];
+                return typeof value !== 'number' || value >= 0;
+              })
+        .map((item: T) => item[key2])
         }
       ],
+    }
   }
 }
 

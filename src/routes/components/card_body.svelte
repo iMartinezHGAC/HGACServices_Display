@@ -3,15 +3,24 @@
   import {toCamelCase} from "../helpers/caseConversion"
 	import Card from "$routes/components/card.svelte";
 
+interface CustomEchartType {
+  parent_table: string,
+  echarts_data: echarts.EChartsOption,
+}
+
+interface CardDataType {
+  program: ProgramType,
+  echarts: CustomEchartType[]
+}
+
   interface cardProps {
     cardNames: any[],
     cardData: CardDataType[],
     direction: boolean,
     adwork: boolean,
-    charts: echarts.EChartsOption[],
   }
 
-  const {cardNames, cardData, direction, adwork=false, charts}: cardProps = $props()
+  const {cardNames, cardData, direction, adwork=false}: cardProps = $props()
   let flyValue = $state(direction ? -400 : 400)
 </script>
 
@@ -35,9 +44,8 @@
         <div class="flexy" id={card.program.program_name.split(' ').join('')}>
           <Card 
             project={card.program} 
-            charts={card.charts}
+            charts={card.echarts}
             additionalWork={adwork}
-            echartsList={charts}
           />
         </div>      
       {/each}
