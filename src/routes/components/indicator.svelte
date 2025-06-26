@@ -81,16 +81,35 @@
   }
 
   let dataTable = $state<HTMLElement>()
-
+import 'tippy.js/themes/translucent.css';
   function toTippy(element: HTMLElement) {
     tippy(element, {
       content: dataTable,
       placement: "right-start",
+      theme: 'slateful',
     })
   }
 
 
 </script>
+
+<style> 
+:global(.tippy-box[data-theme~='slateful']) {
+  color: #F1F5F9;
+  background-color: oklch(27.9% 0.041 260.031);
+  font-family: Metropolis;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:global(.tippy-box[data-theme='custom'] .tippy-arrow) {
+  background-color: oklch(37.2% 0.044 257.287);
+}
+</style>
+
 <div class="opacity-0 scale-0" >
   <div bind:this={dataTable}>
     <table>
@@ -114,7 +133,7 @@
 
 
 <div class="flex items-center justify-start flex-col h-full pr-24 pb-8" >
-  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2 border-slate-950 shadow-lg shadow-slate-950" {@attach toTippy}>
+  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2  border-slate-950 shadow-lg shadow-slate-950" {@attach toTippy}>
     {#if above}
       <p class="font-[Staatliches] text-3xl small-caps font-extrabold text-slate-100 w-full flexy pb-4 text-shadow text-shadow-sm">
         {aboveText}

@@ -182,7 +182,6 @@ function getColor(key: string): string {
       <g>
         {#each stackedData() as categoryData, categoryIndex}
           {#each categoryData as barSegment, index}
-            {console.log("stacked data",categoryIndex)}
             <rect
               x={x(data[index].juris)}
               y={y(barSegment[1])}

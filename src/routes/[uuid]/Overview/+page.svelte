@@ -2,11 +2,42 @@
 	import type { PageData} from "../../$types"
 	import Indicator from "$routes/components/indicator.svelte";
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
-	import DonutChart from "$routes/charts/DonutChart.svelte";
   import StatDisplay from "$routes/components/statDisplay.svelte";
   import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte";
 
   const {data}: {data: PageData } = $props() 
+
+
+  const cheesedata = [
+    {
+      name: "Project 1",
+      value: 2100,
+    },
+    {
+      name: "Project 2",
+      value: 1100,
+    },
+    {
+      name: "Project 3",
+      value: 2800,
+    },
+    {
+      name: "Project 4",
+      value: 3100,
+    },
+    {
+      name: "Project 5",
+      value: 2800,
+    },
+  ]
+
+  const dataNames = cheesedata.map(item => item.name)
+  const dataSumOfValues = cheesedata
+    .map(item => item.value)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+
+  let dataTable = $state<HTMLElement>()
+
 
 interface GroupData {
   Group: string;
@@ -108,36 +139,46 @@ const stackbar_data: stackedTrash[] = [
 -->
 
 <div class="fixed flex top-24 w-11/12 h-screen flex-col overflow-auto">
-  <div class="flex flex-row h-auto w-full bg-slate-700 pt-4">
-
+  <div class="grid grid-cols-2 h-screen sticky w-auto bg-slate-700 pt-6 px-auto place-items-center">
     <StatDisplay header="Current Funding" data={chartData.CurrentFunding} colors={tabColors} />
     <StatDisplay header="Services" data={chartData.Services} colors={tabColors} />
     <StatDisplay header="Total Participation" data={chartData.Participation} colors={tabColors} />
 
-    <div class="bg-slate-700 flexy h-full w-1/4 pt-12">
+    <div class="bg-slate-700 h-full w-1/2 pt-12 flex place-items-center">
       <Indicator above={true} below={false} aboveText="Transportation Projects" belowText={"Projects: 7"} numericValue={1230000000} symbol_pre={"$"}/>
     </div>
   </div>
 
-<div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
-  <div class="grid grid-cols-2">
-    <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
-      <StackedBarChart data={stackbar_data} yLabel="Historical Funds" colorSet={tabColors}/>
-    </div>
-    <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
-      <StackedBarChart data={stackbar_services} yLabel="Historical Services" colorSet={tabColors}/>
+  <div class="w-full h-auto bg-slate-700 text-slate-200 flex items-center justify-center rounded-b-xl">
+    <div class="grid grid-cols-2">
+      <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
+        <StackedBarChart data={stackbar_data} yLabel="Historical Funds" colorSet={tabColors}/>
+      </div>
+      <div class="transform scale-90 bg-slate-50 pt-8 pb-4 rounded-lg">
+        <StackedBarChart data={stackbar_services} yLabel="Historical Services" colorSet={tabColors}/>
+      </div>
     </div>
   </div>
 </div>
+
+
+<div class="opacity-0 scale-0" >
+  <div bind:this={dataTable}>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each cheesedata as {name, value}}
+          <tr>
+            <td>{name}</td>
+            <td class="px-4">${value}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 </div>
-<!--
-  Current 2024
-  Historical 2023
-  One bar for each group
-  Color
-    Green for environmental
-      From saturated to desaturated
-        Current to Historical
-          Split historical funding by percenthistorical_funds to fake 2022, 2021, 2020 data
-  
--->

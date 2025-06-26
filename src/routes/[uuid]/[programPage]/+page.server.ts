@@ -58,11 +58,7 @@ export const load: PageServerLoad = async ({locals, params}) => {
   } catch(err) {
     console.error(err)
   }
-  /*
-  const entries = await locals.pb.collection('05_trash_bash').getFullList({
-    expand: 'collection_site_id'
-  })
-  */
+
 	return {
 		post: programData,
     tablesData: tablesData,

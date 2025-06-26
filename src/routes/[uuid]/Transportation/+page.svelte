@@ -1,22 +1,32 @@
 
 <script lang="ts">
+interface CustomEchartType {
+  parent_table: string,
+  echarts_data: echarts.EChartsOption,
+}
+
+interface CardDataType {
+  program: ProgramType,
+  echarts: CustomEchartType[]
+}
+
 	import type { PageData } from './$types';
+  import {page} from "$app/stores"
   import {navigating} from '$app/state'
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
   const routedTo = navigating.to?.route.id?.split('/')[2]
   const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
 
-	import BarChartTb from "$routes/charts/BarChartTB.svelte";
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-  import {snakeToHuman} from "$routes/helpers/caseConversion"
+	import { makeBar } from '$routes/helpers/chartFormatters';
 
 	let { data}: { data: PageData } = $props();
+  $inspect("transport data", data)
 
   const programs: ProgramType[] = data.post
-  const tablesData: DataObject[] = data.tablesData as DataObject[]
-  $inspect(tablesData)
+  const tablesData = data.tablesData
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
@@ -24,99 +34,39 @@
     .filter(str => str !== '')
   )
 
-  function makeBar<T = any>(dataset: T[], key1: keyof T, key2: keyof T) {
-    if(dataset && dataset.length > 1) {
-      return dataset.map((item: T) => ({
-          juris: item[key1],
-          value: item[key2]
-        }))    
-    }
-  }
+  const charts: CustomEchartType[] = []
+  const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
+
+  const keys = Object.keys(tablesData[programNames[1]][0])
+  const usefulKeys = keys.filter(key => !exclusions.includes(key))
+  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
 
 
+/*
+  let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
+  let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
+*/
 
-let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
-let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
 
-const EXCLUDED_FIELDS = [
-  "collectionId",
-  "collectionName",
-  "from_date",
-  "id",
-  "jurisdiction",
-  "to_date",
-];
-// Function to get unique field names, excluding specified fields
-const getColumnNames = (data) => {
-  const columnNamesByCollection = {};
- 
-  Object.keys(data).forEach(collectionName => {
-    // Check if items exist and is not empty
-    if (data[collectionName].items && data[collectionName].items.length > 0) {
-      // Get columns from the first item, filtering out excluded fields
-      const columns = Object.keys(data[collectionName].items[0])
-        .filter(field => !EXCLUDED_FIELDS.includes(field));
-      
-      columnNamesByCollection[collectionName] = columns;
-    }
-  });
- 
-  return columnNamesByCollection;
-};
+  charts.push(makeBar(programNames[0], tablesData[programNames[0]], "from_date" ,"orders_count"))
+  charts.push(makeBar(programNames[0], tablesData[programNames[0]], "from_date", "orders_dollars"))
+  charts.push(makeBar(programNames[1], tablesData[programNames[1]], "from_date" ,"accounts_count"))
 
-const getExtendedCharts = (columnNames, trash_pounds, tires) => {
-  const extendedCharts = [];
- 
-  Object.entries(columnNames).forEach(([collection, columns]) => {
-    columns.forEach((column, index) => {
-      const chartData = index % 2 === 0 ? trash_pounds : tires;
-      
-      extendedCharts.push({
-        chartTitle: column,
-        chartData: chartData,
-        Chart: BarChartTb,
-      });
-    });
-  });
- 
-  return extendedCharts;
-};
-  // Usage
-const columnNames = getColumnNames(tablesData);
-const charts = $derived(
-  getExtendedCharts(columnNames, trash_pounds, tires)
-);
+const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
+    const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
+    const data: CardDataType = {program: program, echarts: eCharts}
+    return data
+  }))
 
-$inspect("charts", charts)
-
-const cardData: CardDataType[] = $derived(
-  programs.map((program: ProgramType) => {
-    // Find the collection that matches the program's active_directory_group
-    const matchingCollection = Object.keys(columnNames).find(
-      collection => collection.toLowerCase().includes(program.active_directory_group)
-    );
- 
-    // Get charts for this collection's columns
-    const programCharts = matchingCollection 
-      ? charts.filter(chart => 
-          columnNames[matchingCollection].includes(chart.chartTitle)
-        )
-      : charts;
- 
-    return {
-      program,
-      charts: programCharts
-    };
-  })
-);
-
-$inspect("card data", cardData)
+$inspect("card data",cardData)
 
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={true}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
 {:else}
   <div>Loading...</div>
   
 {/if}
+
+

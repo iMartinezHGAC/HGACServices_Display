@@ -1,5 +1,13 @@
+<svelte:head>
+    <!-- Development -->
+  <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+
+</svelte:head>
+
 <script lang="ts">
   import * as d3 from 'd3';
+	import tippy from 'tippy.js';
 
   type DonutType = {
     name: string,
@@ -35,7 +43,38 @@ const colorMap: Record<string, string> = {
   'economic development': '#CC9917'
 };
 
- 
+  const cheesedata = [
+    {
+      name: "Project 1",
+      value: 2100,
+    },
+    {
+      name: "Project 2",
+      value: 1100,
+    },
+    {
+      name: "Project 3",
+      value: 2800,
+    },
+    {
+      name: "Project 4",
+      value: 3100,
+    },
+    {
+      name: "Project 5",
+      value: 2800,
+    },
+  ]
+
+  const dataNames = cheesedata.map(item => item.name)
+  const dataSumOfValues = cheesedata
+    .map(item => item.value)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+
+  let dataTable = $state<HTMLElement>()
+  $inspect("Table",dataTable)
+
+
 // Color selection function
 function getColor(key: string): string {
   // Convert snake_case to lowercase for matching
@@ -97,9 +136,33 @@ function getColor(key: string): string {
 
   // Reactive arcs
   let arcs = $derived(pie(data));
+
+  function toTippy(element: HTMLElement) {
+    tippy(element, {
+      content: dataTable,
+      placement: "right-start",
+      theme: "slateful",
+    })
+  }
 </script>
 
-<div class="relative w-full h-full">
+
+<div class="transform opacity-0 scale-0 w-0 h-0" >
+  <div bind:this={dataTable}>
+    <table>
+      <tbody>
+        {#each cheesedata as {name, value}}
+          <tr>
+            <td>{name}</td>
+            <td class="px-4">${value}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="w-full h-full" {@attach toTippy}>
   <svg 
     {width} 
     {height} 
@@ -109,18 +172,16 @@ function getColor(key: string): string {
     <!-- Slices of the donut -->
     <g>
       {#each arcs as arcData, i (arcData.data.name)}
-        <path
-          role="button"
-          aria-label="{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}"
-          fill={colorScale(i.toString())}
-          d={arc(arcData)}
-          class="transition-all duration-200 hover:brightness-150 hover:scale-105 cursor-pointer"
-          onmouseenter={() => (hoveredIndex = i)}
-          onmouseleave={() => (hoveredIndex = null)}
-        >
-          <a href={arcData.data.name}></a>
-          <title>{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}</title>
-        </path>
+        <a href={`/a8se97t2/${arcData.data.name}`} aria-label="project-link" >
+          <path
+            role="button"
+            aria-label="{arcData.data.name}: {preSymbol + formatValue(arcData.data.value)}"
+            fill={colorScale(i.toString())}
+            d={arc(arcData)}
+            class="transition-all duration-200 hover:brightness-150 hover:scale-105 cursor-pointer"
+          >
+          </path>
+        </a>
       {/each}
     </g>
 
@@ -156,6 +217,4 @@ function getColor(key: string): string {
   </svg>
 </div>
 
-<style>
-  /* No specific tooltip styling needed since <title> is handled natively by browsers */
-</style>
+

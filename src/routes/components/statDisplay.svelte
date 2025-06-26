@@ -16,7 +16,7 @@ let {header, data, preSymbol="", postSymbol="", colors}: donutDisplayType = $pro
 
 </script>
 
-<div class="flex items-center flex-col h-full w-1/4 bg-slate-700 p-0 pt-0">
+<div class="flex items-center flex-col h-full w-1/2 bg-slate-700 p-0 pt-0">
   <p class="font-[Staatliches] text-2xl text-slate-200 mb-4">
     {header}
   </p>
