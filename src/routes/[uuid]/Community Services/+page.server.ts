@@ -1,6 +1,5 @@
 import type { PageServerLoad } from './$types';
 import PocketBase from 'pocketbase'
-//import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
 
 interface TableFetchOptions {
   sort?: string;
@@ -19,7 +18,7 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
     sort: '',
     expand: '',
     filter: '',
-    perPage: 50,
+    perPage: 900,
   }
 
   const mergedOptions = {...defaultOptions, ...options}
@@ -64,15 +63,24 @@ export const load: PageServerLoad = async ({locals, params}) => {
   })
   let tableNames: string[] = []
   tableNames = await programData.map((program: ProgramType) => program.parent_table)
-  tableNames.unshift("33_hgac_coop_purchasing")
+  //tableNames.unshift("33_hgac_coop_purchasing")
   console.log("table names", tableNames)
 
   let tablesData: TableDataResult
+  let tables: TableDataResult
+  let tableLivable: TableDataResult
   try {
-  tablesData = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
-  } catch(err) {
-    console.error(err)
+      //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
+      tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance, studies'})
+    } catch(err) {
+      console.error(err)
   }
+  try {
+      tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
+    } catch(err) {
+      console.error(err)
+  }
+  //console.log('table data',tablesData)
   /*
   const entries = await locals.pb.collection('05_trash_bash').getFullList({
     expand: 'collection_site_id'
@@ -80,6 +88,6 @@ export const load: PageServerLoad = async ({locals, params}) => {
   */
 	return {
 		post: programData,
-    tablesData: tablesData,
+    tablesData: {...tables, ...tableLivable},
   }
 }

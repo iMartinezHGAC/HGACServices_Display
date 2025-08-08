@@ -2,6 +2,9 @@
 interface CustomEchartType {
   parent_table: string,
   echarts_data: echarts.EChartsOption,
+  chartType?: string,
+  indicatorVal?: string | number,
+  indicatorName?: string
 }
 
 interface CardDataType {
@@ -19,41 +22,59 @@ interface CardDataType {
 
 	import CardBody from "$routes/components/card_body.svelte";
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { makeBar } from '$routes/helpers/chartFormatters';
+	import { makeBar, makePie } from '$routes/helpers/chartFormatters';
 
 	let { data}: { data: PageData } = $props();
 
   const programs: ProgramType[] = data.post
   const tablesData = data.tablesData
+  let charts = $state<CustomEchartType[]>([])
+  $inspect('data',tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined))
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-    console.log("Name: ", programNames)
 
-  const charts: CustomEchartType[] = []
   const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
 
-  const keys = Object.keys(tablesData["33_hgac_coop_purchasing"]['items'][0]) ?? ["test"]
-  console.log("keys: ",keys)
 
-  const usefulKeys = keys.filter(key => !exclusions.includes(key))
-  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
 
-/*
-  let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
-*/
 
-programNames.forEach((programName)=>{
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date" ,"orders_count"))
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date", "orders_dollars"))
-  }
-)
+const assistance =tablesData['14_livable_centers']['items'].map(item=>item.expand.assistance).filter(item => item !== undefined) 
+const studies =tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined) 
+
+charts.push(makePie('14_livable_centers', assistance, "task_request_type"))
+charts.push(makePie('14_livable_centers', studies, "study_progress"))
+
+charts.push({
+  parent_table: "12_fall_planning_workshop",
+  echarts_data: {},
+  chartType: "indicator",
+  //@ts-ignore
+  indicatorVal: 25,
+  indicatorName: "Attendees"
+})
+charts.push({
+  parent_table: "09_bb_main_street",
+  echarts_data: {},
+  chartType: "indicator",
+  //@ts-ignore
+  indicatorVal: 17,
+  indicatorName: "Meeting Count"
+})
+charts.push({
+  parent_table: "09_bb_main_street",
+  echarts_data: {},
+  chartType: "indicator",
+  //@ts-ignore
+  indicatorVal: 8,
+  indicatorName: "Meeting Hours"
+})
 
 const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
+    $inspect.trace('cardData')
     const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
     const data: CardDataType = {program: program, echarts: eCharts}
     return data
@@ -64,7 +85,7 @@ $inspect("card data",cardData)
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={true}/>
 {:else}
   <div>Loading...</div>
   

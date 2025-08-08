@@ -7,6 +7,7 @@
 
 <script lang="ts">
   import transit from "$lib/assets/transit.svg"
+	import { number } from "echarts";
   import tippy from "tippy.js";
 
   const data = [
@@ -56,7 +57,7 @@
     below = false,
     aboveText = "",
     belowText = "",
-    numericValue = 15,
+    numericValue,
     symbol_pre = "",
     symbol_post = "",
   }: propTypes = $props()
@@ -113,40 +114,46 @@ import 'tippy.js/themes/translucent.css';
   background-color: oklch(37.2% 0.044 257.287);
 }
 </style>
-
-<div class="opacity-0 scale-0" >
-  <div bind:this={dataTable}>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each data as {name, value}}
+ <!-- Hidden Table -->
+<!--
+  <div class="opacity-0 scale-0">
+    <div bind:this={dataTable}>
+      <table>
+        <thead>
           <tr>
-            <td>{name}</td>
-            <td class="px-4">${value}</td>
+            <th>Name</th>
+            <th>Value</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each data as {name, value}}
+            <tr>
+              <td>{name}</td>
+              <td class="px-4">${value}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+-->
 
+<!-- Indicator Card -->
+  <div class="w-full max-w-[18rem] h-64 mx-auto my-8 flex flex-col items-center justify-center text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 border-2 border-slate-950 shadow-md shadow-slate-950">
 
-<div class="flex items-center justify-start flex-col h-full pr-24 pb-8" >
-  <div class="w-72 h-64 flexy flex-col text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 pt-0 border-2  border-slate-950 shadow-lg shadow-slate-950" {@attach toTippy}>
     {#if above}
-      <p class="font-[Staatliches] text-3xl small-caps font-extrabold text-slate-100 w-full flexy pb-4 text-shadow text-shadow-sm">
+      <p class="font-arial text-3xl font-extrabold text-slate-100 w-full pb-4 text-shadow text-shadow-sm">
         {aboveText}
       </p>
     {/if}
-    <div class="flexy flex-row font-bold text-center">
-      <div class="flexy text-[clamp(1rem,4vw,4rem)]">
-        <p class="font-[Metropolis] text-[4rem] font-bold">{symbol_pre}{truncateYAxisValue(dataSumOfValues)} {postScript} </p>
-        <p class="items-end text-[8rem]">{symbol_post}</p>
+    <div class="flex flex-row items-center justify-center font-bold">
+      <div class="flex items-center text-[clamp(1rem,4vw,4rem)]">
+        {#if numericValue && numericValue !== 0}
+          <p class="font-[Metropolis] text-[4rem] font-bold">{symbol_pre}{truncateYAxisValue(numericValue)} {postScript}</p>
+        {:else}
+          <p class="font-[Metropolis] text-[4rem] font-bold">{symbol_pre}{truncateYAxisValue(dataSumOfValues)} {postScript}</p>
+        {/if}
+        <p class="text-[4rem]">{symbol_post}</p>
       </div>
     </div>
     {#if belowText}
@@ -155,4 +162,3 @@ import 'tippy.js/themes/translucent.css';
       </div>
     {/if}
   </div>
-</div>

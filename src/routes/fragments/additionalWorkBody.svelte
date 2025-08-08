@@ -8,10 +8,10 @@
     location: string, 
     dates: string[], 
     funding?: number, 
-    customMetric?: customMetric
+    customMetrics?: CustomMetric[]
   }
 
-  let {projectName, expanded=false, bodyText, location, dates, funding, customMetric}: props = $props()
+  let {projectName, expanded=false, bodyText, location, dates, funding, customMetrics}: props = $props()
   let paragraph: HTMLElement 
   let clamped = $state(false)
   const lineHeight = 24
@@ -85,10 +85,12 @@
     {/if}
 
   </div>
-  {#if customMetric}
+  {#if customMetrics}
+    {#each customMetrics as customMetric }
     <p class="font-medium text-xl">
       {customMetric.metricName}: {customMetric.metricValue}
     </p>
+    {/each}
   {/if}
   <div> 
     <p

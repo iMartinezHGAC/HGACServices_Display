@@ -8,6 +8,9 @@
 interface CustomEchartType {
   parent_table: string,
   echarts_data: echarts.EChartsOption,
+  chartType?: string,
+  indicatorVal?: string | number,
+  indicatorName?: string
 }
 
 interface CardDataType {

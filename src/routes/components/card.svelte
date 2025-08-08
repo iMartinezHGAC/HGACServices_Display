@@ -1,19 +1,19 @@
 <script lang="ts">
-  import CardHeader from "../fragments/cardHeader.svelte";
 	import CardBlurbTb from "../fragments/cardBlurbTB.svelte";
 	import AdditionalWork from "./additionalWork.svelte";
 	import Printer from "$lib/assets/printer.svelte";
 	import Indicator from "./indicator.svelte";
-  import {snakeToHuman} from "$routes/helpers/caseConversion"
 
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
-	import type { number } from "echarts/core";
 	import RenderEchart from "./renderEchart.svelte";
 
 interface CustomEchartType {
   parent_table: string,
   echarts_data: echarts.EChartsOption,
+  chartType?: string,
+  indicatorVal?: string | number,
+  indicatorName?: string
 }
 
 interface CardDataType {
@@ -21,11 +21,11 @@ interface CardDataType {
   echarts: CustomEchartType[]
 }
 
-  interface cardProps {
-    project: ProgramType,
-    charts: CustomEchartType[]
-    additionalWork: boolean
-  }
+interface cardProps {
+  project: ProgramType,
+  charts: CustomEchartType[]
+  additionalWork: boolean
+}
 
   const {project, charts, additionalWork = false}: cardProps = $props()
   const graphState = graphsState()
@@ -69,33 +69,9 @@ interface CardDataType {
     } else return ""
   })
 
-  $inspect(linkUrls)
 
 </script>
 
-<!--
-{#snippet renderChart(chartTitle: string, chartData: object|number, chartType: string, Chart: Component, i: number)}
-  <div class="card-style">
-    {#if chartType === "indicator"}
-      <Indicator above={true} below={false} aboveText={chartTitle} belowText={""} numericValue={chartData as number}/>
-    {:else}
-      <Chart data={chartData} width={800} height={580} yLabel={snakeToHuman(chartTitle)}/>
-    {/if}
-  </div>
-{/snippet}
-
--->
-{#snippet renderAllCharts(charts: ChartType[])}
-  <!--
-      {#each charts as {chartTitle, chartData, chartType, Chart},i}
-        {#if i<2}
-          {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
-        {:else if i>=2 && accordionFlag}
-          {@render renderChart(chartTitle, chartData, chartType, Chart,i)}
-        {/if}
-    {/each}
-  -->
-{/snippet}
 
 <div class="flex-col w-full items-center justify-center bg-white border-2 border-slate-700 mb-4 rounded-b-md" {@attach toGraph}>
   <div class="flex bg-slate-700 w-full">
@@ -118,13 +94,19 @@ interface CardDataType {
       <Printer id="printerIcon"/>
     </button>
   </div>
-  <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 mt-8">
+  <div class="grid grid-cols-2 gap-1 items-center justify-center px-12 py-8 w-full">
     {#each charts as chart}
-      {console.log(chart)}
-        <RenderEchart chart={chart.echarts_data} />
+      {#if chart.chartType && chart.chartType === "indicator"}
+        <Indicator above={true} below={false} aboveText={chart.indicatorName!} belowText={""} numericValue={chart.indicatorVal! as number}/>
+      {:else}
+        {console.log(chart)}
+          <RenderEchart chart={chart.echarts_data} />
+      {/if}
     {/each}
+    <!--
     {#if accordionFlag}
     {/if}
+    -->
 </div>
     {#if charts.length > 2}
       <button class="flex h-12 w-11/12 bg-slate-700 text-white mx-auto items-center justify-center" 
@@ -137,8 +119,8 @@ interface CardDataType {
   {#if additionalWork}
   <div class="flexy" {@attach toGraphWork}>
     <AdditionalWork 
-      bodyText={"Lorem Ipsum"} 
-      projectName={"Dog Poop Pickup"} 
+      bodyText={"The workshop featured leading experts in urban planning, community development, and social innovation who provided insight on how communities can encourage, embrace, and develop inclusive spaces where people spend time between home, work, and school. We explored the transformative impact of third places—vibrant multigenerational hubs such as cafes, parks, libraries, and other unique gathering spaces where community connections flourish, and gained insights on the relevance of third places post COVID-19, including physical and mental health benefits. Participants learned why these spaces are critical to fostering social connections and well-being in urban settings. "} 
+      projectName={"Between Home and Work: How Third Places Help Build Inclusive Communities"} 
       funding={40} 
       projectTimeframe={""} 
     />

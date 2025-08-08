@@ -14,3 +14,11 @@
 @utility titling-caps {
   font-variant: titling-caps;
 }
+
+@utility font-arial {
+  font-family: Arial, sans-serif;
+}
+
+@theme {
+  --font-sans: Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}

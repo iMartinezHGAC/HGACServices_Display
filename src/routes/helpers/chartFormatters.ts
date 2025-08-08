@@ -27,6 +27,59 @@ interface CardDataType {
     return num.toLocaleString();
   }
 
+export function makePie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  key1: keyof T
+): CustomEchartType {
+  // Count how many times each unique value appears for key1
+  const countMap: Record<string, number> = {};
+  dataset.forEach((item: T) => {
+    const key = item[key1] as string;
+    if (key in countMap) {
+      countMap[key]++;
+    } else {
+      countMap[key] = 1;
+    }
+  });
+
+  // Prepare data for ECharts
+  const pieData = Object.entries(countMap).map(([name, value]) => ({ name, value }));
+
+  return {
+    parent_table: parent_table,
+    echarts_data: {
+      title: {
+        text: snakeToHuman(key1 as string),
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 30,
+      },
+      series: [
+        {
+          name: snakeToHuman(key1 as string),
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+      ]
+    }
+  };
+}
+
 export function makeBar<T = any>(
     parent_table: string,
     dataset: T[], 

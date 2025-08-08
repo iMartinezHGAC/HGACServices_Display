@@ -121,6 +121,9 @@ interface ProgramType {
 interface CustomEchartType {
   parent_table: string,
   charts: echarts.EChartsOption,
+  chartType?: string,
+  indicatorVal?: string | number,
+  indicatorName?: string
 }
 
 interface CardDataType {
