@@ -74,13 +74,11 @@ charts.push({
 })
 
 const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
-    $inspect.trace('cardData')
     const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
     const data: CardDataType = {program: program, echarts: eCharts}
     return data
   }))
 
-$inspect("card data",cardData)
 
 </script>
 

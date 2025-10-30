@@ -1,5 +1,4 @@
-
-let graphs: HTMLDivElement[] = $state([])
+let graphs: HTMLDivElement[] = []
 
 export function graphsState() {
 
