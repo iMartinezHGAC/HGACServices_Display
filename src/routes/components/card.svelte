@@ -70,7 +70,18 @@ interface cardProps {
       return project.expand.blurb.program_blurb
     } else return ""
   })
+// Toggle state for expand/collapse
+  let expanded = $state(false);
 
+  // Derived value: items to render
+  let itemsToShow = $derived(
+    expanded ? additionalWork : additionalWork.slice(0, 3)
+  );
+
+  // Toggle function
+  function toggleExpanded() {
+    expanded = !expanded;
+  }
 
 </script>
 
@@ -121,16 +132,30 @@ interface cardProps {
   {#if additionalWork}
     <div class="flexy flex-col" {@attach toGraphWork}>
         {#if project.program_name === "Livable Centers"}
-      {#each additionalWork as adWork}
-      <AdditionalWork 
-        bodyText={adWork.project_description} 
-        projectName={adWork.project_name} 
-        funding={adWork.budget}
-        start_date={adWork.start_date}
-        end_date={adWork.end_date}
-      />
-      {/each}
-        {/if}
+          {#each itemsToShow as adWork}
+          <AdditionalWork 
+            bodyText={adWork.project_description} 
+            projectName={adWork.project_name} 
+            funding={adWork.budget}
+            start_date={adWork.start_date}
+            end_date={adWork.end_date}
+          />
+          {/each}
+          {#if additionalWork.length > 3}
+            <div class="expand-toggle">
+              <button onclick={toggleExpanded}>
+                {expanded ? 'Show Less' : `Show All (${additionalWork.length - 3} more)`}
+              </button>
+            </div>
+          {/if}
+        {:else}
+          <AdditionalWork 
+            bodyText={"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."} 
+            projectName={"Ieacta Est"} 
+            funding={0}
+
+          />
+      {/if}
     </div>
   {/if}
 </div>

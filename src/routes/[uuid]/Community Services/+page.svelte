@@ -32,7 +32,7 @@ interface CardDataType {
   let charts = $state<CustomEchartType[]>([])
   $inspect('data',tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined))
   let projectDetails = data.projectDetails as AdworkType[]
-// $inspect('project details', data.projectDetails)
+ $inspect('project details', data.projectDetails)
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
