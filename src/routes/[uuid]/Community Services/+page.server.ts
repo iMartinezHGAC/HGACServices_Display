@@ -69,6 +69,7 @@ export const load: PageServerLoad = async ({locals, params}) => {
   let tablesData: TableDataResult
   let tables: TableDataResult
   let tableLivable: TableDataResult
+  let projectDetails: object
   try {
       //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
       tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance, studies'})
@@ -86,8 +87,16 @@ export const load: PageServerLoad = async ({locals, params}) => {
     expand: 'collection_site_id'
   })
   */
+  try {
+    projectDetails = await locals.pb.collection('one_liners').getFullList({
+      filter: `program.program_name = "Livable Centers"`
+    })
+  } catch(err) {
+    console.error('Error trying to get project details',err)
+  }
 	return {
 		post: programData,
     tablesData: {...tables, ...tableLivable},
+    projectDetails: projectDetails
   }
 }

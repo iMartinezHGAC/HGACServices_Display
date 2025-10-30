@@ -15,6 +15,7 @@ interface CardDataType {
 	import type { PageData } from './$types';
   import {page} from "$app/stores"
   import {navigating} from '$app/state'
+	import type { AdworkType } from "../../ambient";
 
   const routedFrom = navigating.from?.route.id?.split('/')[2]
   const routedTo = navigating.to?.route.id?.split('/')[2]
@@ -30,6 +31,8 @@ interface CardDataType {
   const tablesData = data.tablesData
   let charts = $state<CustomEchartType[]>([])
   $inspect('data',tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined))
+  let projectDetails = data.projectDetails as AdworkType[]
+// $inspect('project details', data.projectDetails)
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
@@ -83,7 +86,7 @@ const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> 
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={true}/>
+  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={projectDetails}/>
 {:else}
   <div>Loading...</div>
   

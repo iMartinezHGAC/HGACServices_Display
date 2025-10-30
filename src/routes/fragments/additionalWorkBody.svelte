@@ -97,7 +97,7 @@
       bind:this={paragraph}
       class={`w-full font-[Metropolis] transition-opacity duration-300 ease-in-out overflow-hidden ${ clamped && !expanded ? 'line-clamp-2 opacity-80 mask-gradient-fade' : ''}`} 
     >
-      {bodyText}
+      {@html bodyText}
     </p>
     <span 
       class="font-extrabold text-lg small-caps font-[Metropolis] cursor-pointer select-none"

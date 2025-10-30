@@ -144,3 +144,15 @@ interface DashboardType {
   tab_text_light_mode: boolean,
   updated: Date,
 }
+
+
+type AdworkType = {
+  budget: number,
+    custom_metrics: object,
+    start_date: Date,
+    end_date: Date,
+    jurisdiction: string[],
+    program: string,
+    project_description: string,
+    project_name: string,
+  }

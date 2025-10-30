@@ -7,6 +7,7 @@
   import exportChartToPDF from "$lib/scripts/convertSVGtoPDF"
 	import { graphsState } from "../charts/graphVectors.svelte";
 	import RenderEchart from "./renderEchart.svelte";
+	import type { AdworkType } from "../../ambient";
 
 interface CustomEchartType {
   parent_table: string,
@@ -21,13 +22,14 @@ interface CardDataType {
   echarts: CustomEchartType[]
 }
 
+
 interface cardProps {
   project: ProgramType,
   charts: CustomEchartType[]
-  additionalWork: boolean
+  additionalWork: AdworkType[]
 }
 
-  const {project, charts, additionalWork = false}: cardProps = $props()
+  const {project, charts, additionalWork}: cardProps = $props()
   const graphState = graphsState()
 
 
@@ -117,13 +119,18 @@ interface cardProps {
       <span></span>
     {/if}
   {#if additionalWork}
-  <div class="flexy" {@attach toGraphWork}>
-    <AdditionalWork 
-      bodyText={"The workshop featured leading experts in urban planning, community development, and social innovation who provided insight on how communities can encourage, embrace, and develop inclusive spaces where people spend time between home, work, and school. We explored the transformative impact of third places—vibrant multigenerational hubs such as cafes, parks, libraries, and other unique gathering spaces where community connections flourish, and gained insights on the relevance of third places post COVID-19, including physical and mental health benefits. Participants learned why these spaces are critical to fostering social connections and well-being in urban settings. "} 
-      projectName={"Between Home and Work: How Third Places Help Build Inclusive Communities"} 
-      funding={40} 
-      projectTimeframe={""} 
-    />
-  </div>
+    <div class="flexy flex-col" {@attach toGraphWork}>
+        {#if project.program_name === "Livable Centers"}
+      {#each additionalWork as adWork}
+      <AdditionalWork 
+        bodyText={adWork.project_description} 
+        projectName={adWork.project_name} 
+        funding={adWork.budget}
+        start_date={adWork.start_date}
+        end_date={adWork.end_date}
+      />
+      {/each}
+        {/if}
+    </div>
   {/if}
 </div>

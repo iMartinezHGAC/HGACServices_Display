@@ -22,10 +22,10 @@ interface CardDataType {
     cardNames: any[],
     cardData: CardDataType[],
     direction: boolean,
-    adwork: boolean,
+    adwork: Object[] | undefined,
   }
 
-  const {cardNames, cardData, direction, adwork=false}: cardProps = $props()
+  const {cardNames, cardData, direction, adwork}: cardProps = $props()
   let flyValue = $state(direction ? -400 : 400)
 
   /* FUTURE EXPORT ALL
