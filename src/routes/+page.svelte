@@ -11,7 +11,7 @@
 	let { data }: props = $props();
 	let jurisstate = jurisState();
 
-	$inspect('main page data', data);
+	//$inspect('main page data', data);
 
 	async function handleClick(jurisdiction: JurisdictionType) {
 		jurisstate.setJurisdiction(jurisdiction);

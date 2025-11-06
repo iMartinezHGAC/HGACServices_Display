@@ -24,7 +24,7 @@
     jurisdiction = "harris_county"
   }
   */
-	$inspect('import state in layout', jurisId);
+	$inspect('import state in layout', jurisId.jurisdiction);
 	let jurisdiction = $derived.by(()=> {
     if(jurisId.jurisdiction) return jurisId.jurisdiction.name
      return 'Harris County'

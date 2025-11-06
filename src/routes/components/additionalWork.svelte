@@ -18,7 +18,7 @@ interface addWorkProps {
 
 let {bodyText, projectName="Brazoria County: Dog poop stations", start_date, end_date, customMetrics, funding}: addWorkProps = $props()
 
-$inspect(start_date, end_date)
+//$inspect(start_date, end_date)
 
 const exampleMetric: CustomMetric = {
   metricName: "Attendees",

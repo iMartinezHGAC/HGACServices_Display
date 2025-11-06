@@ -14,7 +14,6 @@ interface props {
 
 let {chosenTab, jurisdiction, dashboard_groups}: props = $props()
 
-let human_readable = $derived(snakeToHuman(jurisdiction))
 
 function toSnakeCase(tabName: string) {
   return tabName.split(' ').join('_')
@@ -35,6 +34,11 @@ function handleSetChosen(tabName: string) {
 
 $inspect("chosen tab", chosenTab)
 
+const dynamicFontSize = $derived.by(()=>{
+  if(jurisdiction.length > 13) return "text-xl"
+  if(jurisdiction.length > 21) return "text-lg"
+  return "text-2xl"
+})
 
 const jurisId = jurisState()
 
@@ -51,7 +55,7 @@ const jurisId = jurisState()
 <div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500">
   <div class="flex justify-start items-center flex-none">
     <img src={county_logo} alt="harris" class="h-24 p-2">
-    <p class="px-6 text-2xl w-3/4 font-extrabold font-[Metropolis] small-caps text-slate-200 select-none">{human_readable}</p>
+    <p class="px-6 {dynamicFontSize} w-3/4 font-extrabold font-[Metropolis] small-caps text-slate-200 select-none">{jurisdiction}</p>
   </div>
   <div class="flex-grow"></div>
   <div class="flex items-end justify-start flex-wrap overflow-y-auto">

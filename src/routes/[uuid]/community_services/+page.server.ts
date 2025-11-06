@@ -76,12 +76,17 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
   let projectDetails: object
   try {
     //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
-    tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), { expand: 'assistance, studies' })
+    tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), { 
+      expand: 'assistance, studies',
+      filter: `jurisdiction = "${params.uuid}"`
+    })
   } catch (err) {
     console.error(err)
   }
   try {
-    tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {})
+    tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {
+      filter: `jurisdiction = "${params.uuid}"`
+    })
   } catch (err) {
     console.error(err)
   }
