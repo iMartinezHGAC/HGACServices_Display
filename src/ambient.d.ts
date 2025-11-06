@@ -1,5 +1,13 @@
 import * as echarts from 'echarts'
 
+type JurisdictionType = {
+  collectionId: string,
+  collectionName: string,
+  name: string,
+  geography: string,
+  id: string
+}
+
 type graphProp = {
   data: object[],
   width: number,
@@ -23,11 +31,11 @@ interface GroupData {
   };
 }
 
-type ServiceKey = 'Current_Funds' | 'Current_Services' | 'Current_Total_Participation' | 
-                  'Historical_Funds' | 'Historical_Services';
+type ServiceKey = 'Current_Funds' | 'Current_Services' | 'Current_Total_Participation' |
+  'Historical_Funds' | 'Historical_Services';
 
 type collection_site_id = {
-  collectionId?: string, 
+  collectionId?: string,
   collectionName?: string,
   date?: date,
   id?: string,
@@ -40,7 +48,7 @@ type expandTB = {
 }
 
 type Trashbash = {
-  collectionId?: string, 
+  collectionId?: string,
   collectionName?: string,
   date?: date,
   id?: string,
@@ -148,11 +156,11 @@ interface DashboardType {
 
 type AdworkType = {
   budget: number,
-    custom_metrics: object,
-    start_date: Date,
-    end_date: Date,
-    jurisdiction: string[],
-    program: string,
-    project_description: string,
-    project_name: string,
-  }
+  custom_metrics: object,
+  start_date: Date,
+  end_date: Date,
+  jurisdiction: string[],
+  program: string,
+  project_description: string,
+  project_name: string,
+}
