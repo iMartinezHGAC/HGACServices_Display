@@ -8,9 +8,15 @@
 
 	interface props {
 <<<<<<< HEAD
+<<<<<<< HEAD
 		data: {
 			data: JurisdictionType[];
 		};
+||||||| Rewrite how URL UUID is set, along with other jurisdiction info
+		data: JurisdictionType[];
+=======
+    data: { data: JurisdictionType[] };
+>>>>>>> master
 ||||||| Rewrite how URL UUID is set, along with other jurisdiction info
 		data: JurisdictionType[];
 =======
@@ -21,6 +27,7 @@
 	let { data }: props = $props();
 	let jurisstate = jurisState();
 
+<<<<<<< HEAD
 	//$inspect('main page data', data);
   let jurisdictions = $derived(data.data)
 
@@ -57,6 +64,12 @@
 		const filterCallback = filterByProperty<JurisdictionType>('name', searchTerm);
 		filteredList = data.data.filter(filterCallback);
 	}
+||||||| Rewrite how URL UUID is set, along with other jurisdiction info
+	$inspect('main page data', data);
+=======
+	//$inspect('main page data', data);
+  let jurisdictions = $derived(data.data)
+>>>>>>> master
 
 	async function handleClick(jurisdiction: JurisdictionType) {
 		jurisstate.setJurisdiction(jurisdiction);
@@ -95,10 +108,19 @@
 	{#each filteredList as jurisdiction}
 ||||||| Rewrite how URL UUID is set, along with other jurisdiction info
 Select a jurisdiction
+<<<<<<< HEAD
 <div class="flex h-screen w-1/3 flex-col items-center justify-center bg-slate-100">
 	{#each data.data as jurisdiction}
 =======
 Select a jurisdiction
+  <input type="text" oninput={handleSearch}>
+<div class="flex h-screen w-1/3 flex-col items-center justify-center bg-slate-100 overflow-auto">
+	{#each jurisdictions as jurisdiction}
+>>>>>>> master
+||||||| Rewrite how URL UUID is set, along with other jurisdiction info
+<div class="flex h-screen w-1/3 flex-col items-center justify-center bg-slate-100">
+	{#each data.data as jurisdiction}
+=======
   <input type="text" oninput={handleSearch}>
 <div class="flex h-screen w-1/3 flex-col items-center justify-center bg-slate-100 overflow-auto">
 	{#each jurisdictions as jurisdiction}
