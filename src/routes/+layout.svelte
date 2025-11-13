@@ -24,8 +24,11 @@
     jurisdiction = "harris_county"
   }
   */
-	$inspect('import state in layout', jurisId);
-	let jurisdiction = $derived('Harris County');
+	$inspect('import state in layout', jurisId.jurisdiction);
+	let jurisdiction = $derived.by(()=> {
+    if(jurisId.jurisdiction) return jurisId.jurisdiction.name
+     return 'Harris County'
+  });
 
 	function toSnakeCase(tabName: string) {
 		return tabName.split(' ').join('_');
