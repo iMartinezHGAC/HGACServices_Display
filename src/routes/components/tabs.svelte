@@ -21,13 +21,13 @@
 	const colorClass = $derived(base);
 	const textColor = textLight ? '#f8fafc' : '#334155';
 	//$inspect(route);
-	$inspect('uuid', uuid);
-	console.log(page.url);
-	$inspect('path', path);
+	//$inspect('uuid', uuid);
+	//console.log(page.url);
+	//$inspect('path', path);
 </script>
 
 <button onclick={chooseEvent}>
-	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={route}
+	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={path}
 		>{tabText}</a
 	>
 </button>

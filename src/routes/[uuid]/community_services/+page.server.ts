@@ -13,7 +13,12 @@ interface TableDataResult<T = any> {
   [tableName: string]: T | { error: string }
 }
 
-async function fetchTables(pb: PocketBase, tableNames: string[], options: TableFetchOptions): Promise<TableDataResult> {
+type TableArgumentType = {
+  tableName: string,
+  subtableNames: string[] | null | undefined 
+}
+
+async function fetchTables(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<TableDataResult> {
   const defaultOptions: TableFetchOptions = {
     sort: '',
     expand: '',
@@ -24,22 +29,50 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
   const mergedOptions = { ...defaultOptions, ...options }
   const results: TableDataResult = {}
 
-  for (const tableName of tableNames) {
-    try {
-      let records = await pb.collection(tableName).getList(1, 1, {
-        sort: mergedOptions.sort,
-        expand: mergedOptions.expand,
-        filter: mergedOptions.filter,
-        perPage: mergedOptions.perPage,
-      })
-      results[tableName] = records
-    } catch (err) {
-      results[tableName] = { error: err instanceof Error ? err.message : "Unknown error" }
-      results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1, 50, { perPage: 40 })
-      console.error(err)
-    }
+  try {
+    let records = await pb.collection(tableName).getList(1, 1, {
+      sort: mergedOptions.sort,
+      expand: mergedOptions.expand,
+      filter: mergedOptions.filter,
+      perPage: mergedOptions.perPage,
+    })
+    results[tableName] = records
+  } catch (err) {
+    results[tableName] = { error: err instanceof Error ? err.message : "Unknown error" }
+    results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1, 50, { perPage: 40 })
+    console.error(err)
   }
   return results
+}
+
+function createHartString(collection: string) {
+  const hartString = `${PB_URL}api/collections/${collection}/dashboard-schema`
+  console.log('Attempting to fetch data from custom endpoint')
+  return hartString
+}
+
+async function tryPocketbase<T>(fn: ()=> Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn()
+  } catch(error) {
+    console.error('Pocketbase encountered an error:', error)
+    return fallback
+  }
+}
+
+async function fetchSubtables(hartString: string) {
+  console.log('using URI:', hartString)
+  try {
+    const res = await fetch(hartString)
+    return await res.json()
+  } catch(error) {
+    console.error('Failed to get subtable data')
+    return null
+  }
+}
+
+async function useFetchSubtables(tableName: string) {
+  return await fetchSubtables(createHartString(tableName))
 }
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
@@ -56,22 +89,39 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
   let tableNames: string[] = []
   tableNames = await programData.map((program: ProgramType) => program.parent_table)
 
-  let tablesData: TableDataResult
-  let tables: TableDataResult
-  let tableLivable: TableDataResult
-  let res = await fetch(`http://${PB_URL}/api/collections/${tableNames[0]}/relation-fields`)
-  let tableSubtables = await res.json()
-  // console.log('SUBTABLES: ', ...tableSubtables)
-  let projectDetails: object
-
-  try {
-    //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
-    tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {
-      expand: tableSubtables,
-      filter: `jurisdiction = "${params.uuid}"`
+  let tableFetchObject: TableArgumentType[] = await Promise.all(
+    tableNames.map(async (tableName: string) => {
+      const subtableNames = await useFetchSubtables(tableName);
+      return {tableName, subtableNames}
     })
-  } catch (err) {
-    console.error(err)
+  )
+
+  tableNames.forEach(async (tableName: string)=> {
+    let subtables = await useFetchSubtables(tableName)
+    tableFetchObject.push({
+      tableName: tableName,
+      subtableNames: subtables
+    })
+  })
+
+  let tables: TableDataResult
+  let projectDetails: object
+  console.log('table fetch object', tableFetchObject)
+
+  for (const tableArgument of tableFetchObject) {
+
+    const subtables = tableArgument.subtableNames !== null && tableArgument.subtableNames !== undefined
+          ? tableArgument.subtableNames 
+          : [""]
+    try {
+      //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
+      tables = await fetchTables(locals.pb, tableArgument.tableName, {
+        expand: subtables.join(" "),
+        filter: `jurisdiction = "${params.uuid}"`
+      })
+    } catch (err) {
+      console.error(err)
+    }
   }
 
 
