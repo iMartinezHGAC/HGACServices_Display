@@ -8,7 +8,6 @@ function isJurisdictionId(id: string) {
 
 let chosenJurisdiction: JurisdictionType
 let juris_uuid: string
-
 export function jurisState() {
   // CRUD
   function setJurisdiction(juris: JurisdictionType) {

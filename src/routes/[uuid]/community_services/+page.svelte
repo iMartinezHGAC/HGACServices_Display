@@ -29,7 +29,7 @@
 
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
-  $inspect('tablesData', tablesData)
+	$inspect('tablesData', tablesData);
 	let charts = $state<CustomEchartType[]>([]);
 	//$inspect('data',tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined))
 	let projectDetails = data.projectDetails as AdworkType[];

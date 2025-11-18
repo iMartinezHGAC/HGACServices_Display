@@ -24,11 +24,10 @@
     jurisdiction = "harris_county"
   }
   */
-	$inspect('import state in layout', jurisId.jurisdiction);
-	let jurisdiction = $derived.by(()=> {
-    if(jurisId.jurisdiction) return jurisId.jurisdiction.name
-     return 'Harris County'
-  });
+	let jurisdiction = $derived.by(() => {
+		if (jurisId.jurisdiction) return jurisId.jurisdiction.name;
+		return 'Harris County';
+	});
 
 	function toSnakeCase(tabName: string) {
 		return tabName.split(' ').join('_');
@@ -40,6 +39,7 @@
 	}
 
 	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
+	$inspect('route path', routePath);
 </script>
 
 <main

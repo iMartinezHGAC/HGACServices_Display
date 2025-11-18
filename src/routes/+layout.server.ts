@@ -3,11 +3,9 @@ import type { LayoutServerLoad } from "./$types"
 import { PB_GENERIC_USER, PB_GENERIC_PASS } from "$env/static/private"
 
 export const load: LayoutServerLoad = async ({ locals, url, params }) => {
-  /*
-  if(url.pathname === "/") {
-    redirect(302, '/overview')
+  if (url.pathname === "/") {
+    redirect(302, '/selector')
   }
-  */
   try {
     const authData = await locals.pb.collection('users').authWithPassword(PB_GENERIC_USER, PB_GENERIC_PASS)
   } catch (error) {

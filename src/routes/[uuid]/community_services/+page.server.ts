@@ -27,11 +27,11 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
   for (const tableName of tableNames) {
     try {
       let records = await pb.collection(tableName).getList(1, 1, {
-          sort: mergedOptions.sort,
-          expand: mergedOptions.expand,
-          filter: mergedOptions.filter,
-          perPage: mergedOptions.perPage,
-        })
+        sort: mergedOptions.sort,
+        expand: mergedOptions.expand,
+        filter: mergedOptions.filter,
+        perPage: mergedOptions.perPage,
+      })
       results[tableName] = records
     } catch (err) {
       results[tableName] = { error: err instanceof Error ? err.message : "Unknown error" }
@@ -43,10 +43,10 @@ async function fetchTables(pb: PocketBase, tableNames: string[], options: TableF
 }
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
-  console.log('params', params)
+  // console.log('params', params)
   let fullpath = url.pathname.split("/")
   let path = fullpath[fullpath.length - 1]
-  console.log('url', path)
+  // console.log('url', path)
 
   const programData = await locals.pb.collection('programs').getFullList({
     expand: 'links,blurb',
@@ -59,14 +59,14 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
   let tablesData: TableDataResult
   let tables: TableDataResult
   let tableLivable: TableDataResult
-  let res = await fetch(`http://127.0.0.1:8090/api/collections/${tableNames[0]}/relation-fields`)
+  let res = await fetch(`http://${PB_URL}/api/collections/${tableNames[0]}/relation-fields`)
   let tableSubtables = await res.json()
-  console.log('SUBTABLES: ',...tableSubtables)
+  // console.log('SUBTABLES: ', ...tableSubtables)
   let projectDetails: object
 
   try {
     //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
-    tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), { 
+    tables = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {
       expand: tableSubtables,
       filter: `jurisdiction = "${params.uuid}"`
     })

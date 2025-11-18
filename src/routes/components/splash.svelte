@@ -41,14 +41,15 @@ const dynamicFontSize = $derived.by(()=>{
 })
 
 const jurisId = jurisState()
+const jurisUUID = $derived(jurisId.uuid)
 
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
       {#if chosenTab === toEverettCase(dash.tab_name).toLowerCase()}
-        <Tabs tabText={dash.tab_name} path={dash.tab_name} color="#334155" setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
+        <Tabs tabText={dash.tab_name} path={dash.tab_name} color="#334155" setChosen={handleSetChosen} uuid={jurisUUID} textLight={dash.tab_text_light_mode}/>
       {:else}
-        <Tabs tabText={dash.tab_name} path={dash.tab_name} color={dash.tab_color} setChosen={handleSetChosen} uuid={jurisId.uuid} textLight={dash.tab_text_light_mode}/>
+        <Tabs tabText={dash.tab_name} path={dash.tab_name} color={dash.tab_color} setChosen={handleSetChosen} uuid={jurisUUID} textLight={dash.tab_text_light_mode}/>
       {/if}
 {/snippet}
 
