@@ -164,3 +164,7 @@ type AdworkType = {
   project_description: string,
   project_name: string,
 }
+
+interface TableDataResult<T = any> {
+  [tableName: string]: T | { error: string }
+}

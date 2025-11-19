@@ -15,7 +15,7 @@ interface TableDataResult<T = any> {
 
 type TableArgumentType = {
   tableName: string,
-  subtableNames: string[] | null | undefined 
+  subtableNames: string[] | null | undefined
 }
 
 async function fetchTables(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<TableDataResult> {
@@ -28,6 +28,7 @@ async function fetchTables(pb: PocketBase, tableName: string, options: TableFetc
 
   const mergedOptions = { ...defaultOptions, ...options }
   const results: TableDataResult = {}
+  console.log(`Attempting to fetch ${tableName} with options: \n${options.expand}`)
 
   try {
     let records = await pb.collection(tableName).getList(1, 1, {
@@ -39,7 +40,7 @@ async function fetchTables(pb: PocketBase, tableName: string, options: TableFetc
     results[tableName] = records
   } catch (err) {
     results[tableName] = { error: err instanceof Error ? err.message : "Unknown error" }
-    results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1, 50, { perPage: 40 })
+    //results[tableName] = await pb.collection("33_hgac_coop_purchasing").getList(1, 50, { perPage: 40 })
     console.error(err)
   }
   return results
@@ -51,10 +52,10 @@ function createHartString(collection: string) {
   return hartString
 }
 
-async function tryPocketbase<T>(fn: ()=> Promise<T>, fallback: T): Promise<T> {
+async function tryPocketbase<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try {
     return await fn()
-  } catch(error) {
+  } catch (error) {
     console.error('Pocketbase encountered an error:', error)
     return fallback
   }
@@ -65,7 +66,7 @@ async function fetchSubtables(hartString: string) {
   try {
     const res = await fetch(hartString)
     return await res.json()
-  } catch(error) {
+  } catch (error) {
     console.error('Failed to get subtable data')
     return null
   }
@@ -92,11 +93,11 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
   let tableFetchObject: TableArgumentType[] = await Promise.all(
     tableNames.map(async (tableName: string) => {
       const subtableNames = await useFetchSubtables(tableName);
-      return {tableName, subtableNames}
+      return { tableName, subtableNames }
     })
   )
 
-  tableNames.forEach(async (tableName: string)=> {
+  tableNames.forEach(async (tableName: string) => {
     let subtables = await useFetchSubtables(tableName)
     tableFetchObject.push({
       tableName: tableName,
@@ -104,26 +105,26 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
     })
   })
 
-  let tables: TableDataResult
+  let tables: TableDataResult = {}
   let projectDetails: object
   console.log('table fetch object', tableFetchObject)
 
   for (const tableArgument of tableFetchObject) {
-
     const subtables = tableArgument.subtableNames !== null && tableArgument.subtableNames !== undefined
-          ? tableArgument.subtableNames 
-          : [""]
+      ? tableArgument.subtableNames
+      : [""];
+
     try {
-      //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
-      tables = await fetchTables(locals.pb, tableArgument.tableName, {
-        expand: subtables.join(" "),
+      const data = await fetchTables(locals.pb, tableArgument.tableName, {
+        expand: subtables.join(","),
         filter: `jurisdiction = "${params.uuid}"`
-      })
+      });
+      tables[tableArgument.tableName] = data[tableArgument.tableName];
     } catch (err) {
-      console.error(err)
+      console.error(err);
+      tables[tableArgument.tableName] = { error: err?.message || 'An error occurred while fetching the table' };
     }
   }
-
 
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
