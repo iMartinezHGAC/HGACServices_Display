@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { snakeToHuman } from '$routes/helpers/caseConversion';
 
 	type tabProps = {
 		tabText: string;
@@ -28,6 +29,6 @@
 
 <button onclick={chooseEvent}>
 	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={path}
-		>{tabText}</a
+		>{snakeToHuman(tabText)}</a
 	>
 </button>
