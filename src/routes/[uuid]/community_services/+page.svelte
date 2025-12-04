@@ -48,6 +48,8 @@
 		'to_date'
 	];
 
+	//console.log(tablesData['14_livable_centers']['items']);
+
 	const assistance = tablesData['14_livable_centers']['items']
 		.map((item) => item.expand.assistance)
 		.filter((item) => item !== undefined);
