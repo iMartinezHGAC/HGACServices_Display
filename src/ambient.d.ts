@@ -80,7 +80,7 @@ type serviceType = {
 
 type serviceKey = keyof serviceType
 
-type donutType = {
+type DonutType = {
   name: string,
   value: number,
 }
@@ -163,4 +163,36 @@ type AdworkType = {
   program: string,
   project_description: string,
   project_name: string,
+}
+
+interface TableFetchOptions {
+  sort?: string;
+  expand?: string;
+  filter?: string;
+  perPage?: number;
+}
+
+interface TableDataResult<T = any> {
+  [tableName: string]: T | {error: string}
+}
+
+
+interface LabeledCollectionType {
+  table_name: string,
+  table_data: object
+}
+
+interface CollectionWSubType {
+  collection: string,
+  subCollections: LabeledCollectionType
+}
+
+type SchemaType = {
+  Name: string,
+  Type: string
+}
+
+type SchemaMultiType = {
+  tableName: string,
+  schema: SchemaType[]
 }

@@ -21,39 +21,53 @@ interface CardDataType {
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
 	import { makeBar } from '$routes/helpers/chartFormatters';
 
-	let { data}: { data: PageData } = $props();
+	let { data}: { data: {
+		post: ProgramType,
+    tableNames: string[],
+    tablesData: object,
+    schema: SchemaMultiType[]
+}} = $props();
 
   const programs: ProgramType[] = data.post
-  const tablesData = data.tablesData
+  const tablesData = data.tableNames
   const cardNames=$derived(programs.map(program => program.program_name))
   const programNames=$derived(
     programs
     .map(program => program.parent_table)
     .filter(str => str !== '')
   )
-    console.log("Name: ", programNames)
+//console.log("Name: ", programNames)
 
+  $inspect('data',data)
   const charts: CustomEchartType[] = []
   const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
 
-  const keys = Object.keys(tablesData["33_hgac_coop_purchasing"]['items'][0]) ?? ["test"]
-  console.log("keys: ",keys)
-
-  const usefulKeys = keys.filter(key => !exclusions.includes(key))
-  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
+  const keys = $derived(data.schema
+  .filter((schema: SchemaMultiType) => schema.tableName === "34_gc_tow_and_go")
+  .map((schema: SchemaMultiType) => schema.schema)
+  .at(0)
+  .map((schema: SchemaType) => schema.Name)
+)
+/*
+.map((schema: SchemaMultiType) => {
+    schema.tableName === "34_gc_tow_and_go"
+  }) 
+*/
+//Object.keys(tablesData['34_gc_tow_and_go']['items'][0]) ?? ["test"]
+  $inspect("keys: ",keys)
 
 /*
-  let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
+  const usefulKeys = keys.filter(key => !exclusions.includes(key))
+  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
 */
 
-programNames.forEach((programName)=>{
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date" ,"orders_count"))
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date", "orders_dollars"))
-  }
-)
+  programNames.forEach((programName)=>{
+      charts.push(makeBar(programName, tablesData['items'], "from_date" ,"orders_count"))
+      charts.push(makeBar(programName, tablesData['items'], "from_date", "orders_dollars"))
+    }
+  )
 
-const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
+  const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
     const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
     const data: CardDataType = {program: program, echarts: eCharts}
     return data
@@ -63,11 +77,10 @@ $inspect("card data",cardData)
 
 </script>
 
+<!--
 {#if data.post}
   <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
 {:else}
   <div>Loading...</div>
-  
 {/if}
-
-
+-->

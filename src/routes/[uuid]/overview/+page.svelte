@@ -4,24 +4,28 @@
 	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
   import StatDisplay from "$routes/components/statDisplay.svelte";
   import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte";
+	import type { CollectionWSubType, DonutType } from "../../../ambient";
 
   const {data}: {data: PageData } = $props() 
 
 
  
-interface GroupData {
-  Group: string;
-  Current_Funds: number;
-  Current_Services: number;
-  Current_Total_Participation: number;
-  Historical_Funds: {
-    [year: string]: number;
-  };
-  Historical_Services: {
-    [year: string]: number;
-  };
+interface PB_Data_Type {
+
 }
 
+  let donutData = $derived<DonutType[]>(
+   data.pbData.map((entry: CollectionWSubType) => {
+      return {
+        name: entry.subCollections.table_name,
+        value: entry.subCollections.table_data.items.length
+      }
+    })
+  ) 
+
+  $inspect('donut data',donutData)
+
+  /*
 type stackedTrash = {
   juris: string,
   historical_funds: number,
@@ -29,6 +33,7 @@ type stackedTrash = {
 }
 
 const fakeData: GroupData[] = data.fakeData
+  $inspect('fake data', fakeData)
 
 const groups = ["Economic Development", "Environmental", "Transportation", "Community Services", "Public Safety", "Business Services", "Workforce", ];
 
@@ -37,12 +42,11 @@ const chartData = {
   Services: convertAllToDonut(fakeData, groups, "Current_Services"),
   Participation: convertAllToDonut(fakeData, groups, "Current_Total_Participation"),
   
-    /*
   HistoricalFunds: convertAllToDonut(fakeData, groups, "Historical_Funds"),
   HistoricalServices: convertAllToDonut(fakeData, groups, "Historical_Services")
-  */
 };
 
+  */
   const tabColors = $derived(Object.values(data.dashboard_groups).map(item=>item.tab_color))
   const tabNames = $derived(Object.values(data.dashboard_groups).map(item=> item.tab_name).filter(tabName=> tabName !== "Overview"))
 
@@ -110,7 +114,8 @@ const stackbar_data: stackedTrash[] = [
 
 <div class="fixed flex top-24 w-11/12 h-screen flex-col overflow-auto">
   <div class="grid grid-cols-2 min-h-screen sticky w-auto bg-slate-700 pt-4 pb-12 px-auto place-items-center">
-    <StatDisplay header="Current Funding" data={chartData.CurrentFunding} colors={tabColors} preSymbol="$"/>
+    <StatDisplay header="Number of Projects" data={donutData} colors={tabColors} preSymbol=""/>
+    <!--
     <StatDisplay header="Services" data={chartData.Services} colors={tabColors} />
     <StatDisplay header="Total Participation" data={chartData.Participation} colors={tabColors} />
     <div class="bg-slate-700 h-auto w-1/2 pt-12 flex justify-center pl-24">
@@ -127,6 +132,7 @@ const stackbar_data: stackedTrash[] = [
         <StackedBarChart data={stackbar_services} yLabel="Historical Services" colorSet={tabColors}/>
       </div>
     </div>
+  -->
   </div>
 </div>
 
