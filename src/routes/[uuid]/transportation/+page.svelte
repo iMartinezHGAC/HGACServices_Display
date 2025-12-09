@@ -18,7 +18,7 @@
 	import CardBody from '$routes/components/card_body.svelte';
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
 	import { makeBar } from '$routes/helpers/chartFormatters';
-	import type { TableDataResult } from '../../../ambient';
+	import type { AdworkType, TableDataResult } from '../../../ambient';
 
 	let {
 		data
@@ -40,6 +40,7 @@
 	//console.log("Name: ", programNames)
 
 	function splitTableData(tablesData: TableDataResult, tableName: string) {
+    console.log('splitTableData data',tablesData[tableName].items)
 		return tablesData[tableName].items;
 	}
 
@@ -112,10 +113,23 @@
 	);
 
 	$inspect('card data', cardData);
+
+  const tempAdwork: AdworkType[] = [
+  {
+    budget: 0,
+    project_name: "test",
+    project_description: "desc",
+    start_date: new Date(),
+    end_date: new Date(),
+    jurisdiction: ['Harris County'],
+    program: 'transportation',
+    custom_metrics: {}
+  }
+  ]
 </script>
 
 {#if data.post}
-	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={false} />
+	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={tempAdwork} />
 {:else}
 	<div>Loading...</div>
 {/if}
