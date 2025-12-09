@@ -1,12 +1,6 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
-import type { ProgramType } from "../../ambient";
-
-
-interface CustomEchartType {
-  parent_table: string,
-  echarts_data: echarts.EChartsOption,
-}
+import type { ProgramType, CustomEchartType } from "../../ambient";
 
 interface CardDataType {
   program: ProgramType,
@@ -25,6 +19,95 @@ function formatValue(num: number): string {
     return (num / 1000).toFixed(2) + "K";
   }
   return num.toLocaleString();
+}
+
+
+/**
+ * Creates a drilldown pie chart for multiple value keys and their single-key breakdowns.
+ * @param parent_table - Name for chart
+ * @param dataset - The data
+ * @param keys - Array, e.g. ['free_tows','paid_tows']
+ * @returns ECharts option plus event handler to enable drilldown.
+ */
+export function makeDrilldownPie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  keys: (keyof T)[]
+): CustomEchartType {
+  // Build parent/summary pie
+  const parentData = keys.map(key => {
+    let total = 0;
+    dataset.forEach(item => {
+      const val = Number(item[key]) || 0;
+      total += val;
+    });
+    return { name: String(key), value: total };
+  });
+ 
+  // Breakdown for a specific key (child pie)
+  function getSingleKeyPieData(k: keyof T) {
+    const countMap: Record<string, number> = {};
+    dataset.forEach(item => {
+      const val = String(item[k]);
+      // Optionally: skip undefined/empty
+      if (!val) return;
+      if (val in countMap) countMap[val]++;
+      else countMap[val] = 1;
+    });
+    return Object.entries(countMap).map(([name, value]) => ({ name, value }));
+  }
+ 
+  // Chart config compatible with your interface
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: keys.map(k => snakeToHuman(String(k))).join(' vs '),
+      left: 'center'
+    },
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 30 },
+    series: [
+      {
+        name: parent_table,
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+ 
+  // Drilldown function available for controller to register
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const keyClicked = params.name as keyof T;
+    if (!keys.includes(keyClicked)) return;
+    const pieData = getSingleKeyPieData(keyClicked);
+ 
+    chartInstance.setOption({
+      title: { text: snakeToHuman(String(keyClicked)), left: 'center' },
+      legend: { show: true },
+      series: [
+        {
+          name: snakeToHuman(String(keyClicked)),
+          type: 'pie',
+          radius: '50%',
+          data: pieData
+        }
+      ]
+    });
+  }
+ 
+  return {
+    parent_table,
+    charts,
+    chartType: 'drilldown_pie',
+    onDrilldown // <-- custom handler, available on the result for your controller to use
+  };
 }
 
 export function makePie<T = any>(
@@ -48,7 +131,7 @@ export function makePie<T = any>(
 
   return {
     parent_table: parent_table,
-    echarts_data: {
+    charts: {
       title: {
         text: snakeToHuman(key1 as string),
         left: 'center'
@@ -89,7 +172,7 @@ export function makeBar<T = any>(
   //console.log('data in makeBar function:', dataset)
   return {
     parent_table: parent_table,
-    echarts_data: {
+    charts: {
       title: {
         text: snakeToHuman(key2 as string)
       },

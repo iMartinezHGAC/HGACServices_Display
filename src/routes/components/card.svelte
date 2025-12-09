@@ -7,15 +7,7 @@
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
 	import { graphsState } from '../charts/graphVectors.svelte';
 	import RenderEchart from './renderEchart.svelte';
-	import type { AdworkType } from '../../ambient';
-
-	interface CustomEchartType {
-		parent_table: string;
-		echarts_data: echarts.EChartsOption;
-		chartType?: string;
-		indicatorVal?: string | number;
-		indicatorName?: string;
-	}
+	import type { AdworkType, CustomEchartType, ProgramType } from '../../ambient';
 
 	interface CardDataType {
 		program: ProgramType;
@@ -126,7 +118,7 @@
 				/>
 			{:else}
 				{console.log(chart)}
-				<RenderEchart chart={chart.echarts_data} />
+				<RenderEchart chart={chart.charts} onDrilldown={chart.onDrilldown}/>
 			{/if}
 		{/each}
 		<!--

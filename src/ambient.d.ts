@@ -131,7 +131,8 @@ interface CustomEchartType {
   charts: echarts.EChartsOption,
   chartType?: string,
   indicatorVal?: string | number,
-  indicatorName?: string
+  indicatorName?: string,
+  onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void
 }
 
 interface CardDataType {

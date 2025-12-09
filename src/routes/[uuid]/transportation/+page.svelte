@@ -1,9 +1,4 @@
 <script lang="ts">
-	interface CustomEchartType {
-		parent_table: string;
-		echarts_data: echarts.EChartsOption;
-	}
-
 	interface CardDataType {
 		program: ProgramType;
 		echarts: CustomEchartType[];
@@ -17,8 +12,8 @@
 
 	import CardBody from '$routes/components/card_body.svelte';
 	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { makeBar } from '$routes/helpers/chartFormatters';
-	import type { AdworkType, TableDataResult } from '../../../ambient';
+	import { makeBar, makeDrilldownPie, makePie } from '$routes/helpers/chartFormatters';
+	import type { AdworkType, ProgramType, SchemaMultiType, TableDataResult, CustomEchartType } from '../../../ambient';
 
 	let {
 		data
@@ -40,7 +35,7 @@
 	//console.log("Name: ", programNames)
 
 	function splitTableData(tablesData: TableDataResult, tableName: string) {
-    console.log('splitTableData data',tablesData[tableName].items)
+    //console.log('splitTableData data',tablesData[tableName].items)
 		return tablesData[tableName].items;
 	}
 
@@ -59,10 +54,16 @@
 		const table = splitTableData(tableData, tableName);
 		return mapTableData(table, field);
 	}
+
+  function splitSubtables(tableData: TableDataResult, tableName: string) {
+    return splitTableData(tablesData, '34_gc_tow_and_go')[0].expand
+
+  }
 	//$inspect('table data: ', tablesData);
 
-	//console.log(splitTableData(tablesData, '37_clean_vehicles'));
-	console.log(splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+	console.log('test splt',splitSubtables(tablesData, '34_gc_tow_and_go').tng);
+  
+	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	//$inspect('data', data);
 	const charts: CustomEchartType[] = [];
@@ -87,19 +88,30 @@
 
 	//programNames.forEach((programName) => {
 	charts.push(
+    makeDrilldownPie(
+      '34_gc_tow_and_go',
+      splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+      ['free_tows', 'paid_tows']
+    ),
+
+    makeDrilldownPie(
+      '34_gc_tow_and_go',
+      splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+      ['towing_charge', 'towing_charge_free']
+    ),
 		makeBar(
 			'37_clean_vehicles',
-			splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'),
+			splitTableData(tablesData, '37_clean_vehicles'),
 			'from_date',
-			'orders_count'
+			'emissions_reduction'
 		)
 	);
 	charts.push(
 		makeBar(
 			'37_clean_vehicles',
-			splitAndMapTable(tablesData, '37_clean_vehicles', 'funding_dollars'),
+			splitTableData(tablesData, '37_clean_vehicles'),
 			'from_date',
-			'orders_dollars'
+			'funding_dollars'
 		)
 	);
 	//});

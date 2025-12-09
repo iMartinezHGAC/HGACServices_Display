@@ -4,14 +4,7 @@
 	import Card from "$routes/components/card.svelte";
 	import { graphsState } from "$routes/charts/graphVectors.svelte";
 	import exportChartToPDF from "$lib/scripts/convertSVGtoPDF";
-
-interface CustomEchartType {
-  parent_table: string,
-  echarts_data: echarts.EChartsOption,
-  chartType?: string,
-  indicatorVal?: string | number,
-  indicatorName?: string
-}
+	import type { ProgramType, CustomEchartType } from "../../ambient";
 
 interface CardDataType {
   program: ProgramType,

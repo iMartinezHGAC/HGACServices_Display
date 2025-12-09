@@ -19,22 +19,12 @@ async function fetchTable(pb: PocketBase, tableName: string, options: TableFetch
 
     const lower_limit: number = Math.floor(Math.random() * 3);
     const upper_limit: number = Math.floor(Math.random() * 300) + 100;
-    let records
-    if (tableName === "33_hgac_coop_purchasing") {
-      records = await pb.collection(tableName).getList(lower_limit, upper_limit, {
-        sort: mergedOptions.sort,
-        expand: mergedOptions.expand,
-        filter: mergedOptions.filter,
-        perPage: mergedOptions.perPage,
-      })
-    } else {
-      records = await pb.collection(tableName).getList(1, 1, {
-        sort: mergedOptions.sort,
-        expand: mergedOptions.expand,
-        filter: mergedOptions.filter,
-        perPage: mergedOptions.perPage,
-      })
-    }
+    let records = await pb.collection(tableName).getList(1, 1, {
+      sort: mergedOptions.sort,
+      expand: mergedOptions.expand,
+      filter: mergedOptions.filter,
+      perPage: mergedOptions.perPage,
+    })
     results = records
   } catch (err) {
     results = { error: err instanceof Error ? err.message : "Unknown error" }
@@ -78,6 +68,7 @@ async function getProjectByID(tableName: string, matchedName: string) {
 
 
 export const load: PageServerLoad = async ({ locals, params }) => {
+  const juris_id = params.uuid
   const programData = await locals.pb.collection('programs').getFullList({
     expand: 'links,blurb',
     filter: `dashboard_tabs.tab_name = "transportation"`,
@@ -85,6 +76,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   //console.log("table names", tableNames)
+  console.log('juris_id',juris_id)
 
   /*
   const entries = await locals.pb.collection('05_trash_bash').getFullList({
@@ -94,9 +86,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
+  
   for (let i = 0; i < tableNames.length; i++) {
+    let subtable = await getSubtableSchema(tableNames[i]) ?? [""]
+    console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
-      perPage: 1000
+      perPage: 1000,
+      filter: `jurisdiction = "${juris_id}"`,
+      expand: subtable.join(', ') // ""
     });
     schema.push(await useGetSchema(tableNames[i]))
   }
