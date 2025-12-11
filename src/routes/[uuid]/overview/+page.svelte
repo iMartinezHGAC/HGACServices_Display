@@ -1,31 +1,25 @@
 <script lang="ts">
-	import type { PageData} from "../../$types"
-	import Indicator from "$routes/components/indicator.svelte";
-	import StackedBarChart from "$routes/charts/StackedBarChart.svelte";
-  import StatDisplay from "$routes/components/statDisplay.svelte";
-  import {convertAllToDonut} from "$lib/scripts/convertPBtoD3.svelte";
-	import type { CollectionWSubType, DonutType } from "../../../ambient";
+	import type { PageData } from '../../$types';
+	import { convertAllToDonut } from '$lib/scripts/convertPBtoD3.svelte';
+	import type { CollectionWSubType, DonutType } from '../../../ambient';
+	import StatDisplay from '../../components/statDisplay.svelte';
 
-  const {data}: {data: PageData } = $props() 
+	const { data }: { data: PageData } = $props();
 
+	interface PB_Data_Type {}
 
- 
-interface PB_Data_Type {
+	let donutData = $derived<DonutType[]>(
+		data.pbData.map((entry: CollectionWSubType) => {
+			return {
+				name: entry.subCollections.table_name,
+				value: entry.subCollections.table_data.items.length
+			};
+		})
+	);
 
-}
+	$inspect('donut data', donutData);
 
-  let donutData = $derived<DonutType[]>(
-   data.pbData.map((entry: CollectionWSubType) => {
-      return {
-        name: entry.subCollections.table_name,
-        value: entry.subCollections.table_data.items.length
-      }
-    })
-  ) 
-
-  $inspect('donut data',donutData)
-
-  /*
+	/*
 type stackedTrash = {
   juris: string,
   historical_funds: number,
@@ -47,57 +41,14 @@ const chartData = {
 };
 
   */
-  const tabColors = $derived(Object.values(data.dashboard_groups).map(item=>item.tab_color))
-  const tabNames = $derived(Object.values(data.dashboard_groups).map(item=> item.tab_name).filter(tabName=> tabName !== "Overview"))
+	const tabColors = $derived(Object.values(data.dashboard_groups).map((item) => item.tab_color));
+	const tabNames = $derived(
+		Object.values(data.dashboard_groups)
+			.map((item) => item.tab_name)
+			.filter((tabName) => tabName !== 'Overview')
+	);
 
-const stackbar_data: stackedTrash[] = [
-  { 
-    juris: '2020', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 700 + index * 50]))
-  },
-  { 
-    juris: '2021', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 800 + index * 70]))
-  },
-  { 
-    juris: '2022', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 800 + index * 20]))
-  },
-  { 
-    juris: '2023', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 800 + index * 10]))
-  },
-  { 
-    juris: '2024', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 800 + index * 100]))
-  }
-];
-
-
-  const stackbar_services: stackedTrash[] = [
-  { 
-    juris: '2020', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 7 + index * 1]))
-  },
-  { 
-    juris: '2021', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 5 + index * 1]))
-  },
-  { 
-    juris: '2022', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 4 + index * 2]))
-  },
-  { 
-    juris: '2023', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 8 + index * 1]))
-  },
-  { 
-    juris: '2024', 
-    ...Object.fromEntries(tabNames.map((name, index) => [name, 7 + index * 1]))
-  }
-  ];
-
-  const blurb = ""
+	const blurb = '';
 </script>
 
 <!--
@@ -112,10 +63,12 @@ const stackbar_data: stackedTrash[] = [
 </div>
 -->
 
-<div class="fixed flex top-24 w-11/12 h-screen flex-col overflow-auto">
-  <div class="grid grid-cols-2 min-h-screen sticky w-auto bg-slate-700 pt-4 pb-12 px-auto place-items-center">
-    <StatDisplay header="Number of Projects" data={donutData} colors={tabColors} preSymbol=""/>
-    <!--
+<div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
+	<div
+		class="px-auto sticky grid min-h-screen w-auto grid-cols-2 place-items-center bg-slate-700 pt-4 pb-12"
+	>
+		<StatDisplay header="Number of Projects" data={donutData} colors={tabColors} preSymbol="" />
+		<!--
     <StatDisplay header="Services" data={chartData.Services} colors={tabColors} />
     <StatDisplay header="Total Participation" data={chartData.Participation} colors={tabColors} />
     <div class="bg-slate-700 h-auto w-1/2 pt-12 flex justify-center pl-24">
@@ -133,7 +86,5 @@ const stackbar_data: stackedTrash[] = [
       </div>
     </div>
   -->
-  </div>
+	</div>
 </div>
-
-

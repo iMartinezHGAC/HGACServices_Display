@@ -5,21 +5,26 @@
 	}
 
 	import { navigating } from '$app/state';
-
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
 	const routedTo = navigating.to?.route.id?.split('/')[2];
 	const routedFromLeft = checkRouteDirection(routedFrom, routedTo);
 
-	import CardBody from '$routes/components/card_body.svelte';
-	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { makeBar, makeDrilldownPie, makePie } from '$routes/helpers/chartFormatters';
-	import type { AdworkType, ProgramType, SchemaMultiType, TableDataResult, CustomEchartType } from '../../../ambient';
+	import type {
+		AdworkType,
+		ProgramType,
+		SchemaMultiType,
+		TableDataResult,
+		CustomEchartType
+	} from '../../../ambient';
+	import CardBody from '../../components/card_body.svelte';
+	import { makeBar, makeDrilldownPie } from '../../helpers/chartFormatters';
+	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
 		data
 	}: {
 		data: {
-			post: ProgramType;
+			post: ProgramType[];
 			tableNames: string[];
 			tablesData: object;
 			schema: SchemaMultiType[];
@@ -35,7 +40,7 @@
 	//console.log("Name: ", programNames)
 
 	function splitTableData(tablesData: TableDataResult, tableName: string) {
-    //console.log('splitTableData data',tablesData[tableName].items)
+		//console.log('splitTableData data',tablesData[tableName].items)
 		return tablesData[tableName].items;
 	}
 
@@ -55,14 +60,13 @@
 		return mapTableData(table, field);
 	}
 
-  function splitSubtables(tableData: TableDataResult, tableName: string) {
-    return splitTableData(tablesData, '34_gc_tow_and_go')[0].expand
+	function splitSubtables(tableData: TableDataResult, tableName: string) {
+		return splitTableData(tablesData, tableName)[0].expand;
+	}
+	$inspect('table data: ', tablesData);
 
-  }
-	//$inspect('table data: ', tablesData);
+	console.log('test splt', splitSubtables(tablesData, '36_transportation_improvement_plan'));
 
-	console.log('test splt',splitSubtables(tablesData, '34_gc_tow_and_go').tng);
-  
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	//$inspect('data', data);
@@ -88,17 +92,67 @@
 
 	//programNames.forEach((programName) => {
 	charts.push(
-    makeDrilldownPie(
-      '34_gc_tow_and_go',
-      splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-      ['free_tows', 'paid_tows']
-    ),
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'free_tows',
+			'paid_tows'
+		]),
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'towing_charge',
+			'towing_charge_free'
+		]),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+			[
+				'abandoned_vehicles',
+				'law_enforcement_special_cases',
+				'mechanical',
+				'medical_fire',
+				'other'
+			],
+			'Other Services'
+		),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').map,
+			[
+				'abandoned_vehicles',
+				'debris',
+				'gone_on_arrival',
+				'information_assistance',
+				'law_enforcement',
+				'mechanicol',
+				'medical_fire',
+				'towing_services',
+				'traffic_control'
+			],
+			'All Services'
+		),
 
-    makeDrilldownPie(
-      '34_gc_tow_and_go',
-      splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-      ['towing_charge', 'towing_charge_free']
-    ),
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').rtp_projects,
+			['fiscal_year', 'funding'],
+			'R.T.P. Projects'
+		),
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').yr10_projects,
+			['fiscal_year', 'funding'],
+			'Yr 10 Projects'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
+			['fiscal_year', 'funding'],
+			'TIP'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
+			['fiscal_year', 'funding'],
+			'LET'
+		),
 		makeBar(
 			'37_clean_vehicles',
 			splitTableData(tablesData, '37_clean_vehicles'),
@@ -126,18 +180,18 @@
 
 	$inspect('card data', cardData);
 
-  const tempAdwork: AdworkType[] = [
-  {
-    budget: 0,
-    project_name: "test",
-    project_description: "desc",
-    start_date: new Date(),
-    end_date: new Date(),
-    jurisdiction: ['Harris County'],
-    program: 'transportation',
-    custom_metrics: {}
-  }
-  ]
+	const tempAdwork: AdworkType[] = [
+		{
+			budget: 0,
+			project_name: 'test',
+			project_description: 'desc',
+			start_date: new Date(),
+			end_date: new Date(),
+			jurisdiction: ['Harris County'],
+			program: 'transportation',
+			custom_metrics: {}
+		}
+	];
 </script>
 
 {#if data.post}

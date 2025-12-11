@@ -1,8 +1,7 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
 	import county_logo from '$lib/assets/harris_county.svg';
-	import { jurisState } from 'jurisStore';
-	import { snakeToHuman } from '$routes/helpers/caseConversion';
+	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 
 	interface props {

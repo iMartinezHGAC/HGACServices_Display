@@ -1,61 +1,70 @@
 <script lang="ts">
-	import { fly } from "svelte/transition";
-  import {toCamelCase} from "../helpers/caseConversion"
-	import Card from "$routes/components/card.svelte";
-	import { graphsState } from "$routes/charts/graphVectors.svelte";
-	import exportChartToPDF from "$lib/scripts/convertSVGtoPDF";
-	import type { ProgramType, CustomEchartType } from "../../ambient";
+	import { fly } from 'svelte/transition';
+	import { toCamelCase } from '../helpers/caseConversion';
+	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
+	import type { ProgramType, CustomEchartType } from '../../ambient';
+	import Card from './card.svelte';
 
-interface CardDataType {
-  program: ProgramType,
-  echarts: CustomEchartType[]
-}
+	interface CardDataType {
+		program: ProgramType;
+		echarts: CustomEchartType[];
+	}
 
-  interface cardProps {
-    cardNames: any[],
-    cardData: CardDataType[],
-    direction: boolean,
-    adwork: Object[] | undefined,
-  }
+	interface cardProps {
+		cardNames: any[];
+		cardData: CardDataType[];
+		direction: boolean;
+		adwork: Object[] | undefined;
+	}
 
-  const {cardNames, cardData, direction, adwork}: cardProps = $props()
-  let flyValue = $state(direction ? -400 : 400)
+	const { cardNames, cardData, direction, adwork }: cardProps = $props();
 
-  /* FUTURE EXPORT ALL
+	const targetIndex = cardData.findIndex(
+		(item) => item.program?.parent_table === '34_gc_tow_and_go'
+	);
+	if (targetIndex !== -1) {
+		const [targetData] = cardData.splice(targetIndex, 1);
+		cardData.unshift(targetData);
 
-  const graphState = graphsState()
+		// Do the same for cardNames, assuming it's parallel to cardData
+		const [targetName] = cardNames.splice(targetIndex, 1);
+		cardNames.unshift(targetName);
+	}
 
-  function handleExportClick() {
-    exportChartToPDF(graphState.graph, project.program_name + " - Harris County")
-  }
-  */
+	let flyValue = $state(direction ? -400 : 400);
+
+	//$inspect('card data', cardData);
 </script>
 
-
 {#snippet formattedEntryText(cardName: string)}
-  <div class="flex text-slate-200 font-[Metropolis] font-medium">
-    <a href={toCamelCase(cardName)} class="px-6 py-4 rounded w-56 bg-slate-600 text-slate-200 focus:bg-slate-800 hover:bg-slate-700 hover:text-white ">{cardName}</a>
-  </div>
+	<div class="flex font-[Metropolis] font-medium text-slate-200">
+		<a
+			href={toCamelCase(cardName)}
+			class="w-56 rounded bg-slate-600 px-6 py-4 text-slate-200 hover:bg-slate-700 hover:text-white focus:bg-slate-800"
+			>{cardName}</a
+		>
+	</div>
 {/snippet}
 
-
 <div class="flex w-screen">
-  <div class="left-0 top-24 w-56 h-full bg-slate-600 flex flex-col justify-start items-start pt-4 text-xl transform z-20" transition:fly={{y:200, duration: 300}}>
-    {#each cardNames as cardName}
-      {@render formattedEntryText(cardName)}
-    {/each}
-  </div>
-  <div class="flex flex-col items-center justify-start w-11/12 h-screen h-max-screen overflow-auto pt-[0%] pb-[6%] z-10 scroll-smooth" transition:fly={{x:flyValue, duration:300 }}>
-    <div class="flexy flex-col">
-      {#each cardData as card, i}
-        <div class="flexy" id={card.program.program_name.split(' ').join('')}>
-          <Card 
-            project={card.program} 
-            charts={card.echarts}
-            additionalWork={adwork}
-          />
-        </div>      
-      {/each}
-    </div>
-  </div>
+	<div
+		class="top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl"
+		transition:fly={{ y: 200, duration: 300 }}
+	>
+		{#each cardNames as cardName}
+			{@render formattedEntryText(cardName)}
+		{/each}
+	</div>
+	<div
+		class="h-max-screen z-10 flex h-screen w-11/12 flex-col items-center justify-start overflow-auto scroll-smooth pt-[0%] pb-[6%]"
+		transition:fly={{ x: flyValue, duration: 300 }}
+	>
+		<div class="flexy flex-col">
+			{#each cardData as card, i}
+				<div class="flexy" id={card.program.program_name.split(' ').join('')}>
+					<Card project={card.program} charts={card.echarts} additionalWork={adwork} />
+				</div>
+			{/each}
+		</div>
+	</div>
 </div>

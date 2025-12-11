@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { snakeToHuman } from '$routes/helpers/caseConversion';
+	import { snakeToHuman } from '../helpers/caseConversion';
 
 	type tabProps = {
 		tabText: string;
