@@ -1,128 +1,104 @@
 import { PB_URL } from '$env/static/private';
+import type { AdworkType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
 import type { PageServerLoad } from './$types';
 import PocketBase from 'pocketbase'
+//import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
 
-interface TableFetchOptions {
-  sort?: string;
-  expand?: string;
-  filter?: string;
-  perPage?: number;
-}
-
-interface TableDataResult<T = any> {
-  [tableName: string]: T | { error: string }
-}
-
-type TableArgumentType = {
-  tableName: string,
-  subtableNames: string[] | null | undefined 
-}
-
-async function fetchTables(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<TableDataResult> {
+async function fetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
   const defaultOptions: TableFetchOptions = {
     sort: '',
     expand: '',
     filter: '',
-    perPage: 900,
+    perPage: 50,
   }
 
   const mergedOptions = { ...defaultOptions, ...options }
-  const results: TableDataResult = {}
+  let results = {}
 
   try {
+
+    const lower_limit: number = Math.floor(Math.random() * 3);
+    const upper_limit: number = Math.floor(Math.random() * 300) + 100;
     let records = await pb.collection(tableName).getList(1, 1, {
       sort: mergedOptions.sort,
       expand: mergedOptions.expand,
       filter: mergedOptions.filter,
       perPage: mergedOptions.perPage,
     })
-    results[tableName] = records
+    results = records
   } catch (err) {
-    results[tableName] = { error: err instanceof Error ? err.message : "Unknown error" }
+    results = { error: err instanceof Error ? err.message : "Unknown error" }
     console.error(err)
   }
   return results
 }
-
-function createHartString(collection: string) {
-  const hartString = `${PB_URL}api/collections/${collection}/dashboard-schema`
-  console.log('Attempting to fetch data from custom endpoint')
-  return hartString
-}
-
-async function tryPocketbase<T>(fn: ()=> Promise<T>, fallback: T): Promise<T> {
+async function getSchema(tableName: string): Promise<SchemaType[]> {
   try {
-    return await fn()
-  } catch(error) {
-    console.error('Pocketbase encountered an error:', error)
-    return fallback
+    const response = await fetch(`${PB_URL}/api/collections/${tableName}/schema`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch schema:', error);
+    throw error;
   }
 }
 
-async function fetchSubtables(hartString: string) {
-  console.log('using URI:', hartString)
-  try {
-    const res = await fetch(hartString)
-    return await res.json()
-  } catch(error) {
-    console.error('Failed to get subtable data')
-    return null
-  }
+async function useGetSchema(tableName: string = "05_trash_bash"): Promise<SchemaMultiType> {
+  const schema = await getSchema(tableName);
+
+  return {
+    tableName,
+    schema
+  };
 }
 
-async function useFetchSubtables(tableName: string) {
-  return await fetchSubtables(createHartString(tableName))
+async function getSubtableSchema(tableName: string) {
+  let res = await fetch(`${PB_URL}/api/collections/${tableName}/dashboard-schema`)
+  return await res.json()
 }
 
-export const load: PageServerLoad = async ({ locals, params, url }) => {
-  // console.log('params', params)
-  let fullpath = url.pathname.split("/")
-  let path = fullpath[fullpath.length - 1]
-  // console.log('url', path)
+async function getProjectByID(tableName: string, matchedName: string) {
+  let res = await fetch(`${PB_URL}/api/collections/${tableName}/getproject/${matchedName}`)
+  return await res.json()
+}
 
+
+export const load: PageServerLoad = async ({ locals, params }) => {
+  const juris_id = params.uuid
   const programData = await locals.pb.collection('programs').getFullList({
     expand: 'links,blurb',
-    filter: `dashboard_tabs.tab_name = "${path}"`,
+    filter: `dashboard_tabs.tab_name = "community_services"`,
   })
 
-  let tableNames: string[] = []
-  tableNames = await programData.map((program: ProgramType) => program.parent_table)
+  let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
+  //console.log("table names", tableNames)
+  console.log('juris_id', juris_id)
 
-  let tableFetchObject: TableArgumentType[] = await Promise.all(
-    tableNames.map(async (tableName: string) => {
-      const subtableNames = await useFetchSubtables(tableName);
-      return {tableName, subtableNames}
-    })
-  )
-
-  tableNames.forEach(async (tableName: string)=> {
-    let subtables = await useFetchSubtables(tableName)
-    tableFetchObject.push({
-      tableName: tableName,
-      subtableNames: subtables
-    })
+  /*
+  const entries = await locals.pb.collection('05_trash_bash').getFullList({
+    expand: 'collection_site_id'
   })
+  */
 
-  let tables: TableDataResult
-  let projectDetails: object
-  console.log('table fetch object', tableFetchObject)
+  let tablesData: TableDataResult = {}
+  let schema: SchemaMultiType[] = []
 
-  for (const tableArgument of tableFetchObject) {
-
-    const subtables = tableArgument.subtableNames !== null && tableArgument.subtableNames !== undefined
-          ? tableArgument.subtableNames 
-          : [""]
-    try {
-      //tableLivable = await fetchTables(locals.pb, tableNames.filter(str => str !== ''), {expand: 'assistance', filter: 'jurisdiction="7rhur9qxcgq9z23"'})
-      tables = await fetchTables(locals.pb, tableArgument.tableName, {
-        expand: subtables.join(" "),
-        filter: `jurisdiction = "${params.uuid}"`
-      })
-    } catch (err) {
-      console.error(err)
-    }
+  for (let i = 0; i < tableNames.length; i++) {
+    let subtable = await getSubtableSchema(tableNames[i]) ?? [""]
+    console.log('subtables if any', subtable)
+    tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
+      perPage: 1000,
+      filter: `jurisdiction = "${juris_id}"`,
+      expand: subtable.join(', ') // ""
+    });
+    schema.push(await useGetSchema(tableNames[i]))
   }
 
+  let projectDetails: AdworkType
 
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
@@ -131,9 +107,12 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
   } catch (err) {
     console.error('Error trying to get project details', err)
   }
+
   return {
     post: programData,
-    tablesData: tables,
+    tableNames: tableNames,
+    tablesData: tablesData,
+    schema: schema,
     projectDetails: projectDetails
   }
 }

@@ -1,44 +1,76 @@
 <script lang="ts">
-	interface CustomEchartType {
-		parent_table: string;
-		echarts_data: echarts.EChartsOption;
-		chartType?: string;
-		indicatorVal?: string | number;
-		indicatorName?: string;
-	}
-
 	interface CardDataType {
 		program: ProgramType;
 		echarts: CustomEchartType[];
 	}
 
-	import type { PageData } from './$types';
-	import { page } from '$app/stores';
 	import { navigating } from '$app/state';
-	import type { AdworkType } from '../../ambient';
-
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
 	const routedTo = navigating.to?.route.id?.split('/')[2];
 	const routedFromLeft = checkRouteDirection(routedFrom, routedTo);
 
-	import CardBody from '$routes/components/card_body.svelte';
-	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { makeBar, makePie } from '$routes/helpers/chartFormatters';
+	import type {
+		AdworkType,
+		ProgramType,
+		SchemaMultiType,
+		TableDataResult,
+		CustomEchartType
+	} from '../../../ambient';
+	import CardBody from '../../components/card_body.svelte';
+	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
-	let { data }: { data: PageData } = $props();
+	let {
+		data
+	}: {
+		data: {
+			post: ProgramType[];
+			tableNames: string[];
+			tablesData: object;
+			schema: SchemaMultiType[];
+		};
+	} = $props();
 
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
-	$inspect('tablesData', tablesData);
-	let charts = $state<CustomEchartType[]>([]);
-	//$inspect('data',tablesData['14_livable_centers']['items'].map(item=>item.expand.studies).filter(item => item !== undefined))
-	let projectDetails = data.projectDetails as AdworkType[];
-	//$inspect('project details', data.projectDetails)
 	const cardNames = $derived(programs.map((program) => program.program_name));
 	const programNames = $derived(
 		programs.map((program) => program.parent_table).filter((str) => str !== '')
 	);
+	//console.log("Name: ", programNames)
 
+	function splitTableData(tablesData: TableDataResult, tableName: string) {
+		//console.log('splitTableData data',tablesData[tableName].items)
+		return tablesData[tableName].items;
+	}
+
+	type PB_Record_Type = {
+		collectionId: string;
+		collectionName: string;
+		id: string;
+		[key: string]: string | number | Date;
+	};
+
+	function mapTableData(data: PB_Record_Type[], field: string) {
+		return data.map((entry: PB_Record_Type) => entry[field]);
+	}
+
+	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
+		const table = splitTableData(tableData, tableName);
+		return mapTableData(table, field);
+	}
+
+	function splitSubtables(tableData: TableDataResult, tableName: string) {
+		return splitTableData(tablesData, tableName)[0].expand;
+	}
+	$inspect('table data: ', tablesData);
+
+	console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
+
+	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+
+	$inspect('data', data);
+	const charts: CustomEchartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -48,43 +80,109 @@
 		'to_date'
 	];
 
-	//console.log(tablesData['14_livable_centers']['items']);
+   /* 
+	const keys = $derived(
+		data.schema
+			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
+			.map((schema: SchemaMultiType) => schema.schema)
+			.at(0)
+			.map((schema: SchemaType) => schema.Name)
+	);
 
-	const assistance = tablesData['14_livable_centers']['items']
-		.map((item) => item.expand.assistance)
-		.filter((item) => item !== undefined);
-	const studies = tablesData['14_livable_centers']['items']
-		.map((item) => item.expand.studies)
-		.filter((item) => item !== undefined);
+	$inspect('keys: ', keys);
+  */
 
-	charts.push(makePie('14_livable_centers', assistance, 'task_request_type'));
-	charts.push(makePie('14_livable_centers', studies, 'study_progress'));
+	//programNames.forEach((programName) => {
 
-	charts.push({
-		parent_table: '12_fall_planning_workshop',
-		echarts_data: {},
-		chartType: 'indicator',
-		//@ts-ignore
-		indicatorVal: 25,
-		indicatorName: 'Attendees'
-	});
-	charts.push({
-		parent_table: '09_bb_main_street',
-		echarts_data: {},
-		chartType: 'indicator',
-		//@ts-ignore
-		indicatorVal: 17,
-		indicatorName: 'Meeting Count'
-	});
-	charts.push({
-		parent_table: '09_bb_main_street',
-		echarts_data: {},
-		chartType: 'indicator',
-		//@ts-ignore
-		indicatorVal: 8,
-		indicatorName: 'Meeting Hours'
-	});
+	charts.push(
 
+  /**
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'free_tows',
+			'paid_tows'
+		]),
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'towing_charge',
+			'towing_charge_free'
+		]),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+			[
+				'abandoned_vehicles',
+				'law_enforcement_special_cases',
+				'mechanical',
+				'medical_fire',
+				'other'
+			],
+			'Other Services'
+		),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').map,
+			[
+				'abandoned_vehicles',
+				'debris',
+				'gone_on_arrival',
+				'information_assistance',
+				'law_enforcement',
+				'mechanicol',
+				'medical_fire',
+				'towing_services',
+				'traffic_control'
+			],
+			'Motorist Assistance Program Services'
+		),
+
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').rtp_projects,
+			['fiscal_year', 'funding'],
+			'R.T.P. Projects'
+		),
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').yr10_projects,
+			['fiscal_year', 'funding'],
+			'Yr 10 Projects'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
+			['fiscal_year', 'funding'],
+			'TIP'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
+			['fiscal_year', 'funding'],
+			'LET'
+		),
+		makeBar(
+			'37_clean_vehicles',
+			splitTableData(tablesData, '37_clean_vehicles'),
+			'from_date',
+			'emissions_reduction'
+		)
+	);
+   */
+  makeValueCountPie(
+    '14_livable_centers',  // Parent table name (from your data example)
+			splitSubtables(tablesData, '14_livable_centers').studies,
+    'status',                      // The key to count unique values for
+    'Status'          // Optional custom title
+  ),  
+    makeValueCountPie(
+    '14_livable_centers',  // Parent table name (from your data example)
+			splitSubtables(tablesData, '14_livable_centers').studies,
+    'study_progress',                      // The key to count unique values for
+    'Study Progress'          // Optional custom title
+  ),
+
+	)
+
+
+	$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {
 			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
@@ -92,10 +190,13 @@
 			return data;
 		})
 	);
+
+	$inspect('card data', cardData);
+
 </script>
 
 {#if data.post}
-	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={projectDetails} />
+	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={data.projectDetails} />
 {:else}
 	<div>Loading...</div>
 {/if}
