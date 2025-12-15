@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { jurisState } from 'jurisStore';
+	import { jurisState } from '../state/jurisState.svelte';
 	import type { JurisdictionType } from '../ambient';
 	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
