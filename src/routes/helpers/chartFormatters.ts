@@ -179,7 +179,8 @@ export function makeDrilldownPie<T = any>(
 export function makeValueCountPie<T = any>(
   parent_table: string,
   dataset: T[],
-  key: keyof T,
+  primaryKey: keyof T,
+  secondaryKey: keyof T,
   title?: string
 ): CustomEchartType {
   // Utility to humanize snake_case to Title Case
@@ -188,40 +189,36 @@ export function makeValueCountPie<T = any>(
   }
 
   // Breakdown for the key (pie data): count occurrences of each value
-  function getSingleKeyPieData(k: keyof T) {
+  function getValueCountPieData(k: keyof T, ds: T[] = dataset) {
     const countMap: Record<string, number> = {};
-    dataset.forEach(item => {
+    ds.forEach(item => {
       const val = String(item[k]);
       // Optionally: skip undefined/empty
       if (!val) return;
       if (val in countMap) countMap[val]++;
       else countMap[val] = 1;
     });
-    return Object.entries(countMap).map(([name, value]) => ({ name, value }));
+    return Object.entries(countMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
   }
 
+  const humanPrimary = snakeToHuman(String(primaryKey));
+  const parentData = getValueCountPieData(primaryKey);
 
-  const humanKey = snakeToHuman(String(key));
-  const pieData = getSingleKeyPieData(key);
 
-  console.log('chart log', dataset)
-  console.log('key', key)
-  console.log('human key', humanKey)
-  console.log('pie data', pieData)
-
+  // Chart config compatible with your interface
   const charts: echarts.EChartsOption = {
     title: {
-      text: title ?? `Distribution of ${humanKey}`,
+      text: title ?? `Distribution of ${humanPrimary}`,
       left: 'center'
     },
     tooltip: { trigger: 'item' },
     legend: { orient: 'vertical', left: 'left', top: 30 },
     series: [
       {
-        name: '',
+        name: humanPrimary,
         type: 'pie',
         radius: '50%',
-        data: pieData,
+        data: parentData,
         label: {
           show: true,
           position: 'outside', // Outside labels always shown
@@ -239,16 +236,16 @@ export function makeValueCountPie<T = any>(
         }
       },
       {
-        name: '',
+        name: humanPrimary + ' (Inside Labels)',
         type: 'pie',
         radius: '50%',
-        data: pieData,
+        data: parentData,
         itemStyle: {
           opacity: 0 // Makes the series invisible but labels can still show
         },
         label: {
           show: function(params: any) {
-            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed for "fits")
+            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
           },
           position: 'inside',
           formatter: '{c}', // Value inside
@@ -261,13 +258,64 @@ export function makeValueCountPie<T = any>(
     ]
   };
 
+  // Drilldown function available for controller to register
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const originalVal = params.data.originalName;
+    if (!originalVal) return;
+    const filteredDataset = dataset.filter(item => String(item[primaryKey]) === originalVal);
+    const pieData = getValueCountPieData(secondaryKey, filteredDataset);
+    const humanSecondary = snakeToHuman(String(secondaryKey));
+
+    chartInstance.setOption({
+      title: { text: `${params.data.name} by ${humanSecondary}`, left: 'center' },
+      legend: { show: true },
+      series: [
+        {
+          name: `${params.data.name} by ${humanSecondary}`,
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          label: {
+            show: true,
+            position: 'outside', // Outside labels always shown
+            formatter: '{b}: {c}' // Category: value
+          },
+          labelLine: {
+            show: true // Connecting lines for outside labels
+          }
+        },
+        {
+          name: `${params.data.name} by ${humanSecondary}` + ' (Inside Labels)',
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          itemStyle: {
+            opacity: 0 // Makes the series invisible but labels can still show
+          },
+          label: {
+            show: function(params: any) {
+              return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+            },
+            position: 'inside',
+            formatter: '{c}', // Value inside
+            opacity: 1 // Ensures label visibility
+          },
+          labelLine: {
+            show: false // No lines for inside labels
+          }
+        }
+      ]
+    });
+  }
 
   return {
     parent_table,
     charts,
-    chartType: 'pie'
+    chartType: 'drilldown_pie',
+    onDrilldown // <-- custom handler, available on the result for your controller to use
   };
 }
+
 
 export function makePie<T = any>(
   parent_table: string,
