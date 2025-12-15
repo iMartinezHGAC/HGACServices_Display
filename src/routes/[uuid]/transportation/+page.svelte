@@ -17,7 +17,7 @@
 		CustomEchartType
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie } from '../../helpers/chartFormatters';
+	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -129,29 +129,29 @@
 			'Motorist Assistance Program Services'
 		),
 
-		makeDrilldownPie(
+  makeValueCountPie(
 			'35_rtp',
 			splitSubtables(tablesData, '35_rtp').rtp_projects,
-			['fiscal_year', 'funding'],
-			'R.T.P. Projects'
-		),
-		makeDrilldownPie(
+    'project_type',                      // The key to count unique values for
+    'RTP Project Types'          // Optional custom title
+  ),  
+  makeValueCountPie(
 			'35_rtp',
 			splitSubtables(tablesData, '35_rtp').yr10_projects,
-			['fiscal_year', 'funding'],
+    'project_type',                      // The key to count unique values for
 			'Yr 10 Projects'
-		),
-		makeDrilldownPie(
+  ),  
+  makeValueCountPie(
 			'36_transportation_improvement_plan',
 			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			['fiscal_year', 'funding'],
-			'TIP'
+    'project_type',                      // The key to count unique values for
+			'TIP Project Type'
 		),
-		makeDrilldownPie(
+  makeValueCountPie(
 			'36_transportation_improvement_plan',
 			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			['fiscal_year', 'funding'],
-			'LET'
+    'project_type',                      // The key to count unique values for
+			'LET Project Type'
 		),
 		makeBar(
 			'37_clean_vehicles',
