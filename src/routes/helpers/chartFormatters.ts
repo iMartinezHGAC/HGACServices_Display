@@ -201,14 +201,14 @@ export function makeValueCountPie<T = any>(
     return Object.entries(countMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
   }
 
-  const humanPrimary = snakeToHuman(String(primaryKey));
+  const humanPrimary = snakeToHuman(String(secondaryKey ?? primaryKey));
   const parentData = getValueCountPieData(primaryKey);
 
 
   // Chart config compatible with your interface
   const charts: echarts.EChartsOption = {
     title: {
-      text: title ?? `Distribution of ${humanPrimary}`,
+      text: title ?? `${humanPrimary}`,
       left: 'center'
     },
     tooltip: { trigger: 'item' },
@@ -236,7 +236,7 @@ export function makeValueCountPie<T = any>(
         }
       },
       {
-        name: humanPrimary + ' (Inside Labels)',
+        name: humanPrimary,
         type: 'pie',
         radius: '50%',
         data: parentData,
@@ -285,7 +285,7 @@ export function makeValueCountPie<T = any>(
           }
         },
         {
-          name: `${params.data.name} by ${humanSecondary}` + ' (Inside Labels)',
+          name: `${params.data.name} by ${humanSecondary}`,
           type: 'pie',
           radius: '50%',
           data: pieData,
