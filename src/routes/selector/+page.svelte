@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { jurisState } from 'jurisStore';
-	import type { JurisdictionType } from '../ambient';
-	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import { sortDescending } from '$lib/scripts/callbackFunctions.svelte';
   import logo from "$lib/assets/HGAC_logo.svg"
+	import type { JurisdictionType } from '../../ambient';
+	import { jurisState } from '$stores/jurisState.svelte';
 
 	interface props {
 		data: {
