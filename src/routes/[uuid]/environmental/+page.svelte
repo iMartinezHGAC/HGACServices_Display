@@ -1,73 +1,202 @@
 <script lang="ts">
-interface CustomEchartType {
-  parent_table: string,
-  echarts_data: echarts.EChartsOption,
-}
+	interface CardDataType {
+		program: ProgramType;
+		echarts: CustomEchartType[];
+	}
 
-interface CardDataType {
-  program: ProgramType,
-  echarts: CustomEchartType[]
-}
+	import { navigating } from '$app/state';
+	const routedFrom = navigating.from?.route.id?.split('/')[2];
+	const routedTo = navigating.to?.route.id?.split('/')[2];
+	const routedFromLeft = checkRouteDirection(routedFrom, routedTo);
 
-	import type { PageData } from './$types';
-  import {page} from "$app/stores"
-  import {navigating} from '$app/state'
+	import type {
+		AdworkType,
+		ProgramType,
+		SchemaMultiType,
+		TableDataResult,
+		CustomEchartType
+	} from '../../../ambient';
+	import CardBody from '../../components/card_body.svelte';
+	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
-  const routedFrom = navigating.from?.route.id?.split('/')[2]
-  const routedTo = navigating.to?.route.id?.split('/')[2]
-  const routedFromLeft = checkRouteDirection(routedFrom, routedTo)
+	let {
+		data
+	}: {
+		data: {
+			post: ProgramType[];
+			tableNames: string[];
+			tablesData: object;
+			schema: SchemaMultiType[];
+		};
+	} = $props();
 
-	import CardBody from "$routes/components/card_body.svelte";
-	import { checkRouteDirection } from '$routes/helpers/flyAnimationDirection';
-	import { makeBar } from '$routes/helpers/chartFormatters';
+	const programs: ProgramType[] = data.post;
+	const tablesData = data.tablesData;
+	const cardNames = $derived(programs.map((program) => program.program_name));
+	const programNames = $derived(
+		programs.map((program) => program.parent_table).filter((str) => str !== '')
+	);
+	//console.log("Name: ", programNames)
 
-	let { data}: { data: PageData } = $props();
+	function splitTableData(tablesData: TableDataResult, tableName: string) {
+		//console.log('splitTableData data',tablesData[tableName].items)
+		return tablesData[tableName].items;
+	}
 
-  const programs: ProgramType[] = data.post
-  const tablesData = data.tablesData
-  const cardNames=$derived(programs.map(program => program.program_name))
-  const programNames=$derived(
-    programs
-    .map(program => program.parent_table)
-    .filter(str => str !== '')
-  )
-    console.log("Name: ", programNames)
+	type PB_Record_Type = {
+		collectionId: string;
+		collectionName: string;
+		id: string;
+		[key: string]: string | number | Date;
+	};
 
-  const charts: CustomEchartType[] = []
-  const exclusions = ['collectionId', 'collectionName', 'id', 'jurisdiction', 'from_date', 'to_date']
+	function mapTableData(data: PB_Record_Type[], field: string) {
+		return data.map((entry: PB_Record_Type) => entry[field]);
+	}
 
-  const keys = Object.keys(tablesData["33_hgac_coop_purchasing"]['items'][0]) ?? ["test"]
-  console.log("keys: ",keys)
+	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
+		const table = splitTableData(tableData, tableName);
+		return mapTableData(table, field);
+	}
 
-  const usefulKeys = keys.filter(key => !exclusions.includes(key))
-  //programNames.forEach(name => console.log(`For ${name}`,tablesData[name][0].map()))
+	function splitSubtables(tableData: TableDataResult, tableName: string) {
+		return splitTableData(tablesData, tableName)[0].expand;
+	}
+	$inspect('table data: ', tablesData);
 
-/*
-  let trash_pounds = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date" ,"orders_count"))
-  let tires = $derived(makeBar(tablesData["33_hgac_coop_purchasing"].items, "from_date", "orders_dollars"))
-*/
+	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 
-programNames.forEach((programName)=>{
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date" ,"orders_count"))
-    charts.push(makeBar(programName, tablesData["33_hgac_coop_purchasing"]['items'], "from_date", "orders_dollars"))
-  }
-)
+	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
-const cardData: CardDataType[] = $derived(programs.map((program: ProgramType)=> {
-    const eCharts = charts.filter(chart => chart.parent_table == program.parent_table)
-    const data: CardDataType = {program: program, echarts: eCharts}
-    return data
-  }))
+	$inspect('data', data);
+	const charts: CustomEchartType[] = [];
+	const exclusions = [
+		'collectionId',
+		'collectionName',
+		'id',
+		'jurisdiction',
+		'from_date',
+		'to_date'
+	];
 
-$inspect("card data",cardData)
+   /* 
+	const keys = $derived(
+		data.schema
+			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
+			.map((schema: SchemaMultiType) => schema.schema)
+			.at(0)
+			.map((schema: SchemaType) => schema.Name)
+	);
+
+	$inspect('keys: ', keys);
+  */
+
+	//programNames.forEach((programName) => {
+
+	charts.push(
+
+  /**
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'free_tows',
+			'paid_tows'
+		]),
+		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+			'towing_charge',
+			'towing_charge_free'
+		]),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+			[
+				'abandoned_vehicles',
+				'law_enforcement_special_cases',
+				'mechanical',
+				'medical_fire',
+				'other'
+			],
+			'Other Services'
+		),
+		makeDrilldownPie(
+			'34_gc_tow_and_go',
+			splitSubtables(tablesData, '34_gc_tow_and_go').map,
+			[
+				'abandoned_vehicles',
+				'debris',
+				'gone_on_arrival',
+				'information_assistance',
+				'law_enforcement',
+				'mechanicol',
+				'medical_fire',
+				'towing_services',
+				'traffic_control'
+			],
+			'Motorist Assistance Program Services'
+		),
+
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').rtp_projects,
+			['fiscal_year', 'funding'],
+			'R.T.P. Projects'
+		),
+		makeDrilldownPie(
+			'35_rtp',
+			splitSubtables(tablesData, '35_rtp').yr10_projects,
+			['fiscal_year', 'funding'],
+			'Yr 10 Projects'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
+			['fiscal_year', 'funding'],
+			'TIP'
+		),
+		makeDrilldownPie(
+			'36_transportation_improvement_plan',
+			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
+			['fiscal_year', 'funding'],
+			'LET'
+		),
+		makeBar(
+			'37_clean_vehicles',
+			splitTableData(tablesData, '37_clean_vehicles'),
+			'from_date',
+			'emissions_reduction'
+		)
+	);
+  makeValueCountPie(
+    '14_livable_centers',  // Parent table name (from your data example)
+			splitSubtables(tablesData, '14_livable_centers').studies,
+    'status',                      // The key to count unique values for
+    'Status'          // Optional custom title
+  ),  
+    makeValueCountPie(
+    '14_livable_centers',  // Parent table name (from your data example)
+			splitSubtables(tablesData, '14_livable_centers').studies,
+    'study_progress',                      // The key to count unique values for
+    'Study Progress'          // Optional custom title
+  ),
+
+   */
+	)
+
+
+	$inspect('charts data', charts);
+	const cardData: CardDataType[] = $derived(
+		programs.map((program: ProgramType) => {
+			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
+			const data: CardDataType = { program: program, echarts: eCharts };
+			return data;
+		})
+	);
+
+	$inspect('card data', cardData);
 
 </script>
 
 {#if data.post}
-  <CardBody cardNames={cardNames} cardData={cardData} direction={routedFromLeft} adwork={false}/>
+	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={data.projectDetails} />
 {:else}
-  <div>Loading...</div>
-  
+	<div>Loading...</div>
 {/if}
-
-
