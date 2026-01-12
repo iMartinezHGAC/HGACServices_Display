@@ -176,6 +176,197 @@ export function makeDrilldownPie<T = any>(
   };
 }
 
+/**
+ * Creates a drilldown pie chart for table sizes and their field cardinality breakdowns.
+ * @param parent_table - Name for chart
+ * @param dataset - The data structure as provided
+ * @param title - Optional title for the chart
+ * @returns ECharts option plus event handler to enable drilldown.
+ */
+export function makeTableDrilldownPie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  title?: string
+): CustomEchartType {
+  // Utility to humanize snake_case to Title Case
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  // Fields to remove from items
+  const fieldsToRemove = ['collectionId', 'id', 'collectionName', 'created', 'updated', 'from_date', 'to_date'];
+
+  // Extract table map: tableName -> items (with fields removed)
+  const tableMap: Record<string, any[]> = {};
+  const tableSizes: Record<string, number> = {};
+  dataset.forEach(group => {
+    if (typeof group === 'object' && group !== null) {
+      Object.entries(group).forEach(([tableName, info]: [string, any]) => {
+        if (info && Array.isArray(info.items)) {
+          // Remove specified fields from each item
+          const cleanedItems = info.items.map((item: any) => {
+            const newItem = { ...item };
+            fieldsToRemove.forEach(field => {
+              delete newItem[field];
+            });
+            return newItem;
+          });
+          tableMap[tableName] = cleanedItems;
+          tableSizes[tableName] = info.totalItems ?? cleanedItems.length;
+        }
+      });
+    }
+  });
+
+  const tables = Object.keys(tableMap);
+
+  // Build parent/summary pie data
+  const parentData = tables.map(tableName => {
+    return { name: snakeToHuman(tableName), value: tableSizes[tableName] };
+  });
+
+  // Breakdown for a specific table (child pie: fields with unique value counts)
+  function getSingleTablePieData(tableName: string) {
+    const items = tableMap[tableName];
+    if (!items || items.length === 0) return [];
+
+    // Collect all unique fields (after removal)
+    const fieldSet = new Set<string>();
+    items.forEach(item => {
+      if (typeof item === 'object' && item !== null) {
+        Object.keys(item).forEach(key => fieldSet.add(key));
+      }
+    });
+
+    // For each field, compute number of unique non-null values
+    const fieldData = [];
+    for (const field of fieldSet) {
+      const uniqueValues = new Set<string>();
+      items.forEach(item => {
+        const val = item[field];
+        if (val !== undefined && val !== null) {
+          uniqueValues.add(JSON.stringify(val)); // Handle non-primitive values
+        }
+      });
+      fieldData.push({ name: snakeToHuman(field), value: uniqueValues.size });
+    }
+
+    return fieldData;
+  }
+
+  console.log('chart log', dataset);
+  console.log('pie data', parentData);
+
+  // Chart config compatible with your interface
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: title ?? 'Table Sizes',
+      left: 'center'
+    },
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 30 },
+    series: [
+      {
+        name: '',
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        label: {
+          show: true,
+          position: 'outside', // Outside labels always shown
+          formatter: '{b}: {c}' // Category: value
+        },
+        labelLine: {
+          show: true // Connecting lines for outside labels
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: '',
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        itemStyle: {
+          opacity: 0 // Makes the series invisible but labels can still show
+        },
+        label: {
+          show: function(params: any) {
+            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed for "fits")
+          },
+          position: 'inside',
+          formatter: '{c}', // Value inside
+          opacity: 1 // Ensures label visibility
+        },
+        labelLine: {
+          show: false // No lines for inside labels
+        }
+      }
+    ]
+  };
+
+  // Drilldown function available for controller to register
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const nameClicked = params.data.name; // Humanized name
+    const originalTable = tables.find(t => snakeToHuman(t) === nameClicked);
+    if (!originalTable) return;
+    const pieData = getSingleTablePieData(originalTable);
+
+    chartInstance.setOption({
+      title: { text: snakeToHuman(originalTable) + ' Field Cardinalities', left: 'center' },
+      legend: { show: true },
+      series: [
+        {
+          name: snakeToHuman(originalTable),
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          label: {
+            show: true,
+            position: 'outside', // Outside labels always shown
+            formatter: '{b}: {c}' // Category: value
+          },
+          labelLine: {
+            show: true // Connecting lines for outside labels
+          }
+        },
+        {
+          name: snakeToHuman(originalTable) + ' (Inside Labels)',
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          itemStyle: {
+            opacity: 0 // Makes the series invisible but labels can still show
+          },
+          label: {
+            show: function(params: any) {
+              return params.percent! >= 5; // Conditional: show inside value only if slice >=5%
+            },
+            position: 'inside',
+            formatter: '{c}', // Value inside
+            opacity: 1 // Ensures label visibility
+          },
+          labelLine: {
+            show: false // No lines for inside labels
+          }
+        }
+      ]
+    });
+  }
+
+  return {
+    parent_table,
+    charts,
+    chartType: 'drilldown_pie',
+    onDrilldown // <-- custom handler, available on the result for your controller to use
+  };
+}
+
 export function makeValueCountPie<T = any>(
   parent_table: string,
   dataset: T[],

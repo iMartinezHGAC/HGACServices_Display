@@ -12,34 +12,34 @@ async function fetchTable(pb: PocketBase, tableName: string, options: TableFetch
     perPage: 50,
   }
 
-  const mergedOptions = {...defaultOptions, ...options}
+  const mergedOptions = { ...defaultOptions, ...options }
   let results = {}
 
-    try {
+  try {
 
-      const lower_limit: number = Math.floor(Math.random() * 3);
-      const upper_limit: number = Math.floor(Math.random() * 300) + 100;
-      let records
-      if(tableName === "33_hgac_coop_purchasing") {
-        records = await pb.collection(tableName).getList(lower_limit,upper_limit,{
-          sort: mergedOptions.sort,
-          expand: mergedOptions.expand,
-          filter: mergedOptions.filter,
-          perPage: mergedOptions.perPage,
-        })
-      } else {
-        records = await pb.collection(tableName).getList(1,1,{
-          sort: mergedOptions.sort,
-          expand: mergedOptions.expand,
-          filter: mergedOptions.filter,
-          perPage: mergedOptions.perPage,
-        })
-      }
-      results = records 
-    } catch (err) {
-      results = {error: err instanceof Error ? err.message : "Unknown error"}
-      console.error(err)
+    const lower_limit: number = Math.floor(Math.random() * 3);
+    const upper_limit: number = Math.floor(Math.random() * 300) + 100;
+    let records
+    if (tableName === "33_hgac_coop_purchasing") {
+      records = await pb.collection(tableName).getList(lower_limit, upper_limit, {
+        sort: mergedOptions.sort,
+        expand: mergedOptions.expand,
+        filter: mergedOptions.filter,
+        perPage: mergedOptions.perPage,
+      })
+    } else {
+      records = await pb.collection(tableName).getList(1, 1, {
+        sort: mergedOptions.sort,
+        expand: mergedOptions.expand,
+        filter: mergedOptions.filter,
+        perPage: mergedOptions.perPage,
+      })
     }
+    results = records
+  } catch (err) {
+    results = { error: err instanceof Error ? err.message : "Unknown error" }
+    console.error(err)
+  }
   return results
 }
 
@@ -54,29 +54,70 @@ async function getSubtableSchema(tableName: string) {
 }
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-  const collections = ['35_rtp', '36_transportation_improvement_plan']
-  let pbData: CollectionWSubType[] = []
+  const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
+  let pbData = []
 
-  collections.forEach(async (table: string) => {
-    let subCollectionsNames = await getSubtableSchema(table)
-    let subTableNames = subCollectionsNames.map((name: string) => table + "_" + name)
-    subTableNames.forEach(async (subTable: string)=> {
-      let record = await fetchTable(locals.pb, subTable, {
-        //filter: `jurisdiction = "${params.uuid}"`
-        perPage: 1000
-      })
+  for (const table of collections) {
+    console.log('Table to get subtables', table);
+    let subCollectionsNames = await getSubtableSchema(table);
+    console.log('Subtables RAW', subCollectionsNames);
 
-      pbData.push({
-        collection: table, 
-        subCollections: {
-          table_name: subTable, 
-          table_data: record
+    const filter = `jurisdiction.name = "${params.uuid}"`;
+    const expand = subCollectionsNames.join(',');
+    let joinedSubtables = ""
+    if (subCollectionsNames && subCollectionsNames.length > 0) joinedSubtables = subCollectionsNames.join(',')
+
+    // Assuming fetchTable is a wrapper for locals.pb.collection(table).getList(1, perPage, { filter, expand });
+    // If fetchTable doesn't support 'expand', replace with direct PocketBase call:
+    // let mainResponse = await locals.pb.collection(table).getList(1, 1000, { filter, expand });
+    let mainResponse = await fetchTable(locals.pb, table, {
+      perPage: 1000,
+      expand: joinedSubtables, // Add this if fetchTable supports it; otherwise, use the direct call above.
+    });
+
+    const mainRecords = mainResponse.items; // Assuming fetchTable returns { items: [...], ... }
+
+    const subCollections: { [key: string]: any } = {};
+
+    for (const name of subCollectionsNames) {
+      const subTable = table + '_' + name;
+      console.log('Subtable', subTable);
+
+      const allSubs: any[] = [];
+      const seen = new Set<string>();
+
+      for (const rec of mainRecords) {
+        let subs = rec.expand?.[name] ?? [];
+        if (!Array.isArray(subs)) {
+          subs = subs ? [subs] : [];
         }
-      })
-    })
-  })
+        for (const sub of subs) {
+          if (sub?.id && !seen.has(sub.id)) {
+            seen.add(sub.id);
+            allSubs.push(sub);
+          }
+        }
+      }
+
+      // Mimic the structure of fetchTable response
+      const subRecord = {
+        page: 1,
+        perPage: 1000,
+        totalItems: allSubs.length,
+        totalPages: 1,
+        items: allSubs,
+      };
+
+      subCollections[subTable] = subRecord;
+    }
+
+    pbData.push({
+      collection: table,
+      subCollections,
+    });
+  }
 
   return {
-    pbData: pbData 
-  }
-}
+    pbData,
+  };
+};
