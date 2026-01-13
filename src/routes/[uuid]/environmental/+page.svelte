@@ -17,7 +17,8 @@
 		CustomEchartType
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import Indicator from '../../components/indicator.svelte';
+	import { accumulateField, makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -67,7 +68,7 @@
 
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 
-	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+	console.log('split map table data', splitAndMapTable(tablesData, '05_trash_bash', 'miles_cleaned'));
 
 	$inspect('data', data);
 	const charts: CustomEchartType[] = [];
@@ -179,6 +180,30 @@
   ),
 
    */
+    {
+      parent_table: "01_solid_waste",
+      indicatorName: "Grants",
+      indicatorVal: accumulateField(tablesData, '01_solid_waste', 'grants'),
+      chartType: "indicator"
+    },    
+    {
+      parent_table: "05_trash_bash",
+      indicatorName: "Trash Pounds",
+      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'trash_pounds'),
+      chartType: "indicator"
+    },
+    {
+      parent_table: "05_trash_bash",
+      indicatorName: "Tires Removed",
+      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'tires'),
+      chartType: "indicator"
+    },
+    {
+      parent_table: "05_trash_bash",
+      indicatorName: "Recycled Pounds",
+      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'recycled_pounds'),
+      chartType: "indicator"
+    },
 	)
 
 

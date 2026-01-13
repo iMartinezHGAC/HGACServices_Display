@@ -87,6 +87,7 @@
 
   let dataTable = $state<HTMLElement>()
 import 'tippy.js/themes/translucent.css';
+	import UseHart from "./useHART.svelte";
   function toTippy(element: HTMLElement) {
     tippy(element, {
       content: dataTable,
@@ -140,7 +141,9 @@ import 'tippy.js/themes/translucent.css';
 
 <!-- Indicator Card -->
   <div class="w-full max-w-[18rem] h-64 mx-auto my-8 flex flex-col items-center justify-center text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 border-2 border-slate-950 shadow-md shadow-slate-950">
-
+  {#if numericValue === null || numericValue === 0}
+   <UseHart/>
+  {:else}
     {#if above}
       <p class="font-arial text-3xl font-extrabold text-slate-100 w-full pb-4 text-shadow text-shadow-sm">
         {aboveText}
@@ -161,4 +164,6 @@ import 'tippy.js/themes/translucent.css';
         Projects: {data.length}
       </div>
     {/if}
+
+  {/if}
   </div>

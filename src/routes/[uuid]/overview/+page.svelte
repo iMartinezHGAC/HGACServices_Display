@@ -17,14 +17,16 @@
     )
 	);
 
-let combinedA = [ pbData[0], pbData[1] ];
-let combinedB = [pbData[2]] 
+let combinedA = [ pbData[1], pbData[2] ];
+let combinedB = [ pbData[2] ]
 
+// Extract the specific object's items array by searching for the group containing the key
+const data_let = [{
+  "36_transportation_improvement_plan_let": pbData[2]["36_transportation_improvement_plan_let"]
+}];
 
 	$inspect('pb data', pbData);
-	$inspect('data A', combinedA);
-
-
+	$inspect('data A', data_let);
 
 	const tabColors = $derived(Object.values(data.dashboard_groups).map((item) => item.tab_color));
 	const tabNames = $derived(
@@ -35,16 +37,14 @@ let combinedB = [pbData[2]]
   let chartA = makeTableDrilldownPie(
 			'35_rtp',
 		  combinedA,
-      "T&G and RTP"
+      "RTP and TIP"
 		)
 
   let chartB = makeTableDrilldownPie(
 			'35_rtp',
-		  combinedB,
-      "TIP"
+		  data_let,
+      "TIP LET"
 		)
-
-
   /*
   */
 </script>

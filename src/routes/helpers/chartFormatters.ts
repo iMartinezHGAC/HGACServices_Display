@@ -1,6 +1,6 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
-import type { ProgramType, CustomEchartType } from "../../ambient";
+import type { ProgramType, CustomEchartType, TableDataResult } from "../../ambient";
 
 interface CardDataType {
   program: ProgramType,
@@ -194,7 +194,7 @@ export function makeTableDrilldownPie<T = any>(
   }
 
   // Fields to remove from items
-  const fieldsToRemove = ['collectionId', 'id', 'collectionName', 'created', 'updated', 'from_date', 'to_date'];
+  const fieldsToRemove = ['collectionId', 'id', 'collectionName', 'source jurisdiction', 'created', 'updated', 'from_date', 'to_date'];
 
   // Extract table map: tableName -> items (with fields removed)
   const tableMap: Record<string, any[]> = {};
@@ -318,7 +318,7 @@ export function makeTableDrilldownPie<T = any>(
     const pieData = getSingleTablePieData(originalTable);
 
     chartInstance.setOption({
-      title: { text: snakeToHuman(originalTable) + ' Field Cardinalities', left: 'center' },
+      title: { text: snakeToHuman(originalTable) + ' ', left: 'center' },
       legend: { show: true },
       series: [
         {
@@ -637,3 +637,35 @@ export function determinePostscript<T = any>(value: T) {
       return "(Thousands)"
     }
 }
+
+type PB_Record_Type = {
+  collectionId: string;
+  collectionName: string;
+  id: string;
+  [key: string]: string | number | Date;
+};
+
+export function splitTableData(tablesData: TableDataResult, tableName: string) {
+  //console.log('splitTableData data',tablesData[tableName].items)
+  return tablesData[tableName].items;
+}
+
+export function mapTableData(data: PB_Record_Type[], field: string) {
+  return data.map((entry: PB_Record_Type) => entry[field]);
+}
+
+export function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
+  const table = splitTableData(tableData, tableName);
+  return mapTableData(table, field);
+}
+
+export function splitSubtables(tablesData: TableDataResult, tableName: string) {
+  return splitTableData(tablesData, tableName)[0].expand;
+}
+
+export function accumulateField(tablesData: TableDataResult, tableName: string, field: string) {
+  return splitAndMapTable(tablesData, tableName, field)
+    .reduce((accumulator, obj) => accumulator + obj, 0)
+}
+
+
