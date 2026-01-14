@@ -165,7 +165,7 @@
 			'37_clean_vehicles',
 			splitTableData(tablesData, '37_clean_vehicles'),
 			'from_date',
-			'funding_dollars'
+			'vehicles_monitored'
 		)
 	);
 	//});

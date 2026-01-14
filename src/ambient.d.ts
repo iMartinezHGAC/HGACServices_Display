@@ -128,9 +128,9 @@ interface ProgramType {
 
 interface CustomEchartType {
   parent_table: string,
-  charts: echarts.EChartsOption,
+  charts: echarts.EChartsOption | null,
   chartType?: string,
-  indicatorVal?: string | number,
+  indicatorVal?: string | number | null,
   indicatorName?: string,
   onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void
 }

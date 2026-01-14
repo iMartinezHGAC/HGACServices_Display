@@ -1,6 +1,8 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
 import type { ProgramType, CustomEchartType, TableDataResult } from "../../ambient";
+import type { number } from "echarts/core";
+import type { number } from "echarts/types/src/echarts.all.js";
 
 interface CardDataType {
   program: ProgramType,
@@ -645,9 +647,15 @@ type PB_Record_Type = {
   [key: string]: string | number | Date;
 };
 
+function isInvalid(data: any) {
+  if(data === undefined || data === null) return true
+  return false
+}
+
 export function splitTableData(tablesData: TableDataResult, tableName: string) {
-  //console.log('splitTableData data',tablesData[tableName].items)
-  return tablesData[tableName].items;
+  const data = tablesData[tableName].items;
+  if (isInvalid(data)) return null
+  return data
 }
 
 export function mapTableData(data: PB_Record_Type[], field: string) {
@@ -659,13 +667,44 @@ export function splitAndMapTable(tableData: TableDataResult, tableName: string, 
   return mapTableData(table, field);
 }
 
+export function splitExpandedMapTable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const table = splitSubtables(tableData, tableName)[chosenSubtable]
+  return mapTableData(table, field);
+}
+
 export function splitSubtables(tablesData: TableDataResult, tableName: string) {
-  return splitTableData(tablesData, tableName)[0].expand;
+  const data = splitTableData(tablesData, tableName)[0]
+  if (isInvalid(data)) return null
+  return data.expand;
 }
 
-export function accumulateField(tablesData: TableDataResult, tableName: string, field: string) {
-  return splitAndMapTable(tablesData, tableName, field)
-    .reduce((accumulator, obj) => accumulator + obj, 0)
+export function selectSplitSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string) {
+  const data = splitSubtables(tableData, tableName)[chosenSubtable]
+  if (isInvalid(data)) return null
+  return data
 }
 
+export function mapSelectedSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const data = selectSplitSubtable(tableData, tableName, chosenSubtable)
+  return data
+}
 
+export function safeSelectObjectField<T extends Object>(table: T, field: keyof T) {
+  const data = table[field]
+  if(isInvalid(data)) return null
+  return data
+}
+
+function accumulateArray(numArray: number[]){
+  return numArray
+    .reduce((accumulator: number, val) => accumulator + val, 0)
+}
+
+export function accumulateMappedFieldSubtable() {
+
+}
+
+export function accumulateMappedField(tableData: TableDataResult, tableName: string, field: string) {
+  const data = splitAndMapTable(tableData,tableName, field)
+  return accumulateArray(data)
+}

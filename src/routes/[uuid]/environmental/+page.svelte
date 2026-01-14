@@ -17,8 +17,8 @@
 		CustomEchartType
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import Indicator from '../../components/indicator.svelte';
-	import { accumulateField, makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import Table from '../../components/table.svelte';
+	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -40,36 +40,22 @@
 	);
 	//console.log("Name: ", programNames)
 
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
-
 	type PB_Record_Type = {
 		collectionId: string;
 		collectionName: string;
 		id: string;
 		[key: string]: string | number | Date;
-	};
+  };
 
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
-	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
+	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
 
-	console.log('split map table data', splitAndMapTable(tablesData, '05_trash_bash', 'miles_cleaned'));
 
+	// console.log('test safe',  splitTableData(tablesData, '03_wqmp'));
+	// console.log('test table',  safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"));
+	console.log('split table data', splitSubtables(tablesData, '10_parks_and_natural_areas'))
+  
 	$inspect('data', data);
 	const charts: CustomEchartType[] = [];
 	const exclusions = [
@@ -81,129 +67,76 @@
 		'to_date'
 	];
 
-   /* 
-	const keys = $derived(
-		data.schema
-			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
-			.map((schema: SchemaMultiType) => schema.schema)
-			.at(0)
-			.map((schema: SchemaType) => schema.Name)
-	);
-
-	$inspect('keys: ', keys);
-  */
-
-	//programNames.forEach((programName) => {
-
 	charts.push(
-
-  /**
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+    /*
+		makeDrilldownPie('10_parks_and_natural_areas', 
+      splitSubtables(tablesData, '10_parks_and_natural_areas').tng, [
 			'free_tows',
 			'paid_tows'
 		]),
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'towing_charge',
-			'towing_charge_free'
-		]),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-			[
-				'abandoned_vehicles',
-				'law_enforcement_special_cases',
-				'mechanical',
-				'medical_fire',
-				'other'
-			],
-			'Other Services'
-		),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').map,
-			[
-				'abandoned_vehicles',
-				'debris',
-				'gone_on_arrival',
-				'information_assistance',
-				'law_enforcement',
-				'mechanicol',
-				'medical_fire',
-				'towing_services',
-				'traffic_control'
-			],
-			'Motorist Assistance Program Services'
-		),
+    */
 
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').rtp_projects,
-			['fiscal_year', 'funding'],
-			'R.T.P. Projects'
-		),
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').yr10_projects,
-			['fiscal_year', 'funding'],
-			'Yr 10 Projects'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			['fiscal_year', 'funding'],
-			'TIP'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			['fiscal_year', 'funding'],
-			'LET'
-		),
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		)
-	);
-  makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'status',                      // The key to count unique values for
-    'Status'          // Optional custom title
-  ),  
-    makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'study_progress',                      // The key to count unique values for
-    'Study Progress'          // Optional custom title
-  ),
-
-   */
     {
       parent_table: "01_solid_waste",
       indicatorName: "Grants",
-      indicatorVal: accumulateField(tablesData, '01_solid_waste', 'grants'),
+      indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grants'),
       chartType: "indicator"
     },    
     {
+      parent_table: "02_water_quality_monitoring",
+      indicatorName: "Monitoring Sites",
+      indicatorVal: selectSplitSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program').monitoring_sites,
+      chartType: "indicator"
+    },
+    {
+      parent_table: "02_water_quality_monitoring",
+      indicatorName: "Monitoring Events",
+      indicatorVal: splitSubtables(tablesData, '02_water_quality_monitoring').clean_rivers_program.monitoring_events,
+      chartType: "indicator"
+    },
+    {
+      parent_table: "03_wqmp",
+      indicatorName: "Monitoring Events",
+      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      chartType: "indicator"
+    },
+    {
+      parent_table: "03_wqmp",
+      indicatorName: "Monitoring Events",
+      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      chartType: "indicator"
+    },
+    {
+      parent_table: "03_wqmp",
+      indicatorName: "Completed Septic Projects",
+      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+      chartType: "indicator"
+    },
+    {
+      parent_table: "03_wqmp",
+      indicatorName: "Completed Septic Project Costs",
+      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+      chartType: "indicator"
+    },
+    {
       parent_table: "05_trash_bash",
       indicatorName: "Trash Pounds",
-      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'trash_pounds'),
+      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'trash_pounds'),
       chartType: "indicator"
     },
     {
       parent_table: "05_trash_bash",
       indicatorName: "Tires Removed",
-      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'tires'),
+      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'tires'),
       chartType: "indicator"
     },
     {
       parent_table: "05_trash_bash",
       indicatorName: "Recycled Pounds",
-      indicatorVal: accumulateField(tablesData, '05_trash_bash', 'recycled_pounds'),
+      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'recycled_pounds'),
       chartType: "indicator"
     },
+
 	)
 
 
@@ -219,6 +152,8 @@
 	$inspect('card data', cardData);
 
 </script>
+
+<Table data={splitSubtables(tablesData, '10_parks_and_natural_areas').awards as PB_Record_Type}/>
 
 {#if data.post}
 	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={data.projectDetails} />

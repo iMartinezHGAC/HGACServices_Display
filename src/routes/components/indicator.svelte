@@ -6,8 +6,6 @@
 </svelte:head>
 
 <script lang="ts">
-  import transit from "$lib/assets/transit.svg"
-	import { number } from "echarts";
   import tippy from "tippy.js";
 
   const data = [
@@ -64,23 +62,20 @@
 
   $inspect("Above text: ", aboveText)
   let postScript = ""
-
-  //const fromColor = "#69ABDE"
-  //const toColor = "#379ED0"
-
+  const PRECISION = 3
 
   function truncateYAxisValue(value: number) {
     if(value > 999999999) {
       postScript = "B"
-      return value/1000000000
+      return (value/1000000000).toPrecision(PRECISION)
     }
     else if(value > 999999) {
       postScript = "M"
-      return value/1000000
+      return (value/1000000).toPrecision(PRECISION)
     }
     else if (value > 1000) {
       postScript = "K"
-      return value/1000
+      return (value/1000).toPrecision(PRECISION)
     }
     else return value
   }

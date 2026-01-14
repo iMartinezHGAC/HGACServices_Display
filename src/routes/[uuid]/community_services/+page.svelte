@@ -170,7 +170,7 @@
     '14_livable_centers',  // Parent table name (from your data example)
 			splitSubtables(tablesData, '14_livable_centers').studies,
     'status',                      // The key to count unique values for
-    'Status'          // Optional custom title
+    'Study Status'          // Optional custom title
   ),  
     makeValueCountPie(
     '14_livable_centers',  // Parent table name (from your data example)
@@ -178,7 +178,12 @@
     'study_progress',                      // The key to count unique values for
     'Study Progress'          // Optional custom title
   ),
-
+    makeValueCountPie(
+    '14_livable_centers',  // Parent table name (from your data example)
+			splitSubtables(tablesData, '14_livable_centers').assistance,
+    'task_request_type',
+      'Task Request Type',
+  ),
 	)
 
 
