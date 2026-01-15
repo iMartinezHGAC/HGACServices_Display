@@ -101,7 +101,7 @@ const data_let = splitTableData(pbData[2],"36_transportation_improvement_plan_le
 		class="px-auto sticky grid min-h-screen w-auto grid-cols-2 place-items-center bg-slate-700 pt-4 pb-12"
 	>
 
-    <div class="flex items-center w-2/3 h-96 justify-center bg-slate-100">
+    <div class="flex items-center w-2/3 h-[27rem] justify-center bg-slate-100">
 				<Indicator
 					above={true}
 					below={false}
@@ -110,10 +110,10 @@ const data_let = splitTableData(pbData[2],"36_transportation_improvement_plan_le
 					numericValue={fundingIndicator.indicator.indicatorVal as number}
 				/>
     </div>   
-    <div class="flex items-center justify-center bg-slate-100">
+    <div class="flex items-center h-[27rem] justify-center bg-slate-100">
       <RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} />
     </div>   
-    <div class="flex items-center justify-center bg-slate-100">
+    <div class="flex items-center h-[27rem] justify-center bg-slate-100">
       <RenderEchart chart={chartB.chart.charts} onDrilldown={chartB.chart.onDrilldown} />
     </div>
 	</div>
