@@ -557,6 +557,241 @@ export function makeTableDrilldownPie<T = any>(
   };
 }
 
+/**
+ * Creates a drilldown pie chart for hierarchical categories, summing a value key at each level.
+ * @param parent_table - Name for chart
+ * @param dataset - The data
+ * @param keys - Array starting with the value key (e.g., 'funding'), followed by category keys for drilldown (e.g., ['project_type', 'project_category', ...])
+ * @param title - Optional title for the chart
+ * @returns ECharts option plus event handler to enable drilldown.
+ */
+export function makeDrilldownMultPie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  keys: (keyof T)[],
+  title?: string
+): ChartType {
+  // Utility to humanize snake_case to Title Case
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  const valueKey = keys[0] as keyof T;
+  const categoryKeys = keys.slice(1) as (keyof T)[];
+
+  if (categoryKeys.length === 0) {
+    throw new Error('At least one category key is required for drilldown.');
+  }
+
+  let currentLevel = 0;
+  let currentFilters: Partial<Record<keyof T, string>> = {};
+
+  // Function to compute pie data for the current level and filters
+  function computePieData(level: number, filters: Partial<Record<keyof T, string>>): { name: string; value: number }[] {
+    const filteredData = dataset.filter(item => {
+      return Object.entries(filters).every(([cat, val]) => String(item[cat as keyof T]) === val);
+    });
+
+    const currentCat = categoryKeys[level];
+    const sumMap: Record<string, number> = {};
+
+    filteredData.forEach(item => {
+      const catVal = String(item[currentCat]);
+      if (!catVal) return; // Skip empty values
+      const val = Number(item[valueKey]) || 0;
+      sumMap[catVal] = (sumMap[catVal] || 0) + val;
+    });
+
+    return Object.entries(sumMap).map(([name, value]) => ({ name, value }));
+  }
+
+  // Function to get breadcrumb string
+  function getBreadcrumb(): string {
+    const parts: string[] = [];
+    for (let i = 0; i < currentLevel; i++) {
+      const cat = categoryKeys[i];
+      const val = currentFilters[cat]!;
+      parts.push(`${snakeToHuman(String(cat))}: ${val}`);
+    }
+    return parts.join(' > ');
+  }
+
+  // Function to get subtext
+  function getSubtext(): string {
+    let subtext = `By ${snakeToHuman(String(categoryKeys[currentLevel]))}`;
+    const breadcrumb = getBreadcrumb();
+    if (breadcrumb) {
+      subtext += `\n${breadcrumb}`;
+    }
+    return subtext;
+  }
+
+  // Function to update the chart
+  function updateChart(chart: echarts.ECharts, pieData: { name: string; value: number }[], showBack: boolean) {
+    const option: echarts.EChartsOption = {
+      title: {
+        text: title ?? 'Drilldown Pie',
+        subtext: getSubtext(),
+        left: 'center',
+      },
+      tooltip: { trigger: 'item' },
+      legend: { orient: 'vertical', left: 'left', top: 30 },
+      series: [
+        {
+          name: '',
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: '{b}: {c}',
+          },
+          labelLine: {
+            show: true,
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+        },
+        {
+          name: '',
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          itemStyle: {
+            opacity: 0,
+          },
+          label: {
+            show: (params: any) => params.percent! >= 5,
+            position: 'inside',
+            formatter: '{c}',
+            opacity: 1,
+          },
+          labelLine: {
+            show: false,
+          },
+        },
+      ],
+    };
+
+    if (showBack) {
+      option.graphic = {
+        type: 'text',
+        left: 10,
+        top: 10,
+        z: 100,
+        style: {
+          text: 'Back',
+          fill: '#000',
+          fontSize: 14,
+          fontWeight: 'bold',
+        },
+        cursor: 'pointer',
+        onclick: () => {
+          if (currentLevel > 0) {
+            const prevCat = categoryKeys[currentLevel - 1];
+            delete currentFilters[prevCat];
+            currentLevel--;
+            const newPieData = computePieData(currentLevel, currentFilters);
+            updateChart(chart, newPieData, currentLevel > 0);
+          }
+        },
+      };
+    }
+
+    chart.setOption(option, true);
+  }
+
+  // Initial pie data
+  const initialPieData = computePieData(0, {});
+
+  // Initial chart config
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: title ?? 'Drilldown Pie',
+      subtext: getSubtext(),
+      left: 'center',
+    },
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 30 },
+    series: [
+      {
+        name: '',
+        type: 'pie',
+        radius: '50%',
+        data: initialPieData,
+        label: {
+          show: true,
+          position: 'outside',
+          formatter: '{b}: {c}',
+        },
+        labelLine: {
+          show: true,
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        },
+      },
+      {
+        name: '',
+        type: 'pie',
+        radius: '50%',
+        data: initialPieData,
+        itemStyle: {
+          opacity: 0,
+        },
+        label: {
+          show: (params: any) => params.percent! >= 5,
+          position: 'inside',
+          formatter: '{c}',
+          opacity: 1,
+        },
+        labelLine: {
+          show: false,
+        },
+      },
+    ],
+  };
+
+  // Drilldown handler
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    if (params.componentType !== 'series') return;
+
+    const clickedName = params.data.name;
+    const currentCat = categoryKeys[currentLevel];
+    currentFilters[currentCat] = clickedName;
+    currentLevel++;
+
+    if (currentLevel >= categoryKeys.length) {
+      console.log('Maximum drilldown level reached');
+      currentLevel--; // Revert
+      delete currentFilters[currentCat];
+      return;
+    }
+
+    const newPieData = computePieData(currentLevel, currentFilters);
+    updateChart(chartInstance, newPieData, true);
+  }
+
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown,
+    },
+    chartType: 'drilldown_pie',
+  };
+}
+
 export function makeValueCountPie<T = any>(
   parent_table: string,
   dataset: T[],

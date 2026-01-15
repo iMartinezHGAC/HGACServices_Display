@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -14,10 +10,16 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+
+		ChartType,
+
+		CardDataType
+
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { makeBar, makeDrilldownPie, makeValueCountPie, selectSplitSubtable, splitSubtables } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -38,31 +40,6 @@
 		programs.map((program) => program.parent_table).filter((str) => str !== '')
 	);
 	//console.log("Name: ", programNames)
-
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
@@ -70,7 +47,7 @@
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -179,6 +156,14 @@
   ),
 
    */
+
+    makeValueCountPie(
+    '26_aging_nutrition_transport',  // Parent table name (from your data example)
+			selectSplitSubtable(tablesData, '26_aging_nutrition_transport', 'congregate'),
+    'persons',                      // The key to count unique values for
+    'Elderly Fed'          // Optional custom title
+  ),
+
 	)
 
 
