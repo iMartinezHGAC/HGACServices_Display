@@ -1,9 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
-
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
 	const routedTo = navigating.to?.route.id?.split('/')[2];
@@ -14,10 +9,16 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+
+		ChartType,
+
+		CardDataType
+
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -43,26 +44,6 @@
 		//console.log('splitTableData data',tablesData[tableName].items)
 		return tablesData[tableName].items;
 	}
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
@@ -70,7 +51,7 @@
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -179,6 +160,56 @@
   ),
 
    */
+  {
+      parent_table: "22_workforce_TEAMS",
+      indicator: {
+        indicatorName: "Individuals Helped",
+        indicatorVal: accumulateMappedField(tablesData, '22_workforce_TEAMS', 'individuals_helped')
+      },
+      chartType: "indicator"
+    },
+  {
+      parent_table: "22_workforce_TEAMS",
+      indicator: {
+        indicatorName: "Estimated Funding",
+        indicatorVal: accumulateMappedField(tablesData, '22_workforce_TEAMS', 'estimated_funding')
+      },
+      chartType: "indicator"
+    },
+  {
+      parent_table: "24_workforce_wit",
+      indicator: {
+        indicatorName: "Individuals Helped",
+        indicatorVal: accumulateMappedField(tablesData, '24_workforce_wit', 'individuals_helped')
+      },
+      chartType: "indicator"
+    },
+
+  {
+      parent_table: "23_workforce_TX3C",
+      indicator: {
+        indicatorName: "Children Helped",
+        indicatorVal: accumulateMappedField(tablesData, '23_workforce_TX3C', 'children_helped')
+      },
+      chartType: "indicator"
+    },
+  {
+      parent_table: "23_workforce_TX3C",
+      indicator: {
+        indicatorName: "Estimated Funding",
+        indicatorVal: accumulateMappedField(tablesData, '23_workforce_TX3C', 'estimated_funding')
+      },
+      chartType: "indicator"
+    },
+    {
+        parent_table: "24_workforce_wit",
+        indicator: {
+          indicatorName: "Estimated Funding",
+          indicatorVal: accumulateMappedField(tablesData, '24_workforce_wit', 'estimated_funding')
+        },
+        chartType: "indicator"
+      },
+
 	)
 
 
