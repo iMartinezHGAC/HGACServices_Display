@@ -739,6 +739,7 @@ export function makeValueSumPie<T = any>(
   const humanPrimary = snakeToHuman(String(primaryKey));
   const humanSecondary = snakeToHuman(String(secondaryKey));
   const parentData = getSumPieData(primaryKey, secondaryKey);
+  const manyCategories = parentData.length > 5;
 
   // Chart config compatible with your interface
   const charts: echarts.EChartsOption = {
@@ -747,7 +748,12 @@ export function makeValueSumPie<T = any>(
       left: 'center'
     },
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 30 },
+    legend: {
+      show: !manyCategories,
+      orient: 'vertical',
+      left: 'left',
+      top: 30
+    },
     series: [
       {
         name: `${humanSecondary} by ${humanPrimary}`,
@@ -755,18 +761,26 @@ export function makeValueSumPie<T = any>(
         radius: '50%',
         data: parentData,
         label: {
-          show: true,
-          position: 'outside', // Outside labels always shown
+          show: !manyCategories,
+          position: 'outside', // Outside labels
           formatter: '{b}: {c}' // Category: value
         },
         labelLine: {
-          show: true // Connecting lines for outside labels
+          show: !manyCategories // Connecting lines for outside labels
         },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
             shadowOffsetX: 0,
             shadowColor: 'rgba(0, 0, 0, 0.5)'
+          },
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: '{b}: {c}'
+          },
+          labelLine: {
+            show: true
           }
         }
       },
@@ -799,28 +813,49 @@ export function makeValueSumPie<T = any>(
     if (!originalVal) return;
     const filteredDataset = dataset.filter(item => String(item[primaryKey]) === originalVal);
     const pieData = getValueCountPieData(secondaryKey, filteredDataset);
-    const humanSecondary = snakeToHuman(String(secondaryKey));
+    const humanDrilldownSecondary = snakeToHuman(String(secondaryKey));
+    const manySubCategories = pieData.length > 5;
 
     chartInstance.setOption({
-      title: { text: `${params.data.name} by ${humanSecondary}`, left: 'center' },
-      legend: { show: true },
+      title: { text: `${params.data.name} by ${humanDrilldownSecondary}`, left: 'center' },
+      legend: {
+        show: !manySubCategories,
+        orient: 'vertical',
+        left: 'left',
+        top: 30
+      },
       series: [
         {
-          name: `${params.data.name} by ${humanSecondary}`,
+          name: `${params.data.name} by ${humanDrilldownSecondary}`,
           type: 'pie',
           radius: '50%',
           data: pieData,
           label: {
-            show: true,
-            position: 'outside', // Outside labels always shown
+            show: !manySubCategories,
+            position: 'outside', // Outside labels
             formatter: '{b}: {c}' // Category: value
           },
           labelLine: {
-            show: true // Connecting lines for outside labels
+            show: !manySubCategories // Connecting lines for outside labels
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            },
+            label: {
+              show: true,
+              position: 'outside',
+              formatter: '{b}: {c}'
+            },
+            labelLine: {
+              show: true
+            }
           }
         },
         {
-          name: `${params.data.name} by ${humanSecondary}`,
+          name: `${params.data.name} by ${humanDrilldownSecondary}`,
           type: 'pie',
           radius: '50%',
           data: pieData,
@@ -851,7 +886,6 @@ export function makeValueSumPie<T = any>(
     chartType: 'drilldown_pie',
   };
 }
-
 
 export function makePie<T = any>(
   parent_table: string,

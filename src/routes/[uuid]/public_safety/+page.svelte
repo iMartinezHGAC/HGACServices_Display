@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -14,10 +10,16 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+
+		ChartType,
+
+		CardDataType
+
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { makeBar, makeDrilldownPie, makeValueCountPie, makeValueSumPie, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -38,39 +40,16 @@
 		programs.map((program) => program.parent_table).filter((str) => str !== '')
 	);
 	//console.log("Name: ", programNames)
-
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
-	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
+	console.log('test splt', 
+			splitTableData(tablesData, '15_regional_law_enforcement_training'))
+  //splitSubtables(tablesData, '14_livable_centers'));
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -178,7 +157,21 @@
     'Study Progress'          // Optional custom title
   ),
 
-   */
+   */ 
+    makeValueSumPie(
+    '15_regional_law_enforcement_training',  // Parent table name (from your data example)
+			splitTableData(tablesData, '15_regional_law_enforcement_training'),
+    'class_name',
+    'participants',                      // The key to count unique values for
+    'Participants by Class Name'          // Optional custom title
+  ),
+    makeValueSumPie(
+    '15_regional_law_enforcement_training',  // Parent table name (from your data example)
+			splitTableData(tablesData, '15_regional_law_enforcement_training'),
+    'class_name',
+    'contact_hours_provided',                      // The key to count unique values for
+    'Contact Hours by Class Name'          // Optional custom title
+  ),
 	)
 
 
