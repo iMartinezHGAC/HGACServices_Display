@@ -14,7 +14,10 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+
+		ChartType
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
 	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
@@ -70,7 +73,7 @@
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	//$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -80,19 +83,9 @@
 		'to_date'
 	];
 
-	const keys = $derived(
-		data.schema
-			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
-			.map((schema: SchemaMultiType) => schema.schema)
-			.at(0)
-			.map((schema: SchemaType) => schema.Name)
-	);
-
-	$inspect('keys: ', keys);
-
-	//programNames.forEach((programName) => {
 	charts.push(
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+		makeDrilldownPie(
+      '34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
 			'free_tows',
 			'paid_tows'
 		]),
@@ -141,24 +134,38 @@
     'project_type',                      // The key to count unique values for
 			'Yr 10 Projects'
   ),  
-  makeValueCountPie(
+		makeDrilldownPie(
 			'36_transportation_improvement_plan',
 			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-    'project_type',                      // The key to count unique values for
-			'TIP Project Type'
+			[
+        'project_type',                      // The key to count unique values for
+        'project_category',
+        'project_subcategory',
+        'project_subcategory2'
+			],
+			'TIP Projects'
 		),
-  makeValueCountPie(
+		makeDrilldownPie(
 			'36_transportation_improvement_plan',
 			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-    'project_type',                      // The key to count unique values for
-			'LET Project Type'
+			[
+        'project_type',                      // The key to count unique values for
+        'project_category',
+        'project_subcategory',
+        'project_subcategory2'
+			],
+			'LET Projects'
 		),
 		makeBar(
 			'37_clean_vehicles',
 			splitTableData(tablesData, '37_clean_vehicles'),
 			'from_date',
 			'emissions_reduction'
-		)
+		),
+    {
+      parent_table: "36_transportation_improvement_plan",
+      table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type
+    },
 	);
 	charts.push(
 		makeBar(

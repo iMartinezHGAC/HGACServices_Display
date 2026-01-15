@@ -1,8 +1,5 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
+
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -14,11 +11,14 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		ChartType,
+
+		CardDataType
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
 	import Table from '../../components/table.svelte';
-	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -54,10 +54,12 @@
 
 	// console.log('test safe',  splitTableData(tablesData, '03_wqmp'));
 	// console.log('test table',  safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"));
-	console.log('split table data', splitSubtables(tablesData, '10_parks_and_natural_areas'))
+	console.log('split table data', 
+accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
+)
   
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -78,63 +80,127 @@
 
     {
       parent_table: "01_solid_waste",
-      indicatorName: "Grants",
-      indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grants'),
+      indicator: {
+        indicatorName: "Grants",
+        indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grants'),
+      },
       chartType: "indicator"
     },    
     {
-      parent_table: "02_water_quality_monitoring",
-      indicatorName: "Monitoring Sites",
-      indicatorVal: selectSplitSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program').monitoring_sites,
+      parent_table: "01_solid_waste",
+      indicator: {
+        indicatorName: "Grant Funding",
+        indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grant_dollars'),
+      },
       chartType: "indicator"
+    },  
+    {
+      parent_table: "01_solid_waste",
+      table: selectSplitSubtable(tablesData, '01_solid_waste', 'workshop') as PB_Record_Type
     },
     {
       parent_table: "02_water_quality_monitoring",
-      indicatorName: "Monitoring Events",
-      indicatorVal: splitSubtables(tablesData, '02_water_quality_monitoring').clean_rivers_program.monitoring_events,
+      indicator: {
+        indicatorName: "Monitoring Sites",
+        indicatorVal: selectSplitSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program').monitoring_sites,
+      },
+      chartType: "indicator"
+    },
+    {
+      parent_table: "02_water_quality_monitoring",
+      indicator: {
+        indicatorName: "Monitoring Events",
+        indicatorVal: splitSubtables(tablesData, '02_water_quality_monitoring').clean_rivers_program.monitoring_events,
+      },
+      chartType: "indicator"
+    },
+		makeDrilldownDonut(
+			'02_water_quality_monitoring',
+      selectSplitSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program'),
+			[
+				'monitoring_event_cost_hgac',
+				'monitoring_event_cost_inkind',
+			],
+			'Motorist Assistance Program Services',
+      accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost').toString() ?? ""
+		),
+    {
+      parent_table: "03_wqmp",
+      indicator: {
+        indicatorName: "Monitoring Events",
+        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "03_wqmp",
-      indicatorName: "Monitoring Events",
-      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      indicator: {
+        indicatorName: "Monitoring Events",
+        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "03_wqmp",
-      indicatorName: "Monitoring Events",
-      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+      indicator: {
+        indicatorName: "Completed Septic Projects",
+        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "03_wqmp",
-      indicatorName: "Completed Septic Projects",
-      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
-      chartType: "indicator"
-    },
-    {
-      parent_table: "03_wqmp",
-      indicatorName: "Completed Septic Project Costs",
-      indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+      indicator: {
+        indicatorName: "Completed Septic Project Costs",
+        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "05_trash_bash",
-      indicatorName: "Trash Pounds",
-      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'trash_pounds'),
+      indicator: {
+        indicatorName: "Trash Pounds",
+        indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'trash_pounds'),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "05_trash_bash",
-      indicatorName: "Tires Removed",
-      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'tires'),
+      indicator: {
+        indicatorName: "Tires Removed",
+        indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'tires'),
+      },
       chartType: "indicator"
     },
     {
       parent_table: "05_trash_bash",
-      indicatorName: "Recycled Pounds",
-      indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'recycled_pounds'),
+      indicator: {
+        indicatorName: "Recycled Pounds",
+        indicatorVal: accumulateMappedField(tablesData, '05_trash_bash', 'recycled_pounds'),
+      },
       chartType: "indicator"
+    },
+		makeDrilldownDonut(
+			'05_trash_bash',
+      splitTableData(tablesData, '05_trash_bash'),
+			[
+				'vol_under_18',
+				'vol_scouts',
+			],
+			'Motorist Assistance Program Services',
+      accumulateMappedField(tablesData, '05_trash_bash', 'tot_volunteer_count').toString() ?? ""
+		),
+    {
+      parent_table: "10_parks_and_natural_areas",
+      table: splitSubtables(tablesData, '10_parks_and_natural_areas').awards as PB_Record_Type
+    },
+    {
+      parent_table: "10_parks_and_natural_areas",
+      table: splitSubtables(tablesData, '10_parks_and_natural_areas').trips as PB_Record_Type
+    },
+    {
+      parent_table: "13_water_innovation",
+      table: splitTableData(tablesData, '13_water_innovation') as PB_Record_Type
     },
 
 	)
@@ -152,8 +218,6 @@
 	$inspect('card data', cardData);
 
 </script>
-
-<Table data={splitSubtables(tablesData, '10_parks_and_natural_areas').awards as PB_Record_Type}/>
 
 {#if data.post}
 	<CardBody {cardNames} {cardData} direction={routedFromLeft} adwork={data.projectDetails} />

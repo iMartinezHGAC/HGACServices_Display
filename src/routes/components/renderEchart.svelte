@@ -1,14 +1,14 @@
 <script lang="ts">
   import * as echarts from "echarts"
   interface props {
-    chart: echarts.EChartsOption
+    chart: echarts.EChartsOption | null
     onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void  
   }
 
   const {chart, onDrilldown}: props = $props()
 
    // Local state
-  let currentChartOption: echarts.EChartsOption = chart;
+  let currentChartOption: echarts.EChartsOption | null = chart;
   let chartInstance: echarts.ECharts | null = null;
   let isDrilledDown = $state(false);
 
@@ -22,14 +22,14 @@
  
   function restoreRootChart() {
     if (chartInstance) {
-      chartInstance.setOption(chart, true);
+      chartInstance.setOption(chart!, true);
       isDrilledDown = false;
     }
   }
 
   function to(element: HTMLElement) {
     chartInstance = echarts.init(element)
-    chartInstance.setOption(chart)
+    chartInstance.setOption(chart!)
 
     if(onDrilldown) {
       chartInstance.on('click', (params) => {

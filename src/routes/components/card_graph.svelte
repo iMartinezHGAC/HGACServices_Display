@@ -1,14 +1,15 @@
 <script lang="ts">
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import type { AdworkType, CustomEchartType, ProgramType } from '../../ambient';
+	import type { AdworkType, ChartType, ProgramType } from '../../ambient';
 	import { graphsState } from '../charts/graphVectors.svelte';
 	import AdditionalWork from './additionalWork.svelte';
 	import Indicator from './indicator.svelte';
 	import RenderEchart from './renderEchart.svelte';
+	import Table from './table.svelte';
 
 	interface props {
 		project: ProgramType;
-		charts: CustomEchartType[];
+		charts: ChartType[];
 		additionalWork: AdworkType[];
 		subtitle?: string;
 	}
@@ -49,17 +50,20 @@
 
 	<div class="grid w-full grid-cols-2 items-center justify-center gap-1 px-12 py-8">
 		{#each charts as chart}
-			{#if chart.chartType && chart.chartType === 'indicator'}
+			{#if chart.indicator && chart.chartType === 'indicator'}
 				<Indicator
 					above={true}
 					below={false}
-					aboveText={chart.indicatorName!}
+					aboveText={chart.indicator.indicatorName}
 					belowText={''}
-					numericValue={chart.indicatorVal! as number}
+					numericValue={chart.indicator.indicatorVal as number}
 				/>
-			{:else}
+			{:else if chart.table}
+        {console.log('table render', chart.table)}
+        <Table data={chart.table}/>
+			{:else if chart.chart}
 				{console.log(chart)}
-				<RenderEchart chart={chart.charts} onDrilldown={chart.onDrilldown} />
+				<RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
 			{/if}
 		{/each}
 	</div>

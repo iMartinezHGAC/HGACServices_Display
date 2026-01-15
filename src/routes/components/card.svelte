@@ -4,12 +4,12 @@
 
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
 	import { graphsState } from '../charts/graphVectors.svelte';
-	import type { AdworkType, CustomEchartType, ProgramType } from '../../ambient';
+	import type { AdworkType, ChartType, ProgramType } from '../../ambient';
 	import CardGraph from './card_graph.svelte';
 
 	interface cardProps {
 		project: ProgramType;
-		charts: CustomEchartType[];
+		charts: ChartType[];
 		additionalWork: AdworkType[];
 	}
 

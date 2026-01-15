@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -14,10 +10,16 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+
+		ChartType,
+
+		CardDataType
+
+
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, makeValueSumPie, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -39,38 +41,14 @@
 	);
 	//console.log("Name: ", programNames)
 
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
-	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
+	//console.log('test splt',splitTableData (tablesData, '33_hgac_coop_purchasing'))
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -166,19 +144,42 @@
 		)
 	);
   makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
+    '33_hgac_coop_purchasing',  // Parent table name (from your data example)
 			splitSubtables(tablesData, '14_livable_centers').studies,
     'status',                      // The key to count unique values for
     'Status'          // Optional custom title
   ),  
-    makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'study_progress',                      // The key to count unique values for
-    'Study Progress'          // Optional custom title
-  ),
-
    */
+    makeValueSumPie(
+    '33_hgac_coop_purchasing',  // Parent table name (from your data example)
+			splitTableData(tablesData, '33_hgac_coop_purchasing'),
+    'category',                      // The key to count unique values for
+    'orders',
+    'Order Count by Category'          // Optional custom title
+  ),
+    makeValueSumPie(
+    '33_hgac_coop_purchasing',  // Parent table name (from your data example)
+			splitTableData(tablesData, '33_hgac_coop_purchasing'),
+    'category',                      // The key to count unique values for
+    'fee_dollars',
+    'Fee Dollars by Category'          // Optional custom title
+  ),
+  {
+      parent_table: "31_hgac_energy_corp",
+      indicator: {
+        indicatorName: "Energy Dollars",
+        indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'dollar_amount')
+      },
+      chartType: "indicator"
+    },
+  {
+      parent_table: "31_hgac_energy_corp",
+      indicator: {
+        indicatorName: "Accounts",
+        indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'accounts_count')
+      },
+      chartType: "indicator"
+    },
 	)
 
 

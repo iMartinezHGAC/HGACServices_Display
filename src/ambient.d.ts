@@ -85,6 +85,7 @@ type DonutType = {
   value: number,
 }
 
+/*
 interface ChartType {
   chartTitle: string,
   chartData: object,
@@ -98,6 +99,7 @@ interface ChartType {
   colors?: string[] | number[],
   chartType?: string,
 }
+*/
 
 interface ProgramBlurb {
   collectionId: string;
@@ -126,18 +128,34 @@ interface ProgramType {
   dashboard_group?: string;
 }
 
+type PB_Record_Type = {
+  collectionId: string;
+  collectionName: string;
+  id: string;
+  [key: string]: string | number | Date;  // Dynamic properties allowing string, number, or Date values
+};
+
+interface IndicatorType {
+  indicatorVal: string | number | null,
+  indicatorName: string,
+}
+
 interface CustomEchartType {
-  parent_table: string,
   charts: echarts.EChartsOption | null,
-  chartType?: string,
-  indicatorVal?: string | number | null,
-  indicatorName?: string,
   onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void
+}
+
+interface ChartType {
+  parent_table: string,
+  chart?: CustomEchartType,
+  indicator?: IndicatorType,
+  table?: PB_Record_Type
+  chartType?: string,
 }
 
 interface CardDataType {
   program: ProgramType,
-  echarts: CustomEchartType[]
+  echarts: ChartType[]
 }
 
 interface DashboardType {
@@ -174,7 +192,7 @@ interface TableFetchOptions {
 }
 
 interface TableDataResult<T = any> {
-  [tableName: string]: T | {error: string}
+  [tableName: string]: T | { error: string }
 }
 
 

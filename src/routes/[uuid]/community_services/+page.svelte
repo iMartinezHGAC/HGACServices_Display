@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -14,10 +10,12 @@
 		ProgramType,
 		SchemaMultiType,
 		TableDataResult,
-		CustomEchartType
+		CustomEchartType,
+		ChartType,
+		CardDataType
 	} from '../../../ambient';
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { makeBar, makeDrilldownPie, makeGroupedBar, makeValueCountPie, selectSplitSubtable, splitSubtables } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -34,9 +32,6 @@
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
-	const programNames = $derived(
-		programs.map((program) => program.parent_table).filter((str) => str !== '')
-	);
 	//console.log("Name: ", programNames)
 
 	function splitTableData(tablesData: TableDataResult, tableName: string) {
@@ -44,33 +39,14 @@
 		return tablesData[tableName].items;
 	}
 
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
-	$inspect('table data: ', tablesData);
+	//$inspect('table data: ', tablesData);
 
 	console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
-	const charts: CustomEchartType[] = [];
+	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -80,110 +56,40 @@
 		'to_date'
 	];
 
-   /* 
-	const keys = $derived(
-		data.schema
-			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
-			.map((schema: SchemaMultiType) => schema.schema)
-			.at(0)
-			.map((schema: SchemaType) => schema.Name)
-	);
-
-	$inspect('keys: ', keys);
-  */
-
-	//programNames.forEach((programName) => {
-
 	charts.push(
-
-  /**
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'free_tows',
-			'paid_tows'
-		]),
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'towing_charge',
-			'towing_charge_free'
-		]),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-			[
-				'abandoned_vehicles',
-				'law_enforcement_special_cases',
-				'mechanical',
-				'medical_fire',
-				'other'
-			],
-			'Other Services'
-		),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').map,
-			[
-				'abandoned_vehicles',
-				'debris',
-				'gone_on_arrival',
-				'information_assistance',
-				'law_enforcement',
-				'mechanicol',
-				'medical_fire',
-				'towing_services',
-				'traffic_control'
-			],
-			'Motorist Assistance Program Services'
-		),
-
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').rtp_projects,
-			['fiscal_year', 'funding'],
-			'R.T.P. Projects'
-		),
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').yr10_projects,
-			['fiscal_year', 'funding'],
-			'Yr 10 Projects'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			['fiscal_year', 'funding'],
-			'TIP'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			['fiscal_year', 'funding'],
-			'LET'
-		),
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		)
-	);
-   */
   makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
+    '14_livable_centers', 
 			splitSubtables(tablesData, '14_livable_centers').studies,
-    'status',                      // The key to count unique values for
-    'Study Status'          // Optional custom title
+    'status',            
+    'Study Status'      
   ),  
     makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
+    '14_livable_centers',
 			splitSubtables(tablesData, '14_livable_centers').studies,
-    'study_progress',                      // The key to count unique values for
-    'Study Progress'          // Optional custom title
+    'study_progress',   
+    'Study Progress'   
   ),
+    makeGroupedBar(
+      '14_livable_centers',
+			splitSubtables(tablesData, '14_livable_centers').studies,
+      'from_date',
+      [
+        'task_request_type'
+      ],
+      "Assistance Provided"
+    ),
+  {
+    parent_table: "14_livable_centers",
+    table: selectSplitSubtable(tablesData, '14_livable_centers', 'studies') as PB_Record_Type
+  },
+    /*
     makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').assistance,
+    '14_livable_centers', 
+			selectSplitSubtable(tablesData, '14_livable_centers', 'assistance'),
     'task_request_type',
       'Task Request Type',
   ),
+    */
 	)
 
 
@@ -197,6 +103,7 @@
 	);
 
 	$inspect('card data', cardData);
+
 
 </script>
 

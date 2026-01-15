@@ -1,13 +1,7 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
-import type { ProgramType, CustomEchartType, TableDataResult } from "../../ambient";
-import type { number } from "echarts/core";
-import type { number } from "echarts/types/src/echarts.all.js";
+import type { ProgramType, CustomEchartType, TableDataResult, ChartType } from "../../ambient";
 
-interface CardDataType {
-  program: ProgramType,
-  echarts: CustomEchartType[]
-}
 
 // Format value function
 function formatValue(num: number): string {
@@ -22,8 +16,199 @@ function formatValue(num: number): string {
   }
   return num.toLocaleString();
 }
+/**
+ * Creates a drilldown donut chart for multiple value keys and their single-key breakdowns.
+ * Works with both dataset as array (T[]) or single object (T).
+ * 
+ * @param parent_table - Name for chart
+ * @param dataset - The data (single object or array of objects)
+ * @param keys - Array, e.g. ['free_tows','paid_tows']
+ * @param title - Optional title for the chart
+ * @param centerText - Optional text/value to display in the center of the donut
+ * @returns ECharts option plus event handler to enable drilldown.
+ */
+export function makeDrilldownDonut<T = any>(
+  parent_table: string,
+  dataset: T | T[],
+  keys: (keyof T)[],
+  title?: string,
+  centerText?: string
+): ChartType {
+  // Normalize dataset to always be an array
+  const dataArray = Array.isArray(dataset) ? dataset : [dataset];
 
+  // Utility to humanize snake_case to Title Case
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
 
+  // Build parent/summary donut data
+  const parentData = keys.map(key => {
+    let total = 0;
+    dataArray.forEach(item => {
+      const val = Number(item[key]) || 0;
+      total += val;
+    });
+    return { name: snakeToHuman(String(key)), value: total };
+  });
+
+  // Breakdown for a specific key (child donut)
+  function getSingleKeyDonutData(k: keyof T) {
+    const countMap: Record<string, number> = {};
+
+    dataArray.forEach(item => {
+      const val = String(item[k]);
+      // Skip undefined/empty values
+      if (!val) return;
+      if (val in countMap) countMap[val]++;
+      else countMap[val] = 1;
+    });
+
+    return Object.entries(countMap).map(([name, value]) => ({ name, value }));
+  }
+
+  console.log('chart log - dataset length:', dataArray.length);
+  console.log('donut data', parentData);
+
+  // Base title configuration
+  const titleConfig: any[] = [
+    {
+      text: title ?? keys.map(k => snakeToHuman(String(k))).join(' vs '),
+      left: 'center',
+      top: 20
+    }
+  ];
+
+  // Add center text if provided
+  if (centerText) {
+    titleConfig.push({
+      text: centerText,
+      left: 'center',
+      top: 'center',
+      textStyle: {
+        fontSize: 20,
+        fontWeight: 'bold'
+      }
+    });
+  }
+
+  // Chart config
+  const charts: echarts.EChartsOption = {
+    title: titleConfig,
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 50 },
+    series: [
+      {
+        name: '',
+        type: 'pie',
+        radius: ['40%', '70%'], // Donut
+        data: parentData,
+        label: {
+          show: true,
+          position: 'outside',
+          formatter: '{b}: {c}'
+        },
+        labelLine: { show: true },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: '',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        data: parentData,
+        itemStyle: { opacity: 0 },
+        label: {
+          show: function(params: any) {
+            return params.percent! >= 5;
+          },
+          position: 'inside',
+          formatter: '{c}',
+          opacity: 1
+        },
+        labelLine: { show: false }
+      }
+    ]
+  };
+
+  // Drilldown handler
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const keyClicked = params.data.name;
+    const originalKey = keys.find(k => snakeToHuman(String(k)) === keyClicked);
+    if (!originalKey) return;
+
+    const donutData = getSingleKeyDonutData(originalKey);
+
+    const drilldownTitleConfig: any[] = [
+      {
+        text: snakeToHuman(String(originalKey)),
+        left: 'center',
+        top: 20
+      }
+    ];
+
+    if (centerText) {
+      drilldownTitleConfig.push({
+        text: centerText,
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          fontSize: 20,
+          fontWeight: 'bold'
+        }
+      });
+    }
+
+    chartInstance.setOption({
+      title: drilldownTitleConfig,
+      legend: { show: true },
+      series: [
+        {
+          name: snakeToHuman(String(originalKey)),
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: donutData,
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: '{b}: {c}'
+          },
+          labelLine: { show: true }
+        },
+        {
+          name: snakeToHuman(String(originalKey)) + ' (Inside Labels)',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: donutData,
+          itemStyle: { opacity: 0 },
+          label: {
+            show: function(params: any) {
+              return params.percent! >= 5;
+            },
+            position: 'inside',
+            formatter: '{c}',
+            opacity: 1
+          },
+          labelLine: { show: false }
+        }
+      ]
+    });
+  }
+
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown
+    },
+    chartType: 'drilldown_donut',
+  };
+}
 /**
  * Creates a drilldown pie chart for multiple value keys and their single-key breakdowns.
  * @param parent_table - Name for chart
@@ -36,7 +221,7 @@ export function makeDrilldownPie<T = any>(
   dataset: T[],
   keys: (keyof T)[],
   title?: string
-): CustomEchartType {
+): ChartType {
   // Utility to humanize snake_case to Title Case
   function snakeToHuman(str: string): string {
     return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
@@ -172,9 +357,11 @@ export function makeDrilldownPie<T = any>(
 
   return {
     parent_table,
-    charts,
+    chart: {
+      charts,
+      onDrilldown
+    },
     chartType: 'drilldown_pie',
-    onDrilldown // <-- custom handler, available on the result for your controller to use
   };
 }
 
@@ -189,7 +376,7 @@ export function makeTableDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[],
   title?: string
-): CustomEchartType {
+): ChartType {
   // Utility to humanize snake_case to Title Case
   function snakeToHuman(str: string): string {
     return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
@@ -360,12 +547,13 @@ export function makeTableDrilldownPie<T = any>(
       ]
     });
   }
-
   return {
     parent_table,
-    charts,
+    chart: {
+      charts,
+      onDrilldown
+    },
     chartType: 'drilldown_pie',
-    onDrilldown // <-- custom handler, available on the result for your controller to use
   };
 }
 
@@ -375,7 +563,7 @@ export function makeValueCountPie<T = any>(
   primaryKey: keyof T,
   secondaryKey: keyof T,
   title?: string
-): CustomEchartType {
+): ChartType {
   // Utility to humanize snake_case to Title Case
   function snakeToHuman(str: string): string {
     return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
@@ -500,12 +688,167 @@ export function makeValueCountPie<T = any>(
       ]
     });
   }
-
   return {
     parent_table,
-    charts,
+    chart: {
+      charts,
+      onDrilldown
+    },
     chartType: 'drilldown_pie',
-    onDrilldown // <-- custom handler, available on the result for your controller to use
+  };
+}
+
+export function makeValueSumPie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  primaryKey: keyof T,
+  secondaryKey: keyof T,
+  title?: string
+): ChartType {
+  // Utility to humanize snake_case to Title Case
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  // Breakdown for the key (pie data): sum values of each group
+  function getSumPieData(gk: keyof T, vk: keyof T, ds: T[] = dataset) {
+    const sumMap: Record<string, number> = {};
+    ds.forEach(item => {
+      const group = String(item[gk]);
+      const val = item[vk] as unknown as number; // Assume numeric; non-numbers are skipped
+      if (!group || isNaN(val)) return;
+      if (group in sumMap) sumMap[group] += val;
+      else sumMap[group] = val;
+    });
+    return Object.entries(sumMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
+  }
+
+  // Existing count function for drilldown
+  function getValueCountPieData(k: keyof T, ds: T[] = dataset) {
+    const countMap: Record<string, number> = {};
+    ds.forEach(item => {
+      const val = String(item[k]);
+      // Optionally: skip undefined/empty
+      if (!val) return;
+      if (val in countMap) countMap[val]++;
+      else countMap[val] = 1;
+    });
+    return Object.entries(countMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
+  }
+
+  const humanPrimary = snakeToHuman(String(primaryKey));
+  const humanSecondary = snakeToHuman(String(secondaryKey));
+  const parentData = getSumPieData(primaryKey, secondaryKey);
+
+  // Chart config compatible with your interface
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: title ?? `${humanSecondary} by ${humanPrimary}`,
+      left: 'center'
+    },
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 30 },
+    series: [
+      {
+        name: `${humanSecondary} by ${humanPrimary}`,
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        label: {
+          show: true,
+          position: 'outside', // Outside labels always shown
+          formatter: '{b}: {c}' // Category: value
+        },
+        labelLine: {
+          show: true // Connecting lines for outside labels
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      },
+      {
+        name: `${humanSecondary} by ${humanPrimary}`,
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        itemStyle: {
+          opacity: 0 // Makes the series invisible but labels can still show
+        },
+        label: {
+          show: function(params: any) {
+            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+          },
+          position: 'inside',
+          formatter: '{c}', // Value inside
+          opacity: 1 // Ensures label visibility
+        },
+        labelLine: {
+          show: false // No lines for inside labels
+        }
+      }
+    ]
+  };
+
+  // Drilldown function available for controller to register
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const originalVal = params.data.originalName;
+    if (!originalVal) return;
+    const filteredDataset = dataset.filter(item => String(item[primaryKey]) === originalVal);
+    const pieData = getValueCountPieData(secondaryKey, filteredDataset);
+    const humanSecondary = snakeToHuman(String(secondaryKey));
+
+    chartInstance.setOption({
+      title: { text: `${params.data.name} by ${humanSecondary}`, left: 'center' },
+      legend: { show: true },
+      series: [
+        {
+          name: `${params.data.name} by ${humanSecondary}`,
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          label: {
+            show: true,
+            position: 'outside', // Outside labels always shown
+            formatter: '{b}: {c}' // Category: value
+          },
+          labelLine: {
+            show: true // Connecting lines for outside labels
+          }
+        },
+        {
+          name: `${params.data.name} by ${humanSecondary}`,
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          itemStyle: {
+            opacity: 0 // Makes the series invisible but labels can still show
+          },
+          label: {
+            show: function(params: any) {
+              return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+            },
+            position: 'inside',
+            formatter: '{c}', // Value inside
+            opacity: 1 // Ensures label visibility
+          },
+          labelLine: {
+            show: false // No lines for inside labels
+          }
+        }
+      ]
+    });
+  }
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown
+    },
+    chartType: 'drilldown_pie',
   };
 }
 
@@ -514,7 +857,7 @@ export function makePie<T = any>(
   parent_table: string,
   dataset: T[],
   key1: keyof T
-): CustomEchartType {
+): ChartType {
   // Count how many times each unique value appears for key1
   const countMap: Record<string, number> = {};
   dataset.forEach((item: T) => {
@@ -531,35 +874,38 @@ export function makePie<T = any>(
 
   return {
     parent_table: parent_table,
-    charts: {
-      title: {
-        text: snakeToHuman(key1 as string),
-        left: 'center'
-      },
-      tooltip: {
-        trigger: 'item'
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        top: 30,
-      },
-      series: [
-        {
-          name: snakeToHuman(key1 as string),
-          type: 'pie',
-          radius: '50%',
-          data: pieData,
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
+    chart: {
+      charts: {
+        title: {
+          text: snakeToHuman(key1 as string),
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          top: 30,
+        },
+        series: [
+          {
+            name: snakeToHuman(key1 as string),
+            type: 'pie',
+            radius: '50%',
+            data: pieData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
             }
           }
-        }
-      ]
-    }
+        ]
+      }
+    },
+    chartType: 'piechart'
   };
 }
 
@@ -568,45 +914,97 @@ export function makeBar<T = any>(
   dataset: T[],
   key1: keyof T,
   key2: keyof T
-): CustomEchartType {
+): ChartType {
   //console.log('data in makeBar function:', dataset)
   return {
     parent_table: parent_table,
-    charts: {
-      title: {
-        text: snakeToHuman(key2 as string)
-      },
-      tooltip: {},
-      //@ts-ignore
-      xAxis: {
-        data: dataset.map((item: T) => truncateDate(item[key1]))
-      },
-      yAxis: {
-        axisLabel: {
-          formatter: function(value) {
-            if (value > 1000000) {
-              return (value / 1000000) + "M"
+    chart: {
+      charts: {
+        title: {
+          text: snakeToHuman(key2 as string)
+        },
+        tooltip: {},
+        //@ts-ignore
+        xAxis: {
+          data: dataset.map((item: T) => truncateDate(item[key1]))
+        },
+        yAxis: {
+          axisLabel: {
+            formatter: function(value) {
+              if (value > 1000000) {
+                return (value / 1000000) + "M"
+              }
+              else if (value > 100000) {
+                return (value / 1000) + "K"
+              }
+              return value
             }
-            else if (value > 100000) {
-              return (value / 1000) + "K"
-            }
-            return value
           }
-        }
-      },
-      //@ts-ignore
-      series: [
-        {
-          name: snakeToHuman(key2 as string),
+        },
+        //@ts-ignore
+        series: [
+          {
+            name: snakeToHuman(key2 as string),
+            type: 'bar',
+            data: dataset
+              .filter((item: T) => {
+                const value = item[key2];
+                return typeof value !== 'number' || value >= 0;
+              })
+              .map((item: T) => item[key2]),
+          }
+        ],
+      }
+    }
+  }
+}
+
+export function makeGroupedBar<T = any>(
+  parent_table: string,
+  dataset: T[],
+  key1: keyof T,
+  groupFields: (keyof T)[],
+  title: string
+): ChartType {
+  //console.log('data in makeGroupedBar function:', dataset)
+  return {
+    parent_table: parent_table,
+    chart: {
+      charts: {
+        title: {
+          text: title
+        },
+        tooltip: {},
+        legend: {
+          data: groupFields.map((field: keyof T) => snakeToHuman(field as string))
+        },
+        //@ts-ignore
+        xAxis: {
+          data: dataset.map((item: T) => truncateDate(item[key1]))
+        },
+        yAxis: {
+          axisLabel: {
+            formatter: function(value) {
+              if (value > 1000000) {
+                return (value / 1000000) + "M"
+              }
+              else if (value > 100000) {
+                return (value / 1000) + "K"
+              }
+              return value
+            }
+          }
+        },
+        //@ts-ignore
+        series: groupFields.map((groupField: keyof T) => ({
+          name: snakeToHuman(groupField as string),
           type: 'bar',
-          data: dataset
-            .filter((item: T) => {
-              const value = item[key2];
-              return typeof value !== 'number' || value >= 0;
-            })
-            .map((item: T) => item[key2]),
-        }
-      ],
+          data: dataset.map((item: T) => {
+            const value = item[groupField];
+            return typeof value !== 'number' || value >= 0 ? value : null;
+          }),
+        })),
+      }
     }
   }
 }
@@ -648,7 +1046,7 @@ type PB_Record_Type = {
 };
 
 function isInvalid(data: any) {
-  if(data === undefined || data === null) return true
+  if (data === undefined || data === null) return true
   return false
 }
 
@@ -659,7 +1057,17 @@ export function splitTableData(tablesData: TableDataResult, tableName: string) {
 }
 
 export function mapTableData(data: PB_Record_Type[], field: string) {
-  return data.map((entry: PB_Record_Type) => entry[field]);
+  if (data === null || typeof data === 'undefined') {
+    return null;
+  }
+  if (Array.isArray(data)) {
+    return data.map((row: any) => row[field]);
+  } else if (typeof data === 'object') {
+    return data[field];
+  } else {
+    // If primitive, return it directly (or null if it doesn't make sense for your use case)
+    return data;
+  }
 }
 
 export function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
@@ -679,9 +1087,15 @@ export function splitSubtables(tablesData: TableDataResult, tableName: string) {
 }
 
 export function selectSplitSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string) {
-  const data = splitSubtables(tableData, tableName)[chosenSubtable]
-  if (isInvalid(data)) return null
-  return data
+  const subtables = splitSubtables(tableData, tableName);
+  if (subtables === null || !(chosenSubtable in subtables)) {
+    return null;
+  }
+  const data = subtables[chosenSubtable];
+  if (isInvalid(data)) {
+    return null;
+  }
+  return data;
 }
 
 export function mapSelectedSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
@@ -691,20 +1105,34 @@ export function mapSelectedSubtable(tableData: TableDataResult, tableName: strin
 
 export function safeSelectObjectField<T extends Object>(table: T, field: keyof T) {
   const data = table[field]
-  if(isInvalid(data)) return null
+  if (isInvalid(data)) return null
   return data
 }
 
-function accumulateArray(numArray: number[]){
+function accumulateArray(numArray: number[]) {
   return numArray
     .reduce((accumulator: number, val) => accumulator + val, 0)
 }
 
-export function accumulateMappedFieldSubtable() {
-
+export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const data = selectSplitSubtable(tableData, tableName, chosenSubtable);
+  if (data === null) {
+    return null;
+  }
+  const mappedData = mapTableData(data, field);
+  if (mappedData === null) {
+    return null;
+  }
+  if (typeof mappedData === 'number') {
+    return mappedData;
+  }
+  if (Array.isArray(mappedData)) {
+    return accumulateArray(mappedData as number[]);
+  }
+  return null;
 }
 
 export function accumulateMappedField(tableData: TableDataResult, tableName: string, field: string) {
-  const data = splitAndMapTable(tableData,tableName, field)
+  const data = splitAndMapTable(tableData, tableName, field)
   return accumulateArray(data)
 }
