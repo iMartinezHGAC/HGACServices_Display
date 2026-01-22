@@ -2,22 +2,23 @@
 	import { fly } from 'svelte/transition';
 	import { toCamelCase } from '../helpers/caseConversion';
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import type { ProgramType, CustomEchartType, AdworkType } from '../../ambient';
+	import type { ProgramType, CustomEchartType, AdworkType, ChartType } from '../../ambient';
 	import Card from './card.svelte';
+	import { areAllChartsEmptyOrZero } from '../helpers/chartFormatters';
 
 	interface CardDataType {
 		program: ProgramType;
-		echarts: CustomEchartType[];
+		echarts: ChartType[];
 	}
 
 	interface cardProps {
-		cardNames: any[];
+		cardNames: string[];
 		cardData: CardDataType[];
 		direction: boolean;
 		adwork: AdworkType[] | undefined;
 	}
 
-	const { cardNames, cardData, direction, adwork }: cardProps = $props();
+	let { cardNames, cardData, direction, adwork }: cardProps = $props();
 
 	const targetIndex = cardData.findIndex(
 		(item) => item.program?.parent_table === '34_gc_tow_and_go'
@@ -32,6 +33,14 @@
 	}
 
 	let flyValue = $state(direction ? -400 : 400);
+
+$inspect('card names', cardNames)
+
+  cardData.forEach(card => {
+    if(areAllChartsEmptyOrZero(card.echarts)) {
+      cardNames = cardNames.filter(cardName => cardName !== card.program.program_name)
+    }
+  })
 
 	//$inspect('card data', cardData);
 </script>
