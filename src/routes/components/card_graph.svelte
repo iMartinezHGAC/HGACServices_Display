@@ -2,7 +2,7 @@
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
 	import type { AdworkType, ChartType, CustomEchartType, ProgramType } from '../../ambient';
 	import { graphsState } from '../charts/graphVectors.svelte';
-	import { isChartEmptyOrAllZero, isIndicatorEmptyOrZero, isTableEmptyOrAllZero } from '../helpers/chartFormatters';
+	import { isAllComponentsEmptyOrZero, isChartEmptyOrAllZero, isIndicatorEmptyOrZero, isTableEmptyOrAllZero } from '../helpers/chartFormatters';
 	import AdditionalWork from './additionalWork.svelte';
 	import Indicator from './indicator.svelte';
 	import RenderEchart from './renderEchart.svelte';
@@ -36,6 +36,9 @@
 		if (workVector) graphState.add(workVector);
 	}
 
+function getNonEmptyChartCount(charts: ChartType[]): number {
+  return charts.filter(chart => !isAllComponentsEmptyOrZero(chart)).length;
+}
 
 </script>
 
@@ -47,25 +50,49 @@
 	{/if}
 
 	<div class="grid w-full grid-cols-2 items-center justify-center gap-1 px-12 py-8">
-		{#each charts as chart}
-			{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-				<Indicator
-					above={true}
-					below={false}
-					aboveText={chart.indicator.indicatorName}
-					belowText={''}
-					numericValue={Number(chart.indicator.indicatorVal)}
-				/>
-			{:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
-				{console.log('table render', chart.table)}
-				<Table data={chart.table} />
-			{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-				{console.log(chart)}
-				<RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
-			{:else}
-			{/if}
-		{/each}	</div>
-	{#if charts.length > 2}
+    {#if getNonEmptyChartCount(charts) <= 2 || accordionFlag}
+      {#each charts as chart}
+        {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
+          <Indicator
+            above={true}
+            below={false}
+            aboveText={chart.indicator.indicatorName}
+            belowText={''}
+            numericValue={Number(chart.indicator.indicatorVal)}
+          />
+        {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
+          {console.log('table render', chart.table)}
+          <Table data={chart.table} />
+        {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+          {console.log(chart)}
+          <RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
+        {:else}
+          <!-- BLANK CHART HERE -->
+        {/if}
+      {/each}
+    {:else}
+      {#each charts.slice(0,2) as chart}
+        {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
+          <Indicator
+            above={true}
+            below={false}
+            aboveText={chart.indicator.indicatorName}
+            belowText={''}
+            numericValue={Number(chart.indicator.indicatorVal)}
+          />
+        {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
+          {console.log('table render', chart.table)}
+          <Table data={chart.table} />
+        {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+          {console.log(chart)}
+          <RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
+        {:else}
+          <!-- BLANK CHART HERE -->
+        {/if}
+      {/each}
+  {/if}
+  </div>
+	{#if getNonEmptyChartCount(charts) > 2}
 		<button
 			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white"
 			onclick={() => {
