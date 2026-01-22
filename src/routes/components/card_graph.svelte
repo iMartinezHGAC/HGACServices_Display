@@ -63,7 +63,6 @@
 				{console.log(chart)}
 				<RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
 			{:else}
-				<div>No data use HART plz</div>
 			{/if}
 		{/each}	</div>
 	{#if charts.length > 2}
