@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { EventType } from "../../ambient";
 	import { snakeToHuman } from "../helpers/caseConversion";
 
   // Emphasizing TypeScript: Define a type for PocketBase records, including fixed properties and dynamic key-value pairs.
@@ -10,7 +11,7 @@
   };
 
   interface Props {
-    data: PB_Record_Type | PB_Record_Type[] | null;  
+    data: PB_Record_Type | PB_Record_Type[] | EventType[] | null;  
     columns?: string[];  
   }
 
@@ -18,18 +19,34 @@
 
   $inspect('props', data);
 
-  let records: PB_Record_Type[] | null = data
+  let records: PB_Record_Type[] | EventType[] | null = data
     ? Array.isArray(data) ? data : [data] 
     : null
 
+if (records && records.length > 0 && 'event_name' in records[0]) {
+  records = records.map(record => {
+    if (record.event_date) {
+      record.event_date = new Date(record.event_date).toISOString().split('T')[0];
+    }
+    return record;
+  });
+}
   // Define excluded keys to remove from display
-  const excludedKeys = ['collectionId', 'collectionName', 'id', 'created', 'from_date', 'jurisdiction', 'source_jurisdiction', 'to_date', 'updated'];
+  const excludedKeys = ['collectionId', 'collectionName', 'id', 'created', 'from_date', 'jurisdiction', 'source_jurisdiction', 'to_date', 'updated', 'FormData', 'email', 'address', 'program'];
 
-  let allKeys: string[] | null = records 
-    ? columns.length > 0 
-      ? columns 
-      : [...new Set(records.flatMap(record => Object.keys(record).filter(key => !excludedKeys.includes(key))))]
-    : null
+let allKeys: string[] | null = records 
+  ? columns.length > 0 
+    ? columns 
+    : (function() {
+        const computedKeys = [...new Set(records.flatMap(record => Object.keys(record).filter(key => !excludedKeys.includes(key))))];
+        if (records.length > 0 && 'event_name' in records[0]) {
+          const preferredOrder = ['event_name', 'event_description', 'event_date', 'attendee_count'];
+          return preferredOrder.filter(key => computedKeys.includes(key))
+            .concat(computedKeys.filter(key => !preferredOrder.includes(key)));
+        }
+        return computedKeys;
+      })()
+  : null
 </script>
 
 <!-- Wrap the table in a div for independent scrolling of body with fixed header -->

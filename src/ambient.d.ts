@@ -149,7 +149,7 @@ interface ChartType {
   parent_table: string,
   chart?: CustomEchartType,
   indicator?: IndicatorType,
-  table?: PB_Record_Type
+  table?: PB_Record_Type | EventType[]
   chartType?: string,
 }
 
@@ -214,4 +214,14 @@ type SchemaType = {
 type SchemaMultiType = {
   tableName: string,
   schema: SchemaType[]
+}
+
+type EventType = {
+  FormData: Object,
+  email: string,
+  event_name: string,
+  event_description: string,
+  attendee_count: number,
+  program: string,
+  event_date: string | Date
 }

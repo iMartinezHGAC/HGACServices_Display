@@ -10,7 +10,7 @@
 	interface cardProps {
 		project: ProgramType;
 		charts: ChartType[];
-		additionalWork: AdworkType[];
+		additionalWork: AdworkType[] | undefined;
 	}
 
 	const { project, charts, additionalWork, subtitle }: cardProps = $props();
@@ -46,10 +46,9 @@
 
 <div
 	class="mb-4 w-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
-	{@attach toGraph}
 >
 	<div class="flex w-full bg-slate-700">
-		<div class="flex w-1/3 flex-col">
+		<div class="flex w-full flex-col">
 			<h1
 				class={'small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white'}
 			>

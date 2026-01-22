@@ -1,6 +1,5 @@
 <script lang="ts">
 
-
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
 	const routedTo = navigating.to?.route.id?.split('/')[2];
@@ -12,10 +11,10 @@
 		SchemaMultiType,
 		TableDataResult,
 		ChartType,
-
-		CardDataType
-
+		CardDataType,
+		EventType
 	} from '../../../ambient';
+
 	import CardBody from '../../components/card_body.svelte';
 	import Table from '../../components/table.svelte';
 	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
@@ -29,6 +28,8 @@
 			tableNames: string[];
 			tablesData: object;
 			schema: SchemaMultiType[];
+      projectDetails: AdworkType[];
+      eventsData: EventType[];
 		};
 	} = $props();
 
@@ -47,16 +48,13 @@
 		[key: string]: string | number | Date;
   };
 
-	$inspect('table data: ', tablesData);
-
+	//$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
-
-
 	// console.log('test safe',  splitTableData(tablesData, '03_wqmp'));
 	// console.log('test table',  safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"));
-	console.log('split table data', 
-accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
-)
+	//console.log('split table data', 
+//accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
+//)
   
 	$inspect('data', data);
 	const charts: ChartType[] = [];
@@ -202,8 +200,18 @@ accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_
       parent_table: "13_water_innovation",
       table: splitTableData(tablesData, '13_water_innovation') as PB_Record_Type
     },
-
 	)
+
+data.tableNames.forEach((tableName: string) => {
+  const filtered = data.eventsData.filter((field: any) => field.program === tableName);
+  
+  if (filtered.length > 0) {
+    charts.push({
+      parent_table: tableName,
+      table: filtered as EventType[]
+    });
+  }
+});
 
 
 	$inspect('charts data', charts);

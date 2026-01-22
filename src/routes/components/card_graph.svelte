@@ -10,7 +10,7 @@
 	interface props {
 		project: ProgramType;
 		charts: ChartType[];
-		additionalWork: AdworkType[];
+		additionalWork: AdworkType[] | undefined;
 		subtitle?: string;
 	}
 	const { project, charts, additionalWork, subtitle }: props = $props();
@@ -21,18 +21,13 @@
 		return 'Show fewer metrics';
 	});
 
-	// Toggle state for expand/collapse
 	let expanded = $state(false);
 
-	// Derived value: items to render
 	let itemsToShow = $derived(expanded ? additionalWork : additionalWork.slice(0, 3));
 
-	// Toggle function
 	function toggleExpanded() {
 		expanded = !expanded;
 	}
-
-	// to
 
 	const graphState = graphsState();
 
@@ -99,11 +94,13 @@
 					</div>
 				{/if}
 			{:else}
+        <!--
 				<AdditionalWork
 					bodyText={'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'}
 					projectName={'Ieacta Est'}
 					funding={0}
 				/>
+        -->
 			{/if}
 		</div>
 	{/if}

@@ -2,7 +2,7 @@
 	import { fly } from 'svelte/transition';
 	import { toCamelCase } from '../helpers/caseConversion';
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import type { ProgramType, CustomEchartType } from '../../ambient';
+	import type { ProgramType, CustomEchartType, AdworkType } from '../../ambient';
 	import Card from './card.svelte';
 
 	interface CardDataType {
@@ -14,7 +14,7 @@
 		cardNames: any[];
 		cardData: CardDataType[];
 		direction: boolean;
-		adwork: Object[] | undefined;
+		adwork: AdworkType[] | undefined;
 	}
 
 	const { cardNames, cardData, direction, adwork }: cardProps = $props();
@@ -46,22 +46,21 @@
 	</div>
 {/snippet}
 
-<div class="flex w-screen">
+<div class="w-screen">
 	<div
-		class="top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl"
-		transition:fly={{ y: 200, duration: 300 }}
+		class="fixed top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl"
 	>
 		{#each cardNames as cardName}
 			{@render formattedEntryText(cardName)}
 		{/each}
 	</div>
 	<div
-		class="h-max-screen z-10 flex h-screen w-11/12 flex-col items-center justify-start overflow-auto scroll-smooth pt-[0%] pb-[6%]"
+		class="z-10 ml-56 flex h-screen w-[calc(100%-14rem)] flex-col items-center justify-start overflow-auto scroll-smooth pt-[0%] pb-[6%]"
 		transition:fly={{ x: flyValue, duration: 300 }}
 	>
-		<div class="flexy flex-col">
+		<div class="flex flex-col w-full">
 			{#each cardData as card, i}
-				<div class="flexy" id={card.program.program_name.split(' ').join('')}>
+				<div class="flex w-full" id={card.program.program_name.split(' ').join('')}>
 					<Card project={card.program} charts={card.echarts} additionalWork={adwork} />
 				</div>
 			{/each}
