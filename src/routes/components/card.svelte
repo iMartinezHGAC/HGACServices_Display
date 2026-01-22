@@ -46,7 +46,7 @@
 </script>
 {#if areAllChartsEmptyOrZero(charts)}
 <div
-	class="mb-4 w-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
+	class="w-full flex-col items-center justify-center rounded-b-md bg-white"
 >
 
 </div>
