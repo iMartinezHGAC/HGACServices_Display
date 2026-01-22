@@ -77,13 +77,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   console.log("table names", tableNames)
-  //console.log('juris_id', juris_id)
 
-  /*
-  const entries = await locals.pb.collection('05_trash_bash').getFullList({
-    expand: 'collection_site_id'
-  })
-  */
 
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
@@ -95,7 +89,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
-      filter: `jurisdiction = "${juris_id}"`,
+      //filter: `jurisdiction = "${juris_id}"`,
       expand: joinedSubtables // ""
     });
     schema.push(await useGetSchema(tableNames[i]))

@@ -804,8 +804,10 @@ export function makeValueCountPie<T = any>(
     return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
-  // Breakdown for the key (pie data): count occurrences of each value
   function getValueCountPieData(k: keyof T, ds: T[] = dataset) {
+    if (!ds) {
+      return [];
+    }
     const countMap: Record<string, number> = {};
     ds.forEach(item => {
       const val = String(item[k]);
@@ -1378,7 +1380,7 @@ export function safeSelectObjectField<T extends Object>(table: T, field: keyof T
   return data
 }
 
-function accumulateArray(numArray: number[]) {
+export function accumulateArray(numArray: number[]) {
   return numArray
     .reduce((accumulator: number, val) => accumulator + val, 0)
 }
@@ -1404,4 +1406,20 @@ export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableN
 export function accumulateMappedField(tableData: TableDataResult, tableName: string, field: string) {
   const data = splitAndMapTable(tableData, tableName, field)
   return accumulateArray(data)
+}
+
+export function collectAllSubrecords(tablesData: TableDataResult, tableName: string, subtable: string): PB_Record_Type[] {
+  const items = splitTableData(tablesData, tableName);
+  if (!items) return [];
+  return items.reduce((acc: PB_Record_Type[], item: any) => {
+    if (item.expand && item.expand[subtable]) {
+      const sub = item.expand[subtable];
+      if (Array.isArray(sub)) {
+        acc.push(...sub);
+      } else {
+        acc.push(sub);
+      }
+    }
+    return acc;
+  }, []);
 }

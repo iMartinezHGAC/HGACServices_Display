@@ -12,13 +12,11 @@
 		ChartType,
 		CardDataType,
 		EventType,
-
 		PB_Record_Type
-
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateArray, accumulateMappedField, accumulateMappedFieldSubtable, collectAllSubrecords, mapTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -56,118 +54,135 @@
 		'to_date'
 	];
 
-   /* 
-	const keys = $derived(
-		data.schema
-			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
-			.map((schema: SchemaMultiType) => schema.schema)
-			.at(0)
-			.map((schema: SchemaType) => schema.Name)
-	);
-
-	$inspect('keys: ', keys);
-  */
-
-	//programNames.forEach((programName) => {
 
 	charts.push(
-
-  /**
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'free_tows',
-			'paid_tows'
-		]),
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'towing_charge',
-			'towing_charge_free'
-		]),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-			[
-				'abandoned_vehicles',
-				'law_enforcement_special_cases',
-				'mechanical',
-				'medical_fire',
-				'other'
-			],
-			'Other Services'
-		),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').map,
-			[
-				'abandoned_vehicles',
-				'debris',
-				'gone_on_arrival',
-				'information_assistance',
-				'law_enforcement',
-				'mechanicol',
-				'medical_fire',
-				'towing_services',
-				'traffic_control'
-			],
-			'Motorist Assistance Program Services'
-		),
-
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').rtp_projects,
-			['fiscal_year', 'funding'],
-			'R.T.P. Projects'
-		),
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').yr10_projects,
-			['fiscal_year', 'funding'],
-			'Yr 10 Projects'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			['fiscal_year', 'funding'],
-			'TIP'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			['fiscal_year', 'funding'],
-			'LET'
-		),
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		)
-	);
-  makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'status',                      // The key to count unique values for
-    'Status'          // Optional custom title
-  ),  
-    makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'study_progress',                      // The key to count unique values for
-    'Study Progress'          // Optional custom title
-  ),
-
-   */
-
-    makeValueCountPie(
-    '26_aging_nutrition_transport',  // Parent table name (from your data example)
-			selectSplitSubtable(tablesData, '26_aging_nutrition_transport', 'congregate'),
-    'persons',                      // The key to count unique values for
-    'Elderly Fed'          // Optional custom title
-  ),
-
+    {
+      parent_table: "27_aging_direct_services",
+      indicator: {
+        indicatorName: "Elderly Transported ",
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'assistance', 'persons') + accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'respite', 'persons')) ?? 0, 
+      },
+      chartType: "indicator"
+    },  
+    {
+      parent_table: "26_aging_nutrition_transport",
+      indicator: {
+        indicatorName: "Trips Provided",
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'transport','trips_provided'))
+      },
+      chartType: "indicator"
+    },  
+    {
+      parent_table: "26_aging_nutrition_transport",
+      indicator: {
+        indicatorName: "Funding",
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'transport','trips_cost'))
+      },
+      chartType: "indicator"
+    },  
 	)
+
+  // New function adapted from makePie for two-slice sum-based pies
+export function makeTwoSlicePie(
+  parent_table: string,
+  titleText: string,
+  seriesName: string,
+  slice1Name: string,
+  slice1Value: number,
+  slice2Name: string,
+  slice2Value: number
+): ChartType {
+  const pieData = [
+    { name: slice1Name, value: slice1Value },
+    { name: slice2Name, value: slice2Value }
+  ];
+
+  return {
+    parent_table: parent_table,
+    chart: {
+      charts: {
+        title: {
+          text: titleText,
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          top: 30,
+        },
+        series: [
+          {
+            name: seriesName,
+            type: 'pie',
+            radius: '50%',
+            data: pieData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      }
+    },
+    chartType: 'piechart'
+  };
+}
+
+
+// Elderly Fed pie
+const personsHome = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'home'), 'persons') as number[]) || []) || 0;
+const personsCongregate = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'congregate'), 'persons') as number[]) || []) || 0;
+charts.push(
+  makeTwoSlicePie(
+    '26_aging_nutrition_transport',
+    'Elderly Fed',
+    'Elderly Fed',
+    'Home',
+    personsHome,
+    'Congregate',
+    personsCongregate
+  )
+);
+
+// Meals Provided pie
+const mealsHome = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'home'), 'meals') as number[]) || []) || 0;
+const mealsCongregate = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'congregate'), 'meals') as number[]) || []) || 0;
+charts.push(
+  makeTwoSlicePie(
+    '26_aging_nutrition_transport',
+    'Meals Provided',
+    'Meals Provided',
+    'Home',
+    mealsHome,
+    'Congregate',
+    mealsCongregate
+  )
+);
+
+// Funding pie
+const costHome = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'home'), 'cost') as number[]) || []) || 0;
+const costCongregate = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'congregate'), 'cost') as number[]) || []) || 0;
+charts.push(
+  makeTwoSlicePie(
+    '26_aging_nutrition_transport',
+    'Funding',
+    'Funding',
+    'Home',
+    costHome,
+    'Congregate',
+    costCongregate
+  )
+);
 
 
 data.tableNames.forEach((tableName: string) => {
-  const filtered = data.eventsData.filter((field: any) => field.program === tableName);
+  const filtered = data.eventsData?.filter((field: any) => field.program === tableName) || [];
   
   if (filtered.length > 0) {
     charts.push({
