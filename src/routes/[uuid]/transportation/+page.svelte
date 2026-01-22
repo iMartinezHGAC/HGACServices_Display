@@ -1,8 +1,4 @@
 <script lang="ts">
-	interface CardDataType {
-		program: ProgramType;
-		echarts: CustomEchartType[];
-	}
 
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
@@ -13,14 +9,16 @@
 		AdworkType,
 		ProgramType,
 		SchemaMultiType,
-		TableDataResult,
-		CustomEchartType,
+		ChartType,
+		CardDataType,
+		EventType,
 
-		ChartType
+		PB_Record_Type
 
 	} from '../../../ambient';
+
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -31,41 +29,15 @@
 			tableNames: string[];
 			tablesData: object;
 			schema: SchemaMultiType[];
+      projectDetails: AdworkType[];
+      eventsData: EventType[];
 		};
 	} = $props();
 
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
-	const programNames = $derived(
-		programs.map((program) => program.parent_table).filter((str) => str !== '')
-	);
-	//console.log("Name: ", programNames)
 
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-	};
-
-	function mapTableData(data: PB_Record_Type[], field: string) {
-		return data.map((entry: PB_Record_Type) => entry[field]);
-	}
-
-	function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
-		const table = splitTableData(tableData, tableName);
-		return mapTableData(table, field);
-	}
-
-	function splitSubtables(tableData: TableDataResult, tableName: string) {
-		return splitTableData(tablesData, tableName)[0].expand;
-	}
 	$inspect('table data: ', tablesData);
 
 	console.log('test splt', splitSubtables(tablesData, '36_transportation_improvement_plan'));
@@ -167,6 +139,17 @@
       table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type
     },
 	);
+
+data.tableNames.forEach((tableName: string) => {
+  const filtered = data.eventsData.filter((field: any) => field.program === tableName);
+  
+  if (filtered.length > 0) {
+    charts.push({
+      parent_table: tableName,
+      table: filtered as EventType[]
+    });
+  }
+});
 	charts.push(
 		makeBar(
 			'37_clean_vehicles',

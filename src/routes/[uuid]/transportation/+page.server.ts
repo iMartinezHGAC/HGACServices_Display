@@ -1,5 +1,5 @@
 import { PB_URL } from '$env/static/private';
-import type { SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
+import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
 import type { PageServerLoad } from './$types';
 import PocketBase from 'pocketbase'
 //import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
@@ -76,7 +76,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   //console.log("table names", tableNames)
-  console.log('juris_id',juris_id)
+  console.log('juris_id', juris_id)
 
   /*
   const entries = await locals.pb.collection('05_trash_bash').getFullList({
@@ -86,7 +86,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
-  
+
   for (let i = 0; i < tableNames.length; i++) {
     let subtable = await getSubtableSchema(tableNames[i]) ?? [""]
     console.log('subtables if any', subtable)
@@ -97,10 +97,38 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     });
     schema.push(await useGetSchema(tableNames[i]))
   }
+
+
+  let projectDetails: AdworkType[] = []
+  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
+  const filterAdwork = filterPartsAdwork.join(' || ');
+  try {
+    projectDetails = await locals.pb.collection('one_liners').getFullList({
+      filter: filterAdwork
+    })
+    //console.log('Project Details if any', projectDetails)
+  } catch (err) {
+    console.error('Error trying to get project details', err)
+  }
+
+  let eventsData: EventType[] = []
+  const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
+  const filter = filterParts.join(' || ');
+  try {
+    eventsData = await locals.pb.collection('events_json').getFullList({
+      filter: filter
+    })
+    console.log('Event Data if any', eventsData)
+  } catch (err) {
+    console.error('Error trying to get events data', err)
+  }
+
   return {
     post: programData,
     tableNames: tableNames,
     tablesData: tablesData,
-    schema: schema
+    schema: schema,
+    projectDetails: projectDetails,
+    eventsData: eventsData
   }
 }

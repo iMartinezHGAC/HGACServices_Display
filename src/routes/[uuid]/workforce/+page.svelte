@@ -1,4 +1,5 @@
 <script lang="ts">
+
 	import { navigating } from '$app/state';
 	const routedFrom = navigating.from?.route.id?.split('/')[2];
 	const routedTo = navigating.to?.route.id?.split('/')[2];
@@ -8,17 +9,16 @@
 		AdworkType,
 		ProgramType,
 		SchemaMultiType,
-		TableDataResult,
-		CustomEchartType,
-
 		ChartType,
+		CardDataType,
+		EventType,
 
-		CardDataType
-
+		PB_Record_Type
 
 	} from '../../../ambient';
+
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -29,21 +29,15 @@
 			tableNames: string[];
 			tablesData: object;
 			schema: SchemaMultiType[];
+      projectDetails: AdworkType[];
+      eventsData: EventType[];
 		};
 	} = $props();
 
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
-	const programNames = $derived(
-		programs.map((program) => program.parent_table).filter((str) => str !== '')
-	);
-	//console.log("Name: ", programNames)
 
-	function splitTableData(tablesData: TableDataResult, tableName: string) {
-		//console.log('splitTableData data',tablesData[tableName].items)
-		return tablesData[tableName].items;
-	}
 	$inspect('table data: ', tablesData);
 
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
@@ -212,6 +206,16 @@
 
 	)
 
+data.tableNames.forEach((tableName: string) => {
+  const filtered = data.eventsData.filter((field: any) => field.program === tableName);
+  
+  if (filtered.length > 0) {
+    charts.push({
+      parent_table: tableName,
+      table: filtered as EventType[]
+    });
+  }
+});
 
 	$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(

@@ -101,14 +101,28 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     schema.push(await useGetSchema(tableNames[i]))
   }
 
-  let projectDetails: AdworkType
-
+  let projectDetails: AdworkType[] = []
+  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
+  const filterAdwork = filterPartsAdwork.join(' || ');
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: `program.program_name = "Aging and Disability"`
+      filter: filterAdwork
     })
+    //console.log('Project Details if any', projectDetails)
   } catch (err) {
     console.error('Error trying to get project details', err)
+  }
+
+  let eventsData: EventType[] = []
+  const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
+  const filter = filterParts.join(' || ');
+  try {
+    eventsData = await locals.pb.collection('events_json').getFullList({
+      filter: filter
+    })
+    console.log('Event Data if any', eventsData)
+  } catch (err) {
+    console.error('Error trying to get events data', err)
   }
 
   return {
@@ -116,6 +130,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     tableNames: tableNames,
     tablesData: tablesData,
     schema: schema,
-    projectDetails: projectDetails
+    projectDetails: projectDetails,
+    eventsData: eventsData
   }
 }
