@@ -1,7 +1,8 @@
 <script lang="ts">
 	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import type { AdworkType, ChartType, ProgramType } from '../../ambient';
+	import type { AdworkType, ChartType, CustomEchartType, ProgramType } from '../../ambient';
 	import { graphsState } from '../charts/graphVectors.svelte';
+	import { isChartEmptyOrAllZero, isIndicatorEmptyOrZero, isTableEmptyOrAllZero } from '../helpers/chartFormatters';
 	import AdditionalWork from './additionalWork.svelte';
 	import Indicator from './indicator.svelte';
 	import RenderEchart from './renderEchart.svelte';
@@ -34,6 +35,8 @@
 	function toGraphWork(workVector: HTMLDivElement) {
 		if (workVector) graphState.add(workVector);
 	}
+
+
 </script>
 
 <div>
@@ -45,23 +48,24 @@
 
 	<div class="grid w-full grid-cols-2 items-center justify-center gap-1 px-12 py-8">
 		{#each charts as chart}
-			{#if chart.indicator && chart.chartType === 'indicator'}
+			{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
 				<Indicator
 					above={true}
 					below={false}
 					aboveText={chart.indicator.indicatorName}
 					belowText={''}
-					numericValue={chart.indicator.indicatorVal as number}
+					numericValue={Number(chart.indicator.indicatorVal)}
 				/>
-			{:else if chart.table}
-        {console.log('table render', chart.table)}
-        <Table data={chart.table}/>
-			{:else if chart.chart}
+			{:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
+				{console.log('table render', chart.table)}
+				<Table data={chart.table} />
+			{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
 				{console.log(chart)}
 				<RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
+			{:else}
+				<div>No data use HART plz</div>
 			{/if}
-		{/each}
-	</div>
+		{/each}	</div>
 	{#if charts.length > 2}
 		<button
 			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white"

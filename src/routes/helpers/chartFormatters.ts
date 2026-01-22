@@ -1,6 +1,6 @@
 import * as echarts from "echarts"
 import { snakeToHuman } from "./caseConversion"
-import type { ProgramType, CustomEchartType, TableDataResult, ChartType } from "../../ambient";
+import type { ProgramType, CustomEchartType, TableDataResult, ChartType, IndicatorType, EventType } from "../../ambient";
 
 
 // Format value function
@@ -1422,4 +1422,82 @@ export function collectAllSubrecords(tablesData: TableDataResult, tableName: str
     }
     return acc;
   }, []);
+}
+
+
+export function isChartEmptyOrAllZero(chartType: ChartType): boolean {
+  const customEchart = chartType.chart;
+  if (!customEchart || !customEchart.charts) {
+    return true;
+  }
+
+  const option: echarts.EChartsOption = customEchart.charts;
+  let series = option.series;
+  if (!series) {
+    return true;
+  }
+
+  if (!Array.isArray(series)) {
+    series = [series];
+  }
+
+  if (series.length === 0) {
+    return true;
+  }
+
+
+
+  for (const ser of series) {
+    const data = ser.data;
+    if (data && Array.isArray(data) && data.length > 0 && hasNonZeroNumber(data)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function hasNonZeroNumber(item: any): boolean {
+  if (typeof item === 'number') {
+    return item !== 0;
+  }
+  if (Array.isArray(item)) {
+    return item.some(hasNonZeroNumber);
+  }
+  if (typeof item === 'object' && item !== null) {
+    return Object.values(item).some(hasNonZeroNumber);
+  }
+  return false;
+}
+
+export function isIndicatorEmptyOrZero(indicator: IndicatorType | undefined): boolean {
+  if (!indicator || indicator.indicatorVal == null) {
+    return true;
+  }
+  const val = indicator.indicatorVal;
+  if (typeof val === 'number') {
+    return val === 0;
+  } else { // string
+    const trimmed = val.trim();
+    return trimmed === '' || trimmed === '0';
+  }
+}
+
+export function isTableEmptyOrAllZero(table: PB_Record_Type | EventType[] | undefined): boolean {
+  if (!table) {
+    return true;
+  }
+  return !hasNonZeroNumber(table);
+}
+
+export function isChartAndIndicatorEmptyOrZero(chartType: ChartType): boolean {
+  return isChartEmptyOrAllZero(chartType) && isIndicatorEmptyOrZero(chartType.indicator);
+}
+
+export function isAllComponentsEmptyOrZero(chartType: ChartType): boolean {
+  return isChartEmptyOrAllZero(chartType) && isIndicatorEmptyOrZero(chartType.indicator) && isTableEmptyOrAllZero(chartType.table);
+}
+
+export function areAllChartsEmptyOrZero(chartTypes: ChartType[]): boolean {
+  return chartTypes.every(isAllComponentsEmptyOrZero);
 }

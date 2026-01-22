@@ -6,6 +6,7 @@
 	import { graphsState } from '../charts/graphVectors.svelte';
 	import type { AdworkType, ChartType, ProgramType } from '../../ambient';
 	import CardGraph from './card_graph.svelte';
+	import { areAllChartsEmptyOrZero } from '../helpers/chartFormatters';
 
 	interface cardProps {
 		project: ProgramType;
@@ -43,7 +44,14 @@
 		graphState.add(vector as HTMLDivElement);
 	}
 </script>
+{#if areAllChartsEmptyOrZero(charts)}
+<div
+	class="mb-4 w-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
+>
 
+</div>
+  {:else}
+  
 <div
 	class="mb-4 w-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
 >
@@ -80,3 +88,5 @@
 	</div>
 	<CardGraph {project} {charts} {additionalWork} {subtitle} />
 </div>
+
+{/if}
