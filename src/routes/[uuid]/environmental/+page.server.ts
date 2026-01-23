@@ -12,15 +12,11 @@ async function fetchTable(pb: PocketBase, tableName: string, options: TableFetch
     filter: '',
     perPage: 50,
   }
-
   const mergedOptions = { ...defaultOptions, ...options }
   let results = {}
 
   try {
-
-    const lower_limit: number = Math.floor(Math.random() * 3);
-    const upper_limit: number = Math.floor(Math.random() * 300) + 100;
-    let records = await pb.collection(tableName).getList(1, 1, {
+    let records = await pb.collection(tableName).getList(100, 1, {
       sort: mergedOptions.sort,
       expand: mergedOptions.expand,
       filter: mergedOptions.filter,
@@ -88,6 +84,20 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
 
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentQuarter = Math.floor(currentMonth / 3);
+  let startQuarter = currentQuarter - 5;
+  let startYear = now.getFullYear();
+  while (startQuarter < 0) {
+    startQuarter += 4;
+    startYear -= 1;
+  }
+  const startMonth = startQuarter * 3;
+  const start = new Date(Date.UTC(startYear, startMonth, 1, 0, 0, 0));
+  const startISO = start.toISOString().replace('T', ' ');
+  const nowISO = now.toISOString().replace('T', ' ');
+
   for (let i = 0; i < tableNames.length; i++) {
     let subtable = await getSubtableSchema(tableNames[i])
     let joinedSubtables = ""
@@ -95,17 +105,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
-      filter: `jurisdiction = "${juris_id}"`,
+      filter: `jurisdiction = "${juris_id}" && ((from_date >= "${startISO}" && from_date <= "${nowISO}") || (to_date >= "${startISO}" && to_date <= "${nowISO}"))`,
       expand: joinedSubtables // ""
     });
     schema.push(await useGetSchema(tableNames[i]))
   }
 
   let projectDetails: AdworkType[] = []
-
   const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
   const filterAdwork = filterPartsAdwork.join(' || ');
-
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
       filter: filterAdwork
@@ -116,18 +124,17 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   let eventsData: EventType[] = []
-
   const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
   const filter = filterParts.join(' || ');
-
   try {
     eventsData = await locals.pb.collection('events_json').getFullList({
       filter: filter
     })
     console.log('Event Data if any', eventsData)
   } catch (err) {
-    console.error('Error trying to get project details', err)
+    console.error('Error trying to get events data', err)
   }
+
   return {
     post: programData,
     tableNames: tableNames,

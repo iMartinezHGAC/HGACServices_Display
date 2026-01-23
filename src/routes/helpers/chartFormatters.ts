@@ -27,15 +27,19 @@ function formatValue(num: number): string {
  * @param centerText - Optional text/value to display in the center of the donut
  * @returns ECharts option plus event handler to enable drilldown.
  */
+//chartFormatters.ts
 export function makeDrilldownDonut<T = any>(
   parent_table: string,
-  dataset: T | T[],
+  dataset: T | T[] | null,
   keys: (keyof T)[],
   title?: string,
   centerText?: string
 ): ChartType {
-  // Normalize dataset to always be an array
-  const dataArray = Array.isArray(dataset) ? dataset : [dataset];
+  // Normalize dataset to always be an array, handling null/undefined and filtering out null items
+  let dataArray: T[] = [];
+  if (dataset) {
+    dataArray = (Array.isArray(dataset) ? dataset : [dataset]).filter(item => item !== null && item !== undefined);
+  }
 
   // Utility to humanize snake_case to Title Case
   function snakeToHuman(str: string): string {
@@ -209,6 +213,7 @@ export function makeDrilldownDonut<T = any>(
     chartType: 'drilldown_donut',
   };
 }
+
 /**
  * Creates a drilldown pie chart for multiple value keys and their single-key breakdowns.
  * @param parent_table - Name for chart
@@ -1352,8 +1357,10 @@ export function splitExpandedMapTable(tableData: TableDataResult, tableName: str
 }
 
 export function splitSubtables(tablesData: TableDataResult, tableName: string) {
-  const data = splitTableData(tablesData, tableName)[0]
-  if (isInvalid(data)) return null
+  const splitData = splitTableData(tablesData, tableName);
+  if (!splitData || !Array.isArray(splitData) || splitData.length === 0) return null;
+  const data = splitData[0];
+  if (isInvalid(data)) return null;
   return data.expand;
 }
 
@@ -1374,15 +1381,15 @@ export function mapSelectedSubtable(tableData: TableDataResult, tableName: strin
   return data
 }
 
-export function safeSelectObjectField<T extends Object>(table: T, field: keyof T) {
-  const data = table[field]
-  if (isInvalid(data)) return null
-  return data
+export function safeSelectObjectField<T extends Object>(table: T | null | undefined, field: keyof T) {
+  if (!table) return null;
+  const data = table[field];
+  if (isInvalid(data)) return null;
+  return data;
 }
 
-export function accumulateArray(numArray: number[]) {
-  return numArray
-    .reduce((accumulator: number, val) => accumulator + val, 0)
+export function accumulateArray(numArray: number[] | null) {
+  return numArray?.reduce((accumulator: number, val) => accumulator + val, 0) ?? 0;
 }
 
 export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {

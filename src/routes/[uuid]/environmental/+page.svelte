@@ -9,14 +9,15 @@
 		AdworkType,
 		ProgramType,
 		SchemaMultiType,
-		TableDataResult,
 		ChartType,
 		CardDataType,
-		EventType
+		EventType,
+
+		PB_Record_Type
+
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import Table from '../../components/table.svelte';
 	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
@@ -36,17 +37,6 @@
 	const programs: ProgramType[] = data.post;
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
-	const programNames = $derived(
-		programs.map((program) => program.parent_table).filter((str) => str !== '')
-	);
-	//console.log("Name: ", programNames)
-
-	type PB_Record_Type = {
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		[key: string]: string | number | Date;
-  };
 
 	//$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
@@ -57,7 +47,6 @@
 //)
   
 	$inspect('data', data);
-	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -66,6 +55,7 @@
 		'from_date',
 		'to_date'
 	];
+	const charts: ChartType[] = [];
 
 	charts.push(
     /*
@@ -100,7 +90,7 @@
       parent_table: "02_water_quality_monitoring",
       indicator: {
         indicatorName: "Monitoring Sites",
-        indicatorVal: selectSplitSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program').monitoring_sites,
+        indicatorVal: accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_sites') ?? 0,
       },
       chartType: "indicator"
     },
@@ -108,7 +98,7 @@
       parent_table: "02_water_quality_monitoring",
       indicator: {
         indicatorName: "Monitoring Events",
-        indicatorVal: splitSubtables(tablesData, '02_water_quality_monitoring').clean_rivers_program.monitoring_events,
+        indicatorVal: accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_events') ?? 0,
       },
       chartType: "indicator"
     },
@@ -120,13 +110,13 @@
 				'monitoring_event_cost_inkind',
 			],
 			'Motorist Assistance Program Services',
-      accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost').toString() ?? ""
+      accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toString() ?? ''
 		),
     {
       parent_table: "03_wqmp",
       indicator: {
         indicatorName: "Monitoring Events",
-        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf") ?? 0,
       },
       chartType: "indicator"
     },
@@ -190,11 +180,11 @@
 		),
     {
       parent_table: "10_parks_and_natural_areas",
-      table: splitSubtables(tablesData, '10_parks_and_natural_areas').awards as PB_Record_Type
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas','awards') as PB_Record_Type
     },
     {
       parent_table: "10_parks_and_natural_areas",
-      table: splitSubtables(tablesData, '10_parks_and_natural_areas').trips as PB_Record_Type
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips') as PB_Record_Type
     },
     {
       parent_table: "13_water_innovation",
