@@ -2,6 +2,7 @@ import { PB_URL } from "$env/static/private";
 import PocketBase from 'pocketbase'
 import type { PageServerLoad } from "./$types";
 import type { CollectionWSubType, TableDataResult, TableFetchOptions } from "../../../ambient";
+import { GetFiveQuarters } from "../../helpers/apiHelpers";
 
 
 async function fetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
@@ -55,6 +56,7 @@ async function getSubtableSchema(tableName: string) {
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
+  const juris_id = params.uuid
   let pbData = []
 
   for (const table of collections) {
@@ -67,11 +69,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     let joinedSubtables = ""
     if (subCollectionsNames && subCollectionsNames.length > 0) joinedSubtables = subCollectionsNames.join(',')
 
-    // Assuming fetchTable is a wrapper for locals.pb.collection(table).getList(1, perPage, { filter, expand });
-    // If fetchTable doesn't support 'expand', replace with direct PocketBase call:
-    // let mainResponse = await locals.pb.collection(table).getList(1, 1000, { filter, expand });
+    let { start, now } = GetFiveQuarters()
+
     let mainResponse = await fetchTable(locals.pb, table, {
       perPage: 1000,
+      filter: `jurisdiction = "${juris_id}"`,
       expand: joinedSubtables, // Add this if fetchTable supports it; otherwise, use the direct call above.
     });
 

@@ -65,7 +65,7 @@
 
 <div class="flex flex-col items-center justify-center">
   <div 
-    class="w-[600px] h-[400px] px-8 scale-100"
+    class="w-[700px] h-[400px] px-8 scale-100"
     {@attach to}>
   </div>  
 

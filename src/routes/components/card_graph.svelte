@@ -79,6 +79,7 @@ function getNonEmptyChartCount(charts: ChartType[]): number {
             aboveText={chart.indicator.indicatorName}
             belowText={''}
             numericValue={Number(chart.indicator.indicatorVal)}
+            symbol_pre={chart.indicator.indicatorSymPre}
           />
         {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
           {console.log('table render', chart.table)}

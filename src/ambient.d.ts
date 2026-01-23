@@ -138,6 +138,7 @@ type PB_Record_Type = {
 interface IndicatorType {
   indicatorVal: string | number | null,
   indicatorName: string,
+  indicatorSymPre?: string
 }
 
 interface CustomEchartType {
