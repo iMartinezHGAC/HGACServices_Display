@@ -36,13 +36,31 @@ function accumulateFunding(data) {
 }
 
   console.log('total funds', accumulateFunding(pbData))
+function renameFields(data: any[]): any[] {
+  return data.map((obj, index) => {
+    if (index === 0) {
+      return {
+        RTP: obj['35_rtp_rtp_projects'],
+        '10_year': obj['35_rtp_yr10_projects']
+      };
+    } else if (index === 1) {
+      return {
+        TIP: obj['36_transportation_improvement_plan_tip'],
+        LET: obj['36_transportation_improvement_plan_let']
+      };
+    }
+    // Fallback to preserve other objects if any
+    return obj;
+  });
+}
 
-let combinedA = [ pbData[1], pbData[2] ];
+// Usage example:
+let combinedA = renameFields([ pbData[1], pbData[2] ]);
 
 const data_let = splitTableData(pbData[2],"36_transportation_improvement_plan_let")
 
 	$inspect('pb data', pbData);
-	$inspect('data A', data_let);
+	$inspect('data A', combinedA);
 
   let chartA = makeTableDrilldownPie(
 			'35_rtp',
