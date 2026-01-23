@@ -135,7 +135,7 @@ import 'tippy.js/themes/translucent.css';
 -->
 
 <!-- Indicator Card -->
-  <div class="w-full max-w-[18rem] h-64 mx-auto my-8 flex flex-col items-center justify-center text-center rounded-xl font-metropolis bg-gradient-to-b from-sky-500 to-[#69ABDE] text-slate-100 border-2 border-slate-950 shadow-md shadow-slate-950">
+  <div class="w-full max-w-[24rem] h-64 px-2 mx-auto my-8 flex flex-col items-center justify-center text-center rounded-xl font-metropolis bg-slate-800 text-slate-100 border-2 border-slate-950 shadow-md shadow-slate-950">
   {#if numericValue === null || numericValue === 0}
    <UseHart/>
   {:else}
