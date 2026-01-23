@@ -458,7 +458,7 @@ export function makeTableDrilldownPie<T = any>(
       left: 'center'
     },
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 30 },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
         name: '',
@@ -513,7 +513,7 @@ export function makeTableDrilldownPie<T = any>(
 
     chartInstance.setOption({
       title: { text: snakeToHuman(originalTable) + ' ', left: 'center' },
-      legend: { show: true },
+      legend: { orient: 'horizontal', left: 'left', bottom: 10 },
       series: [
         {
           name: snakeToHuman(originalTable),
@@ -640,7 +640,7 @@ export function makeDrilldownMultPie<T = any>(
         left: 'center',
       },
       tooltip: { trigger: 'item' },
-      legend: { orient: 'vertical', left: 'left', top: 30 },
+      legend: { orient: 'horizontal', left: 'center', top: 10 },
       series: [
         {
           name: '',
@@ -723,7 +723,7 @@ export function makeDrilldownMultPie<T = any>(
       left: 'center',
     },
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 30 },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
         name: '',
