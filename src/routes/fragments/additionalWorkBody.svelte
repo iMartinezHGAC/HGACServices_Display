@@ -1,24 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { AdworkType } from '../../ambient';
 
 	interface Props {
-		projectName: string;
 		expanded: boolean;
-		bodyText: string;
-		location: string;
-		dates: string[];
-		funding?: number;
-		customMetrics?: CustomMetric[];
+    adwork: AdworkType
 	}
 
 	let {
-		projectName,
 		expanded = false,
-		bodyText,
-		location,
-		dates,
-		funding,
-		customMetrics
+    adwork,
 	}: Props = $props();
 
 	let paragraph: HTMLElement;
@@ -28,6 +19,8 @@
 	const lineHeight = 24;
 	const clampedHeight = maxLines * lineHeight; // 144px
 
+  $inspect('if funding', adwork.budget)
+
 	onMount(() => {
 		requestAnimationFrame(() => {
 			if (paragraph.scrollHeight > clampedHeight) {
@@ -36,61 +29,61 @@
 		});
 	});
 
-	function convertDateString(dateString: string): string {
-		const [mStr, dStr, yStr] = dateString.split('-');
-		const m = Number(mStr);
-		const d = Number(dStr);
-		const y = Number(yStr);
-
-		if (isNaN(m) || isNaN(d) || isNaN(y)) return 'Invalid date';
-
-		const year = y < 100 ? 2000 + y : y;
-		const date = new Date(year, m - 1, d);
-
-		// Basic invalid date check
-		if (
-			date.getMonth() !== m - 1 ||
-			date.getDate() !== d ||
-			date.getFullYear() !== year
-		) {
-			return 'Invalid date';
-		}
-
-		return date.toLocaleDateString('en-US', {
-			month: 'long',
-			day: 'numeric',
-			year: 'numeric'
-		});
+function formatDate(input: string | Date | null | undefined): string {
+	if (!input) {
+		return 'Invalid date';
 	}
+
+	let date: Date;
+
+	if (typeof input === 'string') {
+		date = new Date(input);
+	} else if (input instanceof Date) {
+		date = input;
+	} else {
+		return 'Invalid date';
+	}
+
+	if (isNaN(date.getTime())) {
+		return 'Invalid date';
+	}
+
+	return date.toLocaleDateString('en-US', {
+		month: 'long',
+		day: 'numeric',
+		year: 'numeric',
+		timeZone: 'UTC'  // Ensures the date is shown as the UTC calendar date (e.g., "January 1, 2012")
+	});
+}
+
 </script>
 
 <div class="flex flex-col items-start justify-center border-b-2 border-slate-700 py-4">
-	<p class="text-xl font-semibold">{projectName}</p>
+	<p class="text-xl font-semibold">{adwork.project_name}</p>
 
 	<div class="flex w-full items-center justify-start">
-		<p class="font-[Metropolis] text-xl font-medium">{location}</p>
 
-		{#if funding !== undefined}
+		{#if adwork.budget !== undefined}
 			<p class="pl-8 font-[Metropolis] text-xl font-medium">
-				Funding: ${funding.toLocaleString()}
+				Budget: ${adwork.budget.toLocaleString()}
 			</p>
 		{/if}
 
 		<span class="flex-grow"></span>
 
-		{#if dates.length > 1}
+		{#if adwork.start_date && adwork.end_date}
 			<p class="text-xl font-medium">
-				{convertDateString(dates[0])} - {convertDateString(dates[1])}
+				{formatDate(adwork.start_date)} - {formatDate(adwork.end_date)}
 			</p>
 		{:else}
-			<p class="text-xl font-medium">{convertDateString(dates[0])}</p>
+			<p class="text-xl font-medium">{formatDate(adwork.start_date)}</p>
 		{/if}
 	</div>
 
-	{#if customMetrics}
-		{#each customMetrics as customMetric}
+	{#if adwork.custom_metrics}
+		{#each adwork.custom_metrics as customMetric}
 			<p class="text-xl font-medium">
-				{customMetric.metricName}: {customMetric.metricValue}
+				{customMetric.metric_name}: {customMetric.metric_value}
 			</p>
 		{/each}
 	{/if}
@@ -102,7 +95,7 @@
 				${clamped && !expanded ? 'max-h-[144px] overflow-hidden mask-gradient-fade opacity-80' : 'max-h-[2000px] opacity-100'}
 				${!clamped ? '' : ''}`}
 		>
-			{@html bodyText}
+			{@html adwork.project_description}
 		</p>
 
 		{#if clamped}
