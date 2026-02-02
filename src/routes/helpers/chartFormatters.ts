@@ -29,7 +29,10 @@ const formatNumber = (value: number | string | undefined): string => {
 // Reusable label formatter
 const createLabelFormatter = (showName = true) => {
   return (params: DefaultLabelFormatterCallbackParams) => {
-    const valueStr = formatNumber(params.value);
+    let valueStr = formatNumber(params.value ?? 0);
+    if ((params.data as any)?.isMoney) {
+      valueStr = '$' + valueStr;
+    }
     return showName
       ? `${params.name}: ${valueStr}`
       : valueStr;
@@ -37,15 +40,39 @@ const createLabelFormatter = (showName = true) => {
 };
 
 // Reusable tooltip formatter
-const tooltipFormatter = (params: DefaultLabelFormatterCallbackParams) => {
-  const valueStr = formatNumber(params.value);
-  return `${params.name}: ${valueStr} (${params.percent}%)`;
+const tooltipFormatter = (params: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[]) => {
+  const formatOne = (p: DefaultLabelFormatterCallbackParams) => {
+    let valueStr = formatNumber(p.value ?? 0);
+    if ((p.data as any)?.isMoney) {
+      valueStr = '$' + valueStr;
+    }
+    return `${p.name}: ${valueStr} (${p.percent ?? 0}%)`;
+  };
+
+  if (Array.isArray(params)) {
+    return params.map(formatOne).join('<br/>');
+  }
+  return formatOne(params);
 };
 
 // Optional: Inner label formatter with percentage
 const innerLabelFormatter = (params: DefaultLabelFormatterCallbackParams) => {
-  const valueStr = formatNumber(params.value);
-  return `${valueStr}\n(${params.percent}%)`;
+  let valueStr = formatNumber(params.value ?? 0);
+  if ((params.data as any)?.isMoney) {
+    valueStr = '$' + valueStr;
+  }
+  return `${valueStr}\n(${params.percent ?? 0}%)`;
+};
+
+const monetaryKeywords = [
+  'cost', 'dollar', 'budget', 'price', 'revenue',
+  'expense', 'amount', 'fee', 'charge', 'payment',
+  'spend', 'profit', 'loss', 'income', 'sale', 'total'
+];
+
+const isMonetary = (key: string): boolean => {
+  const lower = key.toLowerCase();
+  return monetaryKeywords.some(kw => lower.includes(kw));
 };
 
 
@@ -247,6 +274,7 @@ export function makeDrilldownDonut<T = any>(
   };
 }
 
+
 /**
  * Creates a drilldown pie chart for multiple value keys and their single-key breakdowns.
  * @param parent_table - Name for chart
@@ -272,32 +300,64 @@ export function makeDrilldownPie<T = any>(
       const val = Number(item[key]) || 0;
       total += val;
     });
-    return { name: snakeToHuman(String(key)), value: total }; // Humanize names here
+    return {
+      name: snakeToHuman(String(key)),
+      value: total,
+      isMoney: isMonetary(String(key))
+    };
   });
+
+  // Sort parent slices by value descending (largest first)
+  parentData.sort((a, b) => b.value - a.value);
 
   // Breakdown for a specific key (child pie)
   function getSingleKeyPieData(k: keyof T) {
     const countMap: Record<string, number> = {};
     dataset.forEach(item => {
       const val = String(item[k]);
-      // Optionally: skip undefined/empty
       if (!val) return;
-      if (val in countMap) countMap[val]++;
-      else countMap[val] = 1;
+      countMap[val] = (countMap[val] || 0) + 1;
     });
-    return Object.entries(countMap).map(([name, value]) => ({ name, value }));
+
+    let entries = Object.entries(countMap);
+
+    // Sort logic
+    if (isMonetary(String(k))) {
+      // For monetary fields: sort by the numeric amount ascending
+      entries.sort(([a], [b]) => Number(a) - Number(b));
+    } else {
+      // For non-monetary: sort by count descending
+      entries.sort(([, a], [, b]) => b - a);
+    }
+
+    // Format names (add $ and commas for monetary fields)
+    const pieData = entries.map(([rawName, value]) => {
+      let name = rawName;
+      if (isMonetary(String(k))) {
+        const num = Number(rawName);
+        if (!isNaN(num)) {
+          name = '$' + formatNumber(num);
+        }
+      }
+      return { name, value };
+    });
+
+    return pieData;
   }
 
+  console.log('chart log', dataset);
+  console.log('pie data', parentData);
 
-  console.log('chart log', dataset)
-  console.log('pie data', parentData)
   // Chart config compatible with your interface
   const charts: echarts.EChartsOption = {
     title: {
       text: title ?? keys.map(k => snakeToHuman(String(k))).join(' vs '),
       left: 'center'
     },
-    tooltip: { trigger: 'item' },
+    tooltip: {
+      trigger: 'item',
+      formatter: tooltipFormatter
+    },
     legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
@@ -307,11 +367,11 @@ export function makeDrilldownPie<T = any>(
         data: parentData,
         label: {
           show: true,
-          position: 'outside', // Outside labels always shown
+          position: 'outside',
           formatter: createLabelFormatter(true)
         },
         labelLine: {
-          show: true // Connecting lines for outside labels
+          show: true
         },
         emphasis: {
           itemStyle: {
@@ -327,18 +387,18 @@ export function makeDrilldownPie<T = any>(
         radius: '50%',
         data: parentData,
         itemStyle: {
-          opacity: 0 // Makes the series invisible but labels can still show
+          opacity: 0
         },
         label: {
           show: function(params: any) {
-            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed for "fits")
+            return params.percent! >= 5;
           },
           position: 'inside',
-          formatter: innerLabelFormatter, // Value inside
-          opacity: 1 // Ensures label visibility
+          formatter: innerLabelFormatter,
+          opacity: 1
         },
         labelLine: {
-          show: false // No lines for inside labels
+          show: false
         }
       }
     ]
@@ -346,14 +406,19 @@ export function makeDrilldownPie<T = any>(
 
   // Drilldown function available for controller to register
   function onDrilldown(params: any, chartInstance: echarts.ECharts) {
-    const keyClicked = params.data.name; // Use humanized name, but map back if needed
+    const keyClicked = params.data.name;
     const originalKey = keys.find(k => snakeToHuman(String(k)) === keyClicked);
     if (!originalKey) return;
+
     const pieData = getSingleKeyPieData(originalKey);
 
     chartInstance.setOption({
       title: { text: snakeToHuman(String(originalKey)), left: 'center' },
       legend: { show: true },
+      tooltip: {
+        trigger: 'item',
+        formatter: tooltipFormatter
+      },
       series: [
         {
           name: snakeToHuman(String(originalKey)),
@@ -362,11 +427,11 @@ export function makeDrilldownPie<T = any>(
           data: pieData,
           label: {
             show: true,
-            position: 'outside', // Outside labels always shown
-            formatter: createLabelFormatter(true) // Category: value
+            position: 'outside',
+            formatter: createLabelFormatter(true)
           },
           labelLine: {
-            show: true // Connecting lines for outside labels
+            show: true
           }
         },
         {
@@ -375,18 +440,18 @@ export function makeDrilldownPie<T = any>(
           radius: '50%',
           data: pieData,
           itemStyle: {
-            opacity: 0 // Makes the series invisible but labels can still show
+            opacity: 0
           },
           label: {
             show: function(params: any) {
-              return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+              return params.percent! >= 5;
             },
             position: 'inside',
-            formatter: innerLabelFormatter, // Value inside
-            opacity: 1 // Ensures label visibility
+            formatter: innerLabelFormatter,
+            opacity: 1
           },
           labelLine: {
-            show: false // No lines for inside labels
+            show: false
           }
         }
       ]
