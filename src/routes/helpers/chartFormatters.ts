@@ -1160,6 +1160,244 @@ export function makeValueSumPie<T = any>(
   };
 }
 
+export function makeValueSumPieTop10<T = any>(
+  parent_table: string,
+  dataset: T[],
+  primaryKey: keyof T,
+  secondaryKey: keyof T,
+  title?: string
+): ChartType {
+  // Utility to humanize snake_case to Title Case
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  // Breakdown for drilldown: count of each secondary value in the selected group(s)
+  function getValueCountPieData(k: keyof T, ds: T[] = dataset) {
+    const countMap: Record<string, number> = {};
+    ds.forEach(item => {
+      const val = String(item[k]);
+      if (!val) return;
+      if (val in countMap) countMap[val]++;
+      else countMap[val] = 1;
+    });
+    return Object.entries(countMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
+  }
+
+  const humanPrimary = snakeToHuman(String(primaryKey));
+  const humanSecondary = snakeToHuman(String(secondaryKey));
+
+  // Compute summed data
+  const sumMap: Record<string, number> = {};
+  dataset.forEach(item => {
+    const group = String(item[primaryKey]);
+    const val = Number(item[secondaryKey]);
+    if (!group || isNaN(val)) return;
+    sumMap[group] = (sumMap[group] || 0) + val;
+  });
+
+  // Build raw pie data with humanized names
+  let rawPieData = Object.entries(sumMap)
+    .map(([originalName, value]) => ({
+      name: snakeToHuman(originalName),
+      value,
+      originalName
+    }))
+    .filter(d => d.value > 0); // Skip zero-value categories
+
+  // Sort descending by value
+  rawPieData.sort((a, b) => b.value - a.value);
+
+  // Build final parent data: top 10 + "Other" if needed
+  const topCount = 10;
+  let parentData: any[] = [];
+  let otherOriginals: string[] = [];
+
+  if (rawPieData.length <= topCount) {
+    parentData = rawPieData;
+  } else {
+    const topItems = rawPieData.slice(0, topCount);
+    parentData = topItems;
+
+    const otherItems = rawPieData.slice(topCount);
+    const otherSum = otherItems.reduce((acc, d) => acc + d.value, 0);
+
+    if (otherSum > 0) {
+      otherOriginals = otherItems.map(d => d.originalName);
+      parentData.push({
+        name: "Other",
+        value: otherSum,
+        originals: otherOriginals // Custom property to identify "Other" group
+      });
+    }
+  }
+
+  const manyCategories = parentData.length > topCount;
+
+  // Chart config
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: title ?? `${humanSecondary} by ${humanPrimary}`,
+      left: 'center'
+    },
+    tooltip: { trigger: 'item' },
+    legend: {
+      orient: 'horizontal',
+      left: 'left',
+      bottom: 10
+    },
+    series: [
+      {
+        name: `${humanSecondary} by ${humanPrimary}`,
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        label: {
+          show: !manyCategories,
+          position: 'outside',
+          formatter: createLabelFormatter(true)
+        },
+        labelLine: {
+          show: !manyCategories
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          },
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: createLabelFormatter(true)
+          },
+          labelLine: {
+            show: true
+          }
+        }
+      },
+      {
+        name: `${humanSecondary} by ${humanPrimary}`,
+        type: 'pie',
+        radius: '50%',
+        data: parentData,
+        itemStyle: {
+          opacity: 0
+        },
+        label: {
+          show: function(params: any) {
+            return params.percent! >= 5;
+          },
+          position: 'inside',
+          formatter: innerLabelFormatter,
+          opacity: 1
+        },
+        labelLine: {
+          show: false
+        }
+      }
+    ]
+  };
+
+  // Drilldown handler
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const data = params.data;
+
+    let filteredDataset: T[] = [];
+    let drillTitle: string = "";
+
+    if (data.originals && Array.isArray(data.originals)) {
+      // "Other" group – combine all small categories
+      const origs: string[] = data.originals;
+      filteredDataset = dataset.filter(item => origs.includes(String(item[primaryKey])));
+      drillTitle = "Other Categories";
+    } else if (data.originalName) {
+      // Individual top-10 category
+      const originalVal = data.originalName;
+      filteredDataset = dataset.filter(item => String(item[primaryKey]) === originalVal);
+      drillTitle = data.name;
+    } else {
+      return; // No drilldown possible
+    }
+
+    if (filteredDataset.length === 0) return;
+
+    const pieData = getValueCountPieData(secondaryKey, filteredDataset);
+    const humanDrilldownSecondary = snakeToHuman(String(secondaryKey));
+    const manySubCategories = pieData.length > 5;
+
+    chartInstance.setOption({
+      title: { text: `${drillTitle} by ${humanDrilldownSecondary}`, left: 'center' },
+      legend: {
+        show: !manySubCategories,
+        orient: 'horizontal',
+        left: 'left',
+        bottom: 10
+      },
+      series: [
+        {
+          name: `${drillTitle} by ${humanDrilldownSecondary}`,
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          label: {
+            show: !manySubCategories,
+            position: 'outside',
+            formatter: createLabelFormatter(true)
+          },
+          labelLine: {
+            show: !manySubCategories
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            },
+            label: {
+              show: true,
+              position: 'outside',
+              formatter: createLabelFormatter(true)
+            },
+            labelLine: {
+              show: true
+            }
+          }
+        },
+        {
+          name: `${drillTitle} by ${humanDrilldownSecondary}`,
+          type: 'pie',
+          radius: '50%',
+          data: pieData,
+          itemStyle: {
+            opacity: 0
+          },
+          label: {
+            show: function(params: any) {
+              return params.percent! >= 5;
+            },
+            position: 'inside',
+            formatter: innerLabelFormatter,
+            opacity: 1
+          },
+          labelLine: {
+            show: false
+          }
+        }
+      ]
+    });
+  }
+
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown
+    },
+    chartType: 'drilldown_pie',
+  };
+}
+
 export function makePie<T = any>(
   parent_table: string,
   dataset: T[],

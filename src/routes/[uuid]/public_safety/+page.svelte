@@ -17,7 +17,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -58,14 +58,14 @@
 	];
 
 	charts.push(
-    makeValueSumPie(
+    makeValueSumPieTop10(
     '15_regional_law_enforcement_training',  // Parent table name (from your data example)
 			splitTableData(tablesData, '15_regional_law_enforcement_training'),
     'class_name',
     'participants',                      // The key to count unique values for
     'Participants by Class Name'          // Optional custom title
   ),
-    makeValueSumPie(
+    makeValueSumPieTop10(
     '15_regional_law_enforcement_training',  // Parent table name (from your data example)
 			splitTableData(tablesData, '15_regional_law_enforcement_training'),
     'class_name',
