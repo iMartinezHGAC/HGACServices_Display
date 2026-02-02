@@ -103,9 +103,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const filterAdwork = filterPartsAdwork.join(' || ');
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: filterAdwork
+      filter: filterAdwork,
+      expand: 'program'
     })
-    //console.log('Project Details if any', projectDetails)
+    console.log('Project Details if any', projectDetails)
   } catch (err) {
     console.error('Error trying to get project details', err)
   }

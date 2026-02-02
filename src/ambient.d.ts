@@ -184,6 +184,7 @@ type AdworkType = {
   program: string,
   project_description: string,
   project_name: string,
+  expand?: { program: ProgramType }
 }
 
 interface TableFetchOptions {

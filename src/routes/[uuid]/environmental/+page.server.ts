@@ -116,12 +116,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const filterAdwork = filterPartsAdwork.join(' || ');
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: filterAdwork
+      filter: filterAdwork,
+      expand: 'program'
     })
-    //console.log('Project Details if any', projectDetails)
+    console.log('Project Details if any', projectDetails)
   } catch (err) {
     console.error('Error trying to get project details', err)
   }
+
+  console.log(projectDetails)
 
   let eventsData: EventType[] = []
   const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
@@ -130,7 +133,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     eventsData = await locals.pb.collection('events_json').getFullList({
       filter: filter
     })
-    console.log('Event Data if any', eventsData)
+    //console.log('Event Data if any', eventsData)
   } catch (err) {
     console.error('Error trying to get events data', err)
   }

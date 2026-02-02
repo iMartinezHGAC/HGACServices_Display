@@ -19,7 +19,7 @@
 	const lineHeight = 24;
 	const clampedHeight = maxLines * lineHeight; // 144px
 
-  $inspect('if funding', adwork.budget)
+  //$inspect('if funding', adwork.budget)
 
 	onMount(() => {
 		requestAnimationFrame(() => {

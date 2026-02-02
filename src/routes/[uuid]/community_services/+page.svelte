@@ -41,11 +41,11 @@
 
 	//$inspect('table data: ', tablesData);
 
-	console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
+	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
-	$inspect('data', data);
+	//$inspect('data', data);
 	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
@@ -100,13 +100,12 @@ data.tableNames.forEach((tableName: string) => {
     charts.push({
       parent_table: tableName,
       table: filtered as EventType[],
-
       fullWidth: true
     });
   }
 });
 
-	$inspect('charts data', charts);
+	//$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {
 			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
@@ -115,7 +114,7 @@ data.tableNames.forEach((tableName: string) => {
 		})
 	);
 
-	$inspect('card data', cardData);
+	//$inspect('card data', cardData);
 
 
 </script>

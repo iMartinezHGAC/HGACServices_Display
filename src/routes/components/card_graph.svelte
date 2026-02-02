@@ -26,8 +26,10 @@
 
 
 	let itemsToShow = $derived.by(()=> {
-    if(expanded && additionalWork) return additionalWork 
-    else if (!expanded && additionalWork) return additionalWork.slice(0, 3)
+    if(expanded && additionalWork) return additionalWork.filter((adwork: AdworkType) => adwork.expand?.program.parent_table === project.parent_table) 
+    else if (!expanded && additionalWork) return additionalWork
+      .filter((adwork: AdworkType) => adwork.expand?.program.parent_table === project.parent_table)
+      .slice(0, 3)
     else return []
   }
   );
@@ -106,23 +108,23 @@ let displayedCharts = $derived(
 	{:else}
 		<span></span>
 	{/if}
-	{#if additionalWork}
+	{#if itemsToShow.length > 0}
 		<div class="flexy flex-col" {@attach toGraphWork}>
-			{#if project.program_name === 'Livable Centers'}
         <h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
 				{#each itemsToShow as adWork}
-          {console.log('additional work', adWork)}
-					<AdditionalWork
-            adwork={adWork}
-					/>
+          {#if adWork.expand?.program.parent_table === project.parent_table}
+        {console.log(adWork.expand?.program.parent_table, 'project', project.parent_table)}
+            <AdditionalWork
+              adwork={adWork}
+            />
+        {/if}
 				{/each}
-				{#if additionalWork.length > 3}
+				{#if itemsToShow.length > 3}
 					<div class="expand-toggle">
 						<button onclick={toggleExpanded}>
-							{expanded ? 'Show Fewer' : `Show All (${additionalWork.length - 3} more)`}
+							{expanded ? 'Show Fewer' : `Show All (${itemsToShow.length - 3} more)`}
 						</button>
 					</div>
-				{/if}
 			{:else}
         <!--
 				<AdditionalWork
