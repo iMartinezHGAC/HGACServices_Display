@@ -98,13 +98,13 @@
 			'35_rtp',
 			splitSubtables(tablesData, '35_rtp').rtp_projects,
     'project_type',                      // The key to count unique values for
-    'RTP Project Types'          // Optional custom title
+    'Regional Transportation Plan Projects: # of Projects grouped by Type'          // Optional custom title
   ),  
   makeValueCountPie(
 			'35_rtp',
 			splitSubtables(tablesData, '35_rtp').yr10_projects,
     'project_type',                      // The key to count unique values for
-			'Yr 10 Projects'
+			'10 Year RTP Projects: # of Projects grouped by Type '
   ),  
 		makeDrilldownPie(
 			'36_transportation_improvement_plan',
@@ -135,8 +135,14 @@
 			'emissions_reduction'
 		),
     {
+      parent_table: "35_rtp",
+      table: splitSubtables(tablesData, '35_rtp').tip as PB_Record_Type,
+      fullWidth: true
+    },
+    {
       parent_table: "36_transportation_improvement_plan",
-      table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type
+      table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type,
+      fullWidth: true
     },
 	);
 

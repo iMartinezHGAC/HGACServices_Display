@@ -41,12 +41,12 @@
 	//$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
 	// console.log('test safe',  splitTableData(tablesData, '03_wqmp'));
-	// console.log('test table',  safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"));
+	 console.log('test table',  splitTableData(tablesData, '03_wqmp'));
 	//console.log('split table data', 
 //accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
 //)
   
-	$inspect('data', data);
+	//$inspect('data', data);
 	const exclusions = [
 		'collectionId',
 		'collectionName',
@@ -123,7 +123,7 @@
     {
       parent_table: "03_wqmp",
       indicator: {
-        indicatorName: "Monitoring Events",
+        indicatorName: "Permitted OSSF Tracked",
         indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
       },
       chartType: "indicator"
@@ -206,7 +206,7 @@ data.tableNames.forEach((tableName: string) => {
 });
 
 
-	$inspect('charts data', charts);
+	//$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {
 			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
@@ -215,7 +215,7 @@ data.tableNames.forEach((tableName: string) => {
 		})
 	);
 
-	$inspect('card data', cardData);
+//	$inspect('card data', cardData);
 
 </script>
 
