@@ -67,15 +67,15 @@
   function truncateYAxisValue(value: number) {
     if(value > 999999999) {
       postScript = "B"
-      return (value/1000000000).toPrecision(PRECISION)
+      return (value/1000000000).toPrecision(PRECISION).toLocaleString();
     }
     else if(value > 999999) {
       postScript = "M"
-      return (value/1000000).toPrecision(PRECISION)
+      return (value/1000000).toPrecision(PRECISION).toLocaleString();
     }
     else if (value > 1000) {
       postScript = "K"
-      return (value/1000).toPrecision(PRECISION)
+      return (value/1000).toPrecision(PRECISION).toLocaleString();
     }
     else return value
   }

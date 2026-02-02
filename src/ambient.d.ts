@@ -152,6 +152,7 @@ interface ChartType {
   indicator?: IndicatorType,
   table?: PB_Record_Type | EventType[]
   chartType?: string,
+  fullWidth?: boolean
 }
 
 interface CardDataType {

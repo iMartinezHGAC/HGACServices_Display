@@ -40,6 +40,11 @@ function getNonEmptyChartCount(charts: ChartType[]): number {
   return charts.filter(chart => !isAllComponentsEmptyOrZero(chart)).length;
 }
 
+let displayedCharts = $derived(
+    getNonEmptyChartCount(charts) <= 2 || accordionFlag
+      ? charts
+      : charts.slice(0, 2)
+  );
 </script>
 
 <div>
@@ -49,50 +54,48 @@ function getNonEmptyChartCount(charts: ChartType[]): number {
 		</div>
 	{/if}
 
-	<div class="grid w-full grid-cols-2 items-center justify-center gap-1 px-12 py-8">
-    {#if getNonEmptyChartCount(charts) <= 2 || accordionFlag}
-      {#each charts as chart}
-        {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-          <Indicator
-            above={true}
-            below={false}
-            aboveText={chart.indicator.indicatorName}
-            belowText={''}
-            numericValue={Number(chart.indicator.indicatorVal)}
-          />
-        {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
-          {console.log('table render', chart.table)}
-          <Table data={chart.table} />
-        {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-          {console.log(chart)}
-          <RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
-        {:else}
-          <!-- BLANK CHART HERE -->
-        {/if}
-      {/each}
+<div class="flex w-full flex-wrap items-start justify-center gap-6 px-12 py-8">
+  {#each displayedCharts as chart}
+    {@const isFullWidth = chart.fullWidth ?? (chart.table !== undefined)}
+
+    {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
+      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+        <Indicator
+          above={true}
+          below={false}
+          aboveText={chart.indicator.indicatorName}
+          belowText={''}
+          numericValue={Number(chart.indicator.indicatorVal)}
+          symbol_pre={chart.indicator.indicatorSymPre}
+        />
+      </div>
+
+    {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
+      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+        {console.log('table render', chart.table)}
+
+        <Table data={chart.table} />
+      </div>
+
+    {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+        {console.log(chart)}
+
+        <RenderEchart
+          chart={chart.chart.charts}
+          onDrilldown={chart.chart.onDrilldown}
+        />
+      </div>
+
     {:else}
-      {#each charts.slice(0,2) as chart}
-        {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-          <Indicator
-            above={true}
-            below={false}
-            aboveText={chart.indicator.indicatorName}
-            belowText={''}
-            numericValue={Number(chart.indicator.indicatorVal)}
-            symbol_pre={chart.indicator.indicatorSymPre}
-          />
-        {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
-          {console.log('table render', chart.table)}
-          <Table data={chart.table} />
-        {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-          {console.log(chart)}
-          <RenderEchart chart={chart.chart.charts} onDrilldown={chart.chart.onDrilldown} />
-        {:else}
-          <!-- BLANK CHART HERE -->
-        {/if}
-      {/each}
-  {/if}
-  </div>
+      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+        <div class="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
+          No data
+        </div>
+      </div>
+    {/if}
+  {/each}
+</div>
 	{#if getNonEmptyChartCount(charts) > 2}
 		<button
 			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white"

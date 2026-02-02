@@ -95,12 +95,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
-      filter: `jurisdiction = "${juris_id}"`,
+      //filter: `jurisdiction = "${juris_id}"`,
       expand: joinedSubtables // ""
     });
     schema.push(await useGetSchema(tableNames[i]))
   }
-
 
   let projectDetails: AdworkType[] = []
   const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present

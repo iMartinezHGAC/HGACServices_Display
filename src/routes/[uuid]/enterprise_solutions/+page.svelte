@@ -61,7 +61,7 @@
 			splitTableData(tablesData, '33_hgac_coop_purchasing'),
     'category',                      // The key to count unique values for
     'orders',
-    'Order Count by Category'          // Optional custom title
+    'Orders Placed: Order Count Grouped by Category'          // Optional custom title
   ),
     makeValueSumPie(
     '33_hgac_coop_purchasing',  // Parent table name (from your data example)
@@ -73,7 +73,7 @@
   {
       parent_table: "31_hgac_energy_corp",
       indicator: {
-        indicatorName: "Energy Dollars",
+        indicatorName: "Dollars spent on electricity through H-GAC Energy",
         indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'dollar_amount')
       },
       chartType: "indicator"
@@ -81,7 +81,7 @@
   {
       parent_table: "31_hgac_energy_corp",
       indicator: {
-        indicatorName: "Accounts",
+        indicatorName: "Entities in your area utilizing H-GAC Energy",
         indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'accounts_count')
       },
       chartType: "indicator"

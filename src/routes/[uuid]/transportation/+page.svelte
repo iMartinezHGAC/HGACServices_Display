@@ -75,7 +75,7 @@
 				'medical_fire',
 				'other'
 			],
-			'Other Services'
+			'Other Tow and Go Services Provided'
 		),
 		makeDrilldownPie(
 			'34_gc_tow_and_go',
@@ -86,12 +86,12 @@
 				'gone_on_arrival',
 				'information_assistance',
 				'law_enforcement',
-				'mechanicol',
+				'mechanical',
 				'medical_fire',
 				'towing_services',
 				'traffic_control'
 			],
-			'Motorist Assistance Program Services'
+			'Motorist Assistance Program (MAP) Services'
 		),
 
   makeValueCountPie(

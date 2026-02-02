@@ -16,6 +16,39 @@ function formatValue(num: number): string {
   }
   return num.toLocaleString();
 }
+
+import type { EChartsOption, DefaultLabelFormatterCallbackParams } from 'echarts';
+
+// Reusable number formatter with comma separators
+const formatNumber = (value: number | string | undefined): string => {
+  if (value === undefined || value === null) return '0';
+  const num = Number(value);
+  return isNaN(num) ? '0' : num.toLocaleString('en-US');
+};
+
+// Reusable label formatter
+const createLabelFormatter = (showName = true) => {
+  return (params: DefaultLabelFormatterCallbackParams) => {
+    const valueStr = formatNumber(params.value);
+    return showName
+      ? `${params.name}: ${valueStr}`
+      : valueStr;
+  };
+};
+
+// Reusable tooltip formatter
+const tooltipFormatter = (params: DefaultLabelFormatterCallbackParams) => {
+  const valueStr = formatNumber(params.value);
+  return `${params.name}: ${valueStr} (${params.percent}%)`;
+};
+
+// Optional: Inner label formatter with percentage
+const innerLabelFormatter = (params: DefaultLabelFormatterCallbackParams) => {
+  const valueStr = formatNumber(params.value);
+  return `${valueStr}\n(${params.percent}%)`;
+};
+
+
 /**
  * Creates a drilldown donut chart for multiple value keys and their single-key breakdowns.
  * Works with both dataset as array (T[]) or single object (T).
@@ -100,7 +133,7 @@ export function makeDrilldownDonut<T = any>(
   const charts: echarts.EChartsOption = {
     title: titleConfig,
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 50 },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
         name: '',
@@ -110,7 +143,7 @@ export function makeDrilldownDonut<T = any>(
         label: {
           show: true,
           position: 'outside',
-          formatter: '{b}: {c}'
+          formatter: createLabelFormatter(true)
         },
         labelLine: { show: true },
         emphasis: {
@@ -132,7 +165,7 @@ export function makeDrilldownDonut<T = any>(
             return params.percent! >= 5;
           },
           position: 'inside',
-          formatter: '{c}',
+          formatter: createLabelFormatter(true),
           opacity: 1
         },
         labelLine: { show: false }
@@ -180,7 +213,7 @@ export function makeDrilldownDonut<T = any>(
           label: {
             show: true,
             position: 'outside',
-            formatter: '{b}: {c}'
+            formatter: createLabelFormatter(true)
           },
           labelLine: { show: true }
         },
@@ -195,7 +228,7 @@ export function makeDrilldownDonut<T = any>(
               return params.percent! >= 5;
             },
             position: 'inside',
-            formatter: '{c}',
+            formatter: createLabelFormatter(true),
             opacity: 1
           },
           labelLine: { show: false }
@@ -265,7 +298,7 @@ export function makeDrilldownPie<T = any>(
       left: 'center'
     },
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 30 },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
         name: '',
@@ -275,7 +308,7 @@ export function makeDrilldownPie<T = any>(
         label: {
           show: true,
           position: 'outside', // Outside labels always shown
-          formatter: '{b}: {c}' // Category: value
+          formatter: createLabelFormatter(true)
         },
         labelLine: {
           show: true // Connecting lines for outside labels
@@ -301,7 +334,7 @@ export function makeDrilldownPie<T = any>(
             return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed for "fits")
           },
           position: 'inside',
-          formatter: '{c}', // Value inside
+          formatter: innerLabelFormatter, // Value inside
           opacity: 1 // Ensures label visibility
         },
         labelLine: {
@@ -330,7 +363,7 @@ export function makeDrilldownPie<T = any>(
           label: {
             show: true,
             position: 'outside', // Outside labels always shown
-            formatter: '{b}: {c}' // Category: value
+            formatter: createLabelFormatter(true) // Category: value
           },
           labelLine: {
             show: true // Connecting lines for outside labels
@@ -349,7 +382,7 @@ export function makeDrilldownPie<T = any>(
               return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
             },
             position: 'inside',
-            formatter: '{c}', // Value inside
+            formatter: innerLabelFormatter, // Value inside
             opacity: 1 // Ensures label visibility
           },
           labelLine: {
@@ -468,7 +501,7 @@ export function makeTableDrilldownPie<T = any>(
         label: {
           show: true,
           position: 'outside', // Outside labels always shown
-          formatter: '{b}: {c}' // Category: value
+          formatter: createLabelFormatter(true) // Category: value
         },
         labelLine: {
           show: true // Connecting lines for outside labels
@@ -494,7 +527,7 @@ export function makeTableDrilldownPie<T = any>(
             return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed for "fits")
           },
           position: 'inside',
-          formatter: '{c}', // Value inside
+          formatter: innerLabelFormatter, // Value inside
           opacity: 1 // Ensures label visibility
         },
         labelLine: {
@@ -523,7 +556,7 @@ export function makeTableDrilldownPie<T = any>(
           label: {
             show: true,
             position: 'outside', // Outside labels always shown
-            formatter: '{b}: {c}' // Category: value
+            formatter: createLabelFormatter(true) // Category: value
           },
           labelLine: {
             show: true // Connecting lines for outside labels
@@ -542,7 +575,7 @@ export function makeTableDrilldownPie<T = any>(
               return params.percent! >= 5; // Conditional: show inside value only if slice >=5%
             },
             position: 'inside',
-            formatter: '{c}', // Value inside
+            formatter: innerLabelFormatter, // Value inside
             opacity: 1 // Ensures label visibility
           },
           labelLine: {
@@ -650,7 +683,7 @@ export function makeDrilldownMultPie<T = any>(
           label: {
             show: true,
             position: 'outside',
-            formatter: '{b}: {c}',
+            formatter: createLabelFormatter(true),
           },
           labelLine: {
             show: true,
@@ -674,7 +707,7 @@ export function makeDrilldownMultPie<T = any>(
           label: {
             show: (params: any) => params.percent! >= 5,
             position: 'inside',
-            formatter: '{c}',
+            formatter: innerLabelFormatter, // Value inside
             opacity: 1,
           },
           labelLine: {
@@ -733,7 +766,7 @@ export function makeDrilldownMultPie<T = any>(
         label: {
           show: true,
           position: 'outside',
-          formatter: '{b}: {c}',
+          formatter: createLabelFormatter(true),
         },
         labelLine: {
           show: true,
@@ -757,7 +790,7 @@ export function makeDrilldownMultPie<T = any>(
         label: {
           show: (params: any) => params.percent! >= 5,
           position: 'inside',
-          formatter: '{c}',
+          formatter: innerLabelFormatter,
           opacity: 1,
         },
         labelLine: {
@@ -835,7 +868,7 @@ export function makeValueCountPie<T = any>(
       left: 'center'
     },
     tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', left: 'left', top: 30 },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
     series: [
       {
         name: humanPrimary,
@@ -845,7 +878,7 @@ export function makeValueCountPie<T = any>(
         label: {
           show: true,
           position: 'outside', // Outside labels always shown
-          formatter: '{b}: {c}' // Category: value
+          formatter: createLabelFormatter(true) // Category: value
         },
         labelLine: {
           show: true // Connecting lines for outside labels
@@ -871,7 +904,7 @@ export function makeValueCountPie<T = any>(
             return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
           },
           position: 'inside',
-          formatter: '{c}', // Value inside
+          formatter: innerLabelFormatter,
           opacity: 1 // Ensures label visibility
         },
         labelLine: {
@@ -901,7 +934,7 @@ export function makeValueCountPie<T = any>(
           label: {
             show: true,
             position: 'outside', // Outside labels always shown
-            formatter: '{b}: {c}' // Category: value
+            formatter: createLabelFormatter(true) // Category: value
           },
           labelLine: {
             show: true // Connecting lines for outside labels
@@ -920,7 +953,7 @@ export function makeValueCountPie<T = any>(
               return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
             },
             position: 'inside',
-            formatter: '{c}', // Value inside
+            formatter: innerLabelFormatter,
             opacity: 1 // Ensures label visibility
           },
           labelLine: {
@@ -992,9 +1025,9 @@ export function makeValueSumPie<T = any>(
     tooltip: { trigger: 'item' },
     legend: {
       show: !manyCategories,
-      orient: 'vertical',
+      orient: 'horizontal',
       left: 'left',
-      top: 30
+      bottom: 10
     },
     series: [
       {
@@ -1005,7 +1038,7 @@ export function makeValueSumPie<T = any>(
         label: {
           show: !manyCategories,
           position: 'outside', // Outside labels
-          formatter: '{b}: {c}' // Category: value
+          formatter: createLabelFormatter(true) // Category: value
         },
         labelLine: {
           show: !manyCategories // Connecting lines for outside labels
@@ -1019,7 +1052,7 @@ export function makeValueSumPie<T = any>(
           label: {
             show: true,
             position: 'outside',
-            formatter: '{b}: {c}'
+            formatter: createLabelFormatter(true)
           },
           labelLine: {
             show: true
@@ -1039,7 +1072,7 @@ export function makeValueSumPie<T = any>(
             return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
           },
           position: 'inside',
-          formatter: '{c}', // Value inside
+          formatter: innerLabelFormatter,
           opacity: 1 // Ensures label visibility
         },
         labelLine: {
@@ -1062,9 +1095,7 @@ export function makeValueSumPie<T = any>(
       title: { text: `${params.data.name} by ${humanDrilldownSecondary}`, left: 'center' },
       legend: {
         show: !manySubCategories,
-        orient: 'vertical',
-        left: 'left',
-        top: 30
+        orient: 'horizontal', left: 'left', bottom: 10
       },
       series: [
         {
@@ -1075,7 +1106,7 @@ export function makeValueSumPie<T = any>(
           label: {
             show: !manySubCategories,
             position: 'outside', // Outside labels
-            formatter: '{b}: {c}' // Category: value
+            formatter: createLabelFormatter(true) // Category: value
           },
           labelLine: {
             show: !manySubCategories // Connecting lines for outside labels
@@ -1089,7 +1120,7 @@ export function makeValueSumPie<T = any>(
             label: {
               show: true,
               position: 'outside',
-              formatter: '{b}: {c}'
+              formatter: createLabelFormatter(true)
             },
             labelLine: {
               show: true
@@ -1109,7 +1140,7 @@ export function makeValueSumPie<T = any>(
               return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
             },
             position: 'inside',
-            formatter: '{c}', // Value inside
+            formatter: innerLabelFormatter,
             opacity: 1 // Ensures label visibility
           },
           labelLine: {
@@ -1159,11 +1190,7 @@ export function makePie<T = any>(
         tooltip: {
           trigger: 'item'
         },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          top: 30,
-        },
+        legend: { orient: 'horizontal', left: 'left', bottom: 10 },
         series: [
           {
             name: snakeToHuman(key1 as string),

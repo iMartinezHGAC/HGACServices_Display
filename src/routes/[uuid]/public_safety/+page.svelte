@@ -40,8 +40,8 @@
 	//console.log("Name: ", programNames)
 	$inspect('table data: ', tablesData);
 
-	console.log('test splt', 
-			splitTableData(tablesData, '15_regional_law_enforcement_training'))
+  $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
+
   //splitSubtables(tablesData, '14_livable_centers'));
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
@@ -57,105 +57,7 @@
 		'to_date'
 	];
 
-   /* 
-	const keys = $derived(
-		data.schema
-			.filter((schema: SchemaMultiType) => schema.tableName === '34_gc_tow_and_go')
-			.map((schema: SchemaMultiType) => schema.schema)
-			.at(0)
-			.map((schema: SchemaType) => schema.Name)
-	);
-
-	$inspect('keys: ', keys);
-  */
-
-	//programNames.forEach((programName) => {
-
 	charts.push(
-
-  /**
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'free_tows',
-			'paid_tows'
-		]),
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
-			'towing_charge',
-			'towing_charge_free'
-		]),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
-			[
-				'abandoned_vehicles',
-				'law_enforcement_special_cases',
-				'mechanical',
-				'medical_fire',
-				'other'
-			],
-			'Other Services'
-		),
-		makeDrilldownPie(
-			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').map,
-			[
-				'abandoned_vehicles',
-				'debris',
-				'gone_on_arrival',
-				'information_assistance',
-				'law_enforcement',
-				'mechanicol',
-				'medical_fire',
-				'towing_services',
-				'traffic_control'
-			],
-			'Motorist Assistance Program Services'
-		),
-
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').rtp_projects,
-			['fiscal_year', 'funding'],
-			'R.T.P. Projects'
-		),
-		makeDrilldownPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').yr10_projects,
-			['fiscal_year', 'funding'],
-			'Yr 10 Projects'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			['fiscal_year', 'funding'],
-			'TIP'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			['fiscal_year', 'funding'],
-			'LET'
-		),
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		)
-	);
-  makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'status',                      // The key to count unique values for
-    'Status'          // Optional custom title
-  ),  
-    makeValueCountPie(
-    '14_livable_centers',  // Parent table name (from your data example)
-			splitSubtables(tablesData, '14_livable_centers').studies,
-    'study_progress',                      // The key to count unique values for
-    'Study Progress'          // Optional custom title
-  ),
-
-   */ 
     makeValueSumPie(
     '15_regional_law_enforcement_training',  // Parent table name (from your data example)
 			splitTableData(tablesData, '15_regional_law_enforcement_training'),
@@ -169,6 +71,30 @@
     'class_name',
     'contact_hours_provided',                      // The key to count unique values for
     'Contact Hours by Class Name'          // Optional custom title
+  ),
+    makeValueSumPie(
+    '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
+    splitTableData(tablesData, '16_regional_criminal_justice_grants'),
+    'grant_type',                      // The key to count unique values for
+    'grant_dollars',
+    'Grants Prioritized'          // Optional custom title
+  ),
+    {
+      parent_table: "16_regional_criminal_justice_grants",
+      table: splitTableData(tablesData, '16_regional_criminal_justice_grants') 
+    },
+    makeValueSumPie(
+    '19_regional_juvenile_mental_health',  // Parent table name (from your data example)
+			splitTableData(tablesData, '19_regional_juvenile_mental_health'),
+    'service_type',                      // The key to count unique values for
+    'service_count',
+  ),
+    makeValueSumPie(
+    '19_regional_juvenile_mental_health',  // Parent table name (from your data example)
+			splitTableData(tablesData, '19_regional_juvenile_mental_health'),
+    'service_type',                      // The key to count unique values for
+    'dollar_amount',
+    'Dollar Amount by Service Type'          // Optional custom title
   ),
 	)
 
