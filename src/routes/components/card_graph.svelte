@@ -54,12 +54,11 @@ let displayedCharts = $derived(
 		</div>
 	{/if}
 
-<div class="flex w-full flex-wrap items-start justify-center gap-6 px-12 py-8">
+<div class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
   {#each displayedCharts as chart}
-    {@const isFullWidth = chart.fullWidth ?? (chart.table !== undefined)}
-
-    {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+    {@const isFullWidth = chart.fullWidth === true}
+    <div class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto">
+      {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
         <Indicator
           above={true}
           below={false}
@@ -68,32 +67,25 @@ let displayedCharts = $derived(
           numericValue={Number(chart.indicator.indicatorVal)}
           symbol_pre={chart.indicator.indicatorSymPre}
         />
-      </div>
 
-    {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
-      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
-        {console.log('table render', chart.table)}
+      {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
 
         <Table data={chart.table} />
-      </div>
 
-    {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+      {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
         {console.log(chart)}
 
         <RenderEchart
           chart={chart.chart.charts}
           onDrilldown={chart.chart.onDrilldown}
         />
-      </div>
 
-    {:else}
-      <div class="{isFullWidth ? 'w-full' : 'w-full md:w-1/2 min-w-0'} overflow-x-auto">
+      {:else}
         <div class="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
-          No data
+          No data. Consider using HART to manage you data
         </div>
-      </div>
-    {/if}
+      {/if}
+    </div>
   {/each}
 </div>
 	{#if getNonEmptyChartCount(charts) > 2}

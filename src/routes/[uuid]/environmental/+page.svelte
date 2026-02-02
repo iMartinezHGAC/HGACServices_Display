@@ -198,7 +198,9 @@ data.tableNames.forEach((tableName: string) => {
   if (filtered.length > 0) {
     charts.push({
       parent_table: tableName,
-      table: filtered as EventType[]
+      table: filtered as EventType[],
+
+        fullWidth: true
     });
   }
 });

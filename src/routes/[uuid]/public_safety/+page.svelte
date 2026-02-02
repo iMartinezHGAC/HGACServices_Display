@@ -72,6 +72,10 @@
     'contact_hours_provided',                      // The key to count unique values for
     'Contact Hours by Class Name'          // Optional custom title
   ),
+    {
+      parent_table: "16_regional_criminal_justice_grants",
+      table: splitTableData(tablesData, '16_regional_criminal_justice_grants'), 
+    },
     makeValueSumPie(
     '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
     splitTableData(tablesData, '16_regional_criminal_justice_grants'),
@@ -79,10 +83,6 @@
     'grant_dollars',
     'Grants Prioritized'          // Optional custom title
   ),
-    {
-      parent_table: "16_regional_criminal_justice_grants",
-      table: splitTableData(tablesData, '16_regional_criminal_justice_grants') 
-    },
     makeValueSumPie(
     '19_regional_juvenile_mental_health',  // Parent table name (from your data example)
 			splitTableData(tablesData, '19_regional_juvenile_mental_health'),

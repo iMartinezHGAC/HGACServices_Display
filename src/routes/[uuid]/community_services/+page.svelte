@@ -57,6 +57,12 @@
 	];
 
 	charts.push(
+
+  {
+    parent_table: "14_livable_centers",
+    table: selectSplitSubtable(tablesData, '14_livable_centers', 'studies') as PB_Record_Type,
+    fullWidth: true
+  },
   makeValueCountPie(
     '14_livable_centers', 
 			splitSubtables(tablesData, '14_livable_centers').studies,
@@ -78,10 +84,6 @@
       ],
       "Assistance Provided"
     ),
-  {
-    parent_table: "14_livable_centers",
-    table: selectSplitSubtable(tablesData, '14_livable_centers', 'studies') as PB_Record_Type
-  },
     /*
     makeValueCountPie(
     '14_livable_centers', 
@@ -94,11 +96,12 @@
 
 data.tableNames.forEach((tableName: string) => {
   const filtered = data.eventsData?.filter((field: any) => field.program === tableName) || [];
-  
   if (filtered.length > 0) {
     charts.push({
       parent_table: tableName,
-      table: filtered as EventType[]
+      table: filtered as EventType[],
+
+      fullWidth: true
     });
   }
 });
