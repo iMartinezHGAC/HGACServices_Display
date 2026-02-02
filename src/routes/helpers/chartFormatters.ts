@@ -1227,7 +1227,10 @@ export function makeValueSumPieTop10<T = any>(
       parentData.push({
         name: "Other",
         value: otherSum,
-        originals: otherOriginals // Custom property to identify "Other" group
+        originals: otherOriginals, // Custom property to identify "Other" group
+        itemStyle: {
+          color: '#aaaaaa'  // Fixed grey color for "Other" slice
+        }
       });
     }
   }
