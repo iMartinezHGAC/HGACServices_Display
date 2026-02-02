@@ -58,12 +58,10 @@
 	class="flex w-11/12 flex-col items-start justify-center overflow-auto border-t-4 border-slate-700 px-4 py-8"
 >
 	<div class="w-full pl-12">
-		<h1 class="text-2xl font-extrabold">Additional Work</h1>
 		<AdditionalWorkBody
 			{projectName}
 			expanded={false}
 			{bodyText}
-			location="Harris County"
 			dates={dateRange}
 			funding={0}
 			customMetrics={[exampleMetric]}

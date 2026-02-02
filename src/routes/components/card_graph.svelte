@@ -103,6 +103,7 @@ let displayedCharts = $derived(
 	{#if additionalWork}
 		<div class="flexy flex-col" {@attach toGraphWork}>
 			{#if project.program_name === 'Livable Centers'}
+        <h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
 				{#each itemsToShow as adWork}
 					<AdditionalWork
 						bodyText={adWork.project_description}
