@@ -57,17 +57,17 @@
 
 	charts.push(
 		makeDrilldownPie(
-      '34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+      '34_gc_tow_and_go', selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'), [
 			'free_tows',
 			'paid_tows'
 		]),
-		makeDrilldownPie('34_gc_tow_and_go', splitSubtables(tablesData, '34_gc_tow_and_go').tng, [
+		makeDrilldownPie('34_gc_tow_and_go', selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'), [
 			'towing_charge',
 			'towing_charge_free'
 		]),
 		makeDrilldownPie(
 			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').tng,
+			selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'),
 			[
 				'abandoned_vehicles',
 				'law_enforcement_special_cases',

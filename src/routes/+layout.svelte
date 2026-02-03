@@ -11,28 +11,19 @@
 
 	import '../app.css';
 	import { jurisState } from '../state/jurisState.svelte';
-	import { DashboardType } from '../ambient';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	const jurisId = jurisState();
-	/*
-  if(data.uuid !== undefined && data.uuid) {
-    console.log("CALLED setUUID", data.uuid)
-    jurisId.setJurisdiction(data.uuid)
-  }
-  if(data.uuid === 'a8se97t2') {
-    jurisdiction = "harris_county"
-  }
-  */
+
 	let jurisdiction = $derived.by(() => {
 		if (jurisId.jurisdiction) return jurisId.jurisdiction.name;
-		return 'Harris County';
+    else return '';
 	});
 
   let logo_url = $derived.by(()=>{
     if(jurisId.logo_url) return jurisId.logo_url
-    return null
+    else return null
   })
 
 	function toSnakeCase(tabName: string) {

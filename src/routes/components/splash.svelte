@@ -66,13 +66,13 @@
 
 <div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500">
 	<div class="flex flex-none items-center justify-start">
-    {#if jurisId.logo_url}
-      <img src={jurisId.logo_url} alt="harris" class="h-24 p-2" />
+    {#if logo_url}
+      <img src={logo_url} alt="harris" class="h-24 p-2" />
     {/if}
 		<p
 			class="px-6 {dynamicFontSize} small-caps w-3/4 font-[Metropolis] font-extrabold text-slate-200 select-none"
 		>
-			{jurisId.jurisdiction.name}
+			{jurisdiction}
 		</p>
 	</div>
 	<div class="flex-grow"></div>

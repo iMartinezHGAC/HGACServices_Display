@@ -120,6 +120,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   return {
-    pbData,
+    pbData: pbData,
   };
 };
