@@ -51,9 +51,48 @@
 	}
 
 	async function handleClick(jurisdiction: JurisdictionType) {
+    jurisstate.clearUUID()
 		jurisstate.setJurisdiction(jurisdiction);
+    jurisstate.setJurisLogo(await fetchImage(jurisdiction))
 		await goto(`/${jurisdiction.id}/overview`);
 	}
+  /***********************  IMAGE FETCH ************************/
+
+  let loading = false;
+
+
+  async function fetchImage(juris: JurisdictionType) {
+
+    let jurisId=juris.id
+    if (!location) return;
+
+  let thumbnailUrl: string | null = null;
+  let fullUrl: string | null = null;
+  let filename: string | null = null;
+  let errorMsg: string | null = null;
+
+    try {
+      const params = new URLSearchParams({jurisdiction: jurisId });
+      const res = await fetch(`/api/download?${params}`);
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Failed to load image');
+      }
+
+      const data = await res.json();
+      thumbnailUrl = data.thumbnailUrl;
+      fullUrl = data.fullUrl;
+      filename = data.filename;
+    } catch (err: any) {
+      errorMsg = err.message || 'Unknown error';
+      console.error(err);
+    } finally {
+      loading = false;
+      return fullUrl
+    }
+  }
+
 </script>
 
 <!------------------------ PSEUDO SPLASH -------------------------------------------------------------->

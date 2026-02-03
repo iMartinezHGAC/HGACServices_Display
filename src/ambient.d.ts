@@ -228,3 +228,13 @@ type EventType = {
   program: string,
   event_date: string | Date
 }
+
+type ImageRecord = {
+  collectionId: string,
+  collectionName: string,
+  id: string,
+  jurisdiction: string,
+  image: string,
+  created: string,
+  updated: string,
+}

@@ -8,6 +8,7 @@ function isJurisdictionId(id: string) {
 
 let chosenJurisdiction: JurisdictionType
 let juris_uuid: string
+let juris_logo: string
 
 export function jurisState() {
   // CRUD
@@ -19,12 +20,21 @@ export function jurisState() {
     }
   }
   function clearUUID() {
+    juris_logo = ""
     juris_uuid = ""
+  }
+
+  function setJurisLogo(url: string) {
+    juris_logo = url
+    console.log("STATE: jurisdiction logo ", juris_logo)
   }
 
   return {
     setJurisdiction: setJurisdiction,
+    setJurisLogo: setJurisLogo,
+    clearUUID: clearUUID,
     get uuid() { return juris_uuid },
     get jurisdiction() { return chosenJurisdiction },
+    get logo_url() { return juris_logo },
   }
 }

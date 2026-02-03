@@ -11,6 +11,7 @@
 
 	import '../app.css';
 	import { jurisState } from '../state/jurisState.svelte';
+	import { DashboardType } from '../ambient';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -29,6 +30,11 @@
 		return 'Harris County';
 	});
 
+  let logo_url = $derived.by(()=>{
+    if(jurisId.logo_url) return jurisId.logo_url
+    return null
+  })
+
 	function toSnakeCase(tabName: string) {
 		return tabName.split(' ').join('_');
 	}
@@ -46,7 +52,7 @@
 	class="fixed flex h-screen w-screen flex-col items-center justify-start bg-slate-200 bg-cover"
 >
 	{#if data.uuid}
-		<Splash chosenTab={routePath} {jurisdiction} dashboard_groups={data.dashboard_groups} />
+		<Splash chosenTab={routePath} {jurisdiction} {logo_url} dashboard_groups={data.dashboard_groups as DashboardType[]} />
 	{/if}
 	{@render children()}
 </main>

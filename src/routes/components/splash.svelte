@@ -1,16 +1,18 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
 	import county_logo from '$lib/assets/harris_county.svg';
+	import type { DashboardType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 
 	interface props {
 		chosenTab: string;
 		jurisdiction: string;
+    logo_url: string | null;
 		dashboard_groups: DashboardType[];
 	}
 
-	let { chosenTab, jurisdiction, dashboard_groups }: props = $props();
+	let { chosenTab, jurisdiction, logo_url, dashboard_groups }: props = $props();
 
 	function toSnakeCase(tabName: string) {
 		return tabName.split(' ').join('_');
@@ -64,7 +66,9 @@
 
 <div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500">
 	<div class="flex flex-none items-center justify-start">
-		<img src={county_logo} alt="harris" class="h-24 p-2" />
+    {#if jurisId.logo_url}
+      <img src={jurisId.logo_url} alt="harris" class="h-24 p-2" />
+    {/if}
 		<p
 			class="px-6 {dynamicFontSize} small-caps w-3/4 font-[Metropolis] font-extrabold text-slate-200 select-none"
 		>
