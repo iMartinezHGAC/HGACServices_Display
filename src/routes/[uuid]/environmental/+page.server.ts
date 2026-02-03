@@ -105,7 +105,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
-      //filter: `jurisdiction = "${juris_id}" && ((from_date >= "${startISO}" && from_date <= "${nowISO}") || (to_date >= "${startISO}" && to_date <= "${nowISO}"))`,
+      filter: `jurisdiction = "${juris_id}" && ((from_date >= "${startISO}" && from_date <= "${nowISO}") || (to_date >= "${startISO}" && to_date <= "${nowISO}"))`,
       expand: joinedSubtables // ""
     });
     schema.push(await useGetSchema(tableNames[i]))

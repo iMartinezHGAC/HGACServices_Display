@@ -9,18 +9,18 @@
   const { chart, onDrilldown }: Props = $props()
 
   // Custom color palette
-const customColors = [
-  '#7AB66F',
-  '#EF9021',
-  '#25B5AF',
-  '#C6093B',
-  '#002F47',
-  '#025773',
-  '#56B4E9', // light sky blue – adds a distinct cool tone
-  '#F0E442', // bright yellow – introduces a high-visibility warm hue
-  '#0072B2', // medium blue – contrasts well with your darker blues
-  '#CC79A7', // reddish purple – adds a magenta/pink tone for variety
-] as const
+  const customColors = [
+    '#7AB66F',
+    '#EF9021',
+    '#25B5AF',
+    '#C6093B',
+    '#002F47',
+    '#025773',
+    '#56B4E9', // light sky blue – adds a distinct cool tone
+    '#F0E442', // bright yellow – introduces a high-visibility warm hue
+    '#0072B2', // medium blue – contrasts well with your darker blues
+    '#CC79A7', // reddish purple – adds a magenta/pink tone for variety
+  ] as const
 
   // Helper to merge custom colors into the provided option (top-level color palette)
   function getOptionWithColors(option: echarts.EChartsOption | null): echarts.EChartsOption {
@@ -59,8 +59,11 @@ const customColors = [
 
     if (onDrilldown) {
       chartInstance.on('click', (params) => {
-        isDrilledDown = true
-        onDrilldown(params, chartInstance!)
+        // Prevent any further drilldown once we have already drilled once
+        if (isDrilledDown) return;
+
+        isDrilledDown = true;
+        onDrilldown(params, chartInstance!);
       })
     }
   }

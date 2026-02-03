@@ -76,6 +76,272 @@ const isMonetary = (key: string): boolean => {
 };
 
 
+
+/**
+ * Creates a drilldown pie chart showing project counts (not funding) by program/plan,
+ * with drilldown to project counts by project_type.
+ * Tooltips show total funding + top 5 projects (by funding) + "and X more".
+ * @param parent_table - Internal reference name
+ * @param dataset - Renamed data structure (e.g., combinedA with RTP, 10_year, TIP, LET)
+ * @param title - Optional title for parent chart
+ * @returns ChartType with drilldown
+ */
+export function makeProjectCountDrilldownPie<T = any>(
+  parent_table: string,
+  dataset: T[],
+  title?: string
+): ChartType {
+  function snakeToHuman(str: string): string {
+    return str
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      .trim();
+  }
+
+  const totalFundingMap: Record<string, number> = {};
+  const countMap: Record<string, number> = {};
+  const projectsMap: Record<string, { name: string; funding: number }[]> = {};
+  const itemsMap: Record<string, any[]> = {};
+
+  dataset.forEach((group) => {
+    if (typeof group === 'object' && group !== null) {
+      Object.entries(group).forEach(([programKey, info]: [string, any]) => {
+        if (info && Array.isArray(info.items)) {
+          const items = info.items;
+          itemsMap[programKey] = items;
+
+          let totalFunding = 0;
+          const projs: { name: string; funding: number }[] = [];
+
+          items.forEach((item: any) => {
+            const funding = Number(item.funding) || 0;
+            totalFunding += funding;
+            const name = item.project_name?.trim() || 'Unnamed Project';
+            projs.push({ name, funding });
+          });
+
+          projs.sort((a, b) => b.funding - a.funding);
+
+          totalFundingMap[programKey] = totalFunding;
+          countMap[programKey] = items.length;
+          projectsMap[programKey] = projs;
+        }
+      });
+    }
+  });
+
+  const programs = Object.keys(projectsMap);
+
+  let parentData = programs.map((key) => ({
+    name: snakeToHuman(key),
+    value: countMap[key],
+    totalFunding: totalFundingMap[key],
+    projects: projectsMap[key],
+  }));
+
+  parentData.sort((a, b) => b.value - a.value);
+
+  function getProjectTypeData(programKey: string): any[] {
+    const items = itemsMap[programKey] || [];
+    if (items.length === 0) return [];
+
+    const typeMap: Record<
+      string,
+      { count: number; totalFunding: number; projects: { name: string; funding: number }[] }
+    > = {};
+
+    items.forEach((item: any) => {
+      let ptype = item.project_type?.trim() || 'Other';
+      if (ptype === 'NULL' || ptype === '') ptype = 'Other';
+
+      if (!typeMap[ptype]) {
+        typeMap[ptype] = { count: 0, totalFunding: 0, projects: [] };
+      }
+
+      const funding = Number(item.funding) || 0;
+      typeMap[ptype].totalFunding += funding;
+      typeMap[ptype].count += 1;
+      const name = item.project_name?.trim() || 'Unnamed Project';
+      typeMap[ptype].projects.push({ name, funding });
+    });
+
+    Object.values(typeMap).forEach((group) => {
+      group.projects.sort((a, b) => b.funding - a.funding);
+    });
+
+    let pieData = Object.keys(typeMap).map((ptype) => ({
+      name: snakeToHuman(ptype),
+      value: typeMap[ptype].count,
+      totalFunding: typeMap[ptype].totalFunding,
+      projects: typeMap[ptype].projects,
+    }));
+
+    pieData.sort((a, b) => b.value - a.value);
+    return pieData;
+  }
+
+  // Tooltip – now shows count + total funding + top 5 (by funding) + "and X more"
+  function tooltipFormatter(params: any): string {
+    const name = params.name || 'Unknown';
+    const count = params.value ?? 0;
+    const totalFunding = params.data?.totalFunding ?? 0;
+    const projects: { name: string; funding: number }[] = params.data?.projects ?? [];
+
+    let html = `<div style="font-weight: bold; font-size: 14px;">${name}</div>`;
+    html += count === 1
+      ? `<div>${count} project</div>`
+      : `<div>${count} projects</div>`;
+    html += `<div>Total Funding: <strong>$${totalFunding.toLocaleString()}</strong></div><br/>`;
+    html += `<div style="font-size: 13px; font-weight: bold;">Projects:</div>`;
+
+    if (projects.length === 0) {
+      html += `<div>No projects</div>`;
+    } else {
+      const displayed = projects.slice(0, 5);
+      displayed.forEach((p: any, idx: number) => {
+        html += `<div>${idx + 1}. ${p.name} — $${p.funding.toLocaleString()}</div>`;
+      });
+      const remaining = projects.length - 5;
+      if (remaining > 0) {
+        html += `<div style="margin-top: 4px; font-style: italic;">and ${remaining} more</div>`;
+      }
+    }
+    return html;
+  }
+
+  // Label formatters – now show project counts
+  const outerLabelFormatter = (params: echarts.DefaultLabelFormatterCallbackParams) => {
+    const name = params.name as string;
+    const count = params.value as number;
+    const percent = params.percent?.toFixed(1) ?? '0';
+    return `${name}\n${count} projects\n(${percent}%)`;
+  };
+
+  const innerLabelFormatter = (params: echarts.DefaultLabelFormatterCallbackParams) => {
+    return (params.value as number).toString();
+  };
+
+  const charts: echarts.EChartsOption = {
+    title: {
+      text: title ?? 'Number of Projects by Program/Plan',
+      left: 'center',
+      top: 4,
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: tooltipFormatter,
+      confine: true,
+    },
+    legend: { orient: 'horizontal', left: 'left', bottom: 10 },
+    series: [
+      {
+        type: 'pie',
+        radius: '70%', // Solid pie (no donut hole)
+        center: ['50%', '50%'],
+        data: parentData,
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        },
+        label: {
+          show: true,
+          position: 'outside',
+          formatter: outerLabelFormatter,
+        },
+        labelLine: {
+          show: true,
+        },
+      },
+      {
+        type: 'pie',
+        radius: '70%',
+        center: ['50%', '50%'],
+        data: parentData,
+        itemStyle: { opacity: 0 },
+        label: {
+          show: (params: any) => (params.percent ?? 0) >= 5,
+          position: 'inside',
+          formatter: innerLabelFormatter,
+          fontWeight: 'bold',
+          color: '#fff',
+        },
+        labelLine: { show: false },
+      },
+    ],
+  };
+
+  function onDrilldown(params: any, chartInstance: echarts.ECharts) {
+    const currentOption = chartInstance.getOption();
+    const currentTitle = (currentOption.title as any[])[0]?.text || '';
+    if (currentTitle.includes('by Project Type')) {
+      return; // Already at child level
+    }
+
+    const clickedName = params.name;
+    const programKey = programs.find((k) => snakeToHuman(k) === clickedName);
+    if (!programKey) return;
+
+    const childData = getProjectTypeData(programKey);
+    if (childData.length === 0) return;
+
+    chartInstance.setOption({
+      title: {
+        text: `${clickedName} — Number of Projects by Project Type`,
+        left: 'center',
+        top: 20,
+      },
+      series: [
+        {
+          type: 'pie',
+          radius: '70%',
+          center: ['50%', '50%'],
+          data: childData,
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: outerLabelFormatter,
+          },
+          labelLine: { show: true },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+        },
+        {
+          type: 'pie',
+          radius: '70%',
+          center: ['50%', '50%'],
+          data: childData,
+          itemStyle: { opacity: 0 },
+          label: {
+            show: (params: any) => (params.percent ?? 0) >= 5,
+            position: 'inside',
+            formatter: innerLabelFormatter,
+            fontWeight: 'bold',
+            color: '#fff',
+          },
+          labelLine: { show: false },
+        },
+      ],
+    });
+  }
+
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown,
+    },
+    chartType: 'drilldown_pie',
+  };
+}
+
 /**
  * Creates a drilldown donut chart for multiple value keys and their single-key breakdowns.
  * Works with both dataset as array (T[]) or single object (T).
@@ -659,6 +925,7 @@ export function makeTableDrilldownPie<T = any>(
     chartType: 'drilldown_pie',
   };
 }
+
 
 /**
  * Creates a drilldown pie chart for hierarchical categories, summing a value key at each level.
@@ -1659,10 +1926,11 @@ function isInvalid(data: any) {
   return false
 }
 
-export function splitTableData(tablesData: TableDataResult, tableName: string) {
-  const data = tablesData[tableName].items;
-  if (isInvalid(data)) return null
-  return data
+export function splitTableData(tablesData: TableDataResult, tableName: string): any[] {
+  // Safely access items, default to empty array if table or items missing/malformed
+  const items = tablesData?.[tableName]?.items;
+  return Array.isArray(items) ? items : [];
+  // Removed the isInvalid check + null return – charts handle empty arrays better than null
 }
 
 export function mapTableData(data: PB_Record_Type[], field: string) {
