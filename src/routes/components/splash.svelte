@@ -72,7 +72,7 @@
 		<p
 			class="px-6 {dynamicFontSize} small-caps w-3/4 font-[Metropolis] font-extrabold text-slate-200 select-none"
 		>
-			{jurisdiction}
+			{jurisId.jurisdiction.name}
 		</p>
 	</div>
 	<div class="flex-grow"></div>
