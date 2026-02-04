@@ -150,7 +150,8 @@ interface ChartType {
   parent_table: string,
   chart?: CustomEchartType,
   indicator?: IndicatorType,
-  table?: PB_Record_Type | EventType[]
+  table?: PB_Record_Type | PB_Record_Type[] | EventType[] | null,
+  columns?: string[],
   chartType?: string,
   fullWidth?: boolean
 }

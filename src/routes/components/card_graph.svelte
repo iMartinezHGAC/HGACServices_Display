@@ -78,7 +78,7 @@ let displayedCharts = $derived(
 
       {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
 
-        <Table data={chart.table} />
+        <Table data={chart.table} columns={chart.columns} />
 
       {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
         {console.log(chart)}

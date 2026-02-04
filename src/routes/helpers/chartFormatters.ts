@@ -2100,6 +2100,103 @@ export function makeGroupedBar<T = any>(
     }
   }
 }
+/**
+   * Combines records from multiple expanded relation fields into one flat array.
+   * Adds a "source" column only when there are multiple source fields.
+   * Filters and orders columns according to the optional columnOrder parameter.
+   */
+export function combineRelatedRecords(
+  tablesData: Record<string, any>,
+  parentCollection: string,
+  relatedFields: string[],                  // e.g. ['rtp_projects', 'yr10_projects']
+  columnOrder: string[] = []                 // optional desired columns in desired order
+): { data: PB_Record_Type[] | null; columns: string[] } | null {
+  const response = tablesData[parentCollection];
+  if (!response?.items?.[0]?.expand) {
+    return null;
+  }
+
+  const expand = response.items[0].expand;
+  const combinedRecords: any[] = [];
+  const hasMultipleSources = relatedFields.length > 1;
+
+  for (const field of relatedFields) {
+    let rel = expand[field];
+    if (!rel) continue;
+
+    // Handle both single object and array (PocketBase can return either depending on relation type)
+    const relArray = Array.isArray(rel) ? rel : [rel];
+
+    for (const record of relArray) {
+      const newRecord = { ...record };
+
+      if (hasMultipleSources) {
+        newRecord.source = snakeToHuman(field); // e.g. "rtp_projects" → "Rtp Projects"
+      }
+
+      combinedRecords.push(newRecord);
+    }
+  }
+
+  if (combinedRecords.length === 0) {
+    return null;
+  }
+
+  // Same excluded keys as your component
+  const excludedKeys = [
+    'collectionId',
+    'collectionName',
+    'id',
+    'created',
+    'from_date',
+    'jurisdiction',
+    'source_jurisdiction',
+    'to_date',
+    'updated',
+    'FormData',
+    'email',
+    'address',
+    'program'
+  ];
+
+  // Determine final column list
+  let columns: string[];
+  if (columnOrder.length > 0) {
+    columns = [...columnOrder];
+    if (hasMultipleSources && !columns.includes('source')) {
+      columns.unshift('source'); // automatically put source first if needed
+    }
+  } else {
+    // Mimic your component's default key computation (first-appearance order)
+    const seen = new Set<string>();
+    const keys: string[] = [];
+
+    combinedRecords.forEach((r) => {
+      Object.keys(r).forEach((k) => {
+        if (!excludedKeys.includes(k) && !seen.has(k)) {
+          seen.add(k);
+          keys.push(k);
+        }
+      });
+    });
+
+    // Ensure source is first when it exists
+    if (hasMultipleSources) {
+      const sourceIdx = keys.indexOf('source');
+      if (sourceIdx !== -1) {
+        keys.splice(sourceIdx, 1);
+        keys.unshift('source');
+      }
+    }
+
+    columns = keys;
+  }
+
+  return {
+    data: combinedRecords as PB_Record_Type[],
+    columns
+  };
+}
 
 export const truncateDate = <T = any>(input: T): T | string =>
   input instanceof Date || (typeof input === 'string' && input.endsWith('Z'))
@@ -2325,3 +2422,4 @@ export function isAllComponentsEmptyOrZero(chartType: ChartType): boolean {
 export function areAllChartsEmptyOrZero(chartTypes: ChartType[]): boolean {
   return chartTypes.every(isAllComponentsEmptyOrZero);
 }
+

@@ -18,7 +18,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeHierarchicalCategoryDonut, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeHierarchicalCategoryDonut, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -42,8 +42,21 @@
 
 	console.log('test splt', selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let'));
 
-	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+const rtpProcessed = combineRelatedRecords(
+  tablesData,
+  '35_rtp',
+  ['rtp_projects', 'yr10_projects'],
+  ['fiscal_year', 'project_name', 'project_description','funding', 'project_type','project_category', 'project_subcategory', 'project_subcategory2',   ] // optional – omit for auto columns
+);
 
+  console.log('rtp processed', rtpProcessed)
+
+const tipProcessed = combineRelatedRecords(
+  tablesData,
+  '36_transportation_improvement_plan',
+  ['tip_projects'],                 // only one source
+  ['project_name', 'project_description', 'funding'] // optional
+);
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
 	const exclusions = [
@@ -127,7 +140,8 @@
 		),
     {
       parent_table: "35_rtp",
-      table: selectSplitSubtable(tablesData, '35_rtp', 'rtp_projects') as PB_Record_Type,
+      table: rtpProcessed?.data ?? null,
+      columns: rtpProcessed?.columns,
       fullWidth: true
     },
     {

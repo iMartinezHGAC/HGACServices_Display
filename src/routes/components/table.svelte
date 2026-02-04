@@ -16,7 +16,7 @@
 
   const { data, columns = [] }: Props = $props();
 
-  $inspect('props', data);
+  $inspect('TABLE props', data, columns);
 
   let records: PB_Record_Type[] | EventType[] | null = data
     ? Array.isArray(data) ? data : [data] 
