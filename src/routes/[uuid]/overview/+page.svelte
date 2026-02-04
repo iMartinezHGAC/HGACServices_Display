@@ -87,6 +87,8 @@
 		},
 		chartType: 'indicator'
 	});
+
+  //$inspect('pbData', data)
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">

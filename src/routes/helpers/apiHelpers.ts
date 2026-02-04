@@ -13,5 +13,26 @@ export function GetFiveQuarters() {
   const startISO = start.toISOString().replace('T', ' ');
   const nowISO = now.toISOString().replace('T', ' ');
 
-  return { start: startISO, now: nowISO }
+  return { start: startISO, now: nowISO };
+}
+
+export function GenerateFilter(subCollectionNames: string[], juris_id: string) {
+  const { start: startISO, now: nowISO } = GetFiveQuarters();
+
+  const innerDateCondition = `from_date <= "${nowISO}"`;
+
+  if (subCollectionNames && subCollectionNames.length > 0) {
+    const subConditions = subCollectionNames.map(
+      (name) => `(${name}.${innerDateCondition})`
+    );
+
+    const overlappingCondition =
+      subConditions.length > 1
+        ? `(${subConditions.join(" || ")})`
+        : subConditions[0];
+
+    return `jurisdiction.id = "${juris_id}" && ${overlappingCondition}`;
+  } else {
+    return `jurisdiction.id = "${juris_id}" && (${innerDateCondition})`;
+  }
 }

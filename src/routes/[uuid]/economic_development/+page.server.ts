@@ -1,5 +1,6 @@
 import { PB_URL } from '$env/static/private';
 import type { AdworkType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
+import { GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
 import PocketBase from 'pocketbase'
 //import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
@@ -92,7 +93,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
-      filter: `jurisdiction = "${juris_id}" && ((from_date >= "${startISO}" && from_date <= "${nowISO}") || (to_date >= "${startISO}" && to_date <= "${nowISO}"))`,
+      filter: GenerateFilter(subtable, juris_id),
       expand: subtable.join(', ') // ""
     });
     schema.push(await useGetSchema(tableNames[i]))
