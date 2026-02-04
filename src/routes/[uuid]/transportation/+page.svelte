@@ -107,30 +107,38 @@ const tipProcessed = combineRelatedRecords(
 			'Motorist Assistance Program (MAP) Services'
 		),
 
-  makeValueCountPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').rtp_projects,
-    'project_type',                      // The key to count unique values for
-    'Regional Transportation Plan Projects: # of Projects grouped by Type'          // Optional custom title
-  ),  
-  makeValueCountPie(
-			'35_rtp',
-			splitSubtables(tablesData, '35_rtp').yr10_projects,
-    'project_type',                      // The key to count unique values for
-			'10 Year RTP Projects: # of Projects grouped by Type '
-  ),   
-  makeValueCountPie(
-			'36_transportation_improvement_plan',
-    selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'tip') || [],
-    'project_type',                      // The key to count unique values for
-    'TIP Projects # of Projects grouped by Type'
-  ),  
-  makeValueCountPie(
-			'36_transportation_improvement_plan',
-    selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let') || [],
-    'project_type',                      // The key to count unique values for
-    'LET Projects  # of Projects grouped by Type'
-  ),  
+makeValueCountPie(
+  '35_rtp',
+  splitSubtables(tablesData, '35_rtp').rtp_projects,
+  'project_type',           // primary
+  'project_subcategory',    // secondary → drilldown
+  'Regional Transportation Plan Projects: # of Projects grouped by Type'
+),
+
+makeValueCountPie(
+  '35_rtp',
+  splitSubtables(tablesData, '35_rtp').yr10_projects,
+  'project_type',
+  'project_subcategory',
+  '10 Year RTP Projects: # of Projects grouped by Type'
+),
+
+// Same pattern for TIP and LET
+makeValueCountPie(
+  '36_transportation_improvement_plan',
+  selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'tip') || [],
+  'project_type',
+  'project_subcategory',
+  'TIP Projects: # of Projects grouped by Type'
+),
+
+makeValueCountPie(
+  '36_transportation_improvement_plan',
+  selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let') || [],
+  'project_type',
+  'project_subcategory',
+  'LET Projects: # of Projects grouped by Type'
+),
 
 		makeBar(
 			'37_clean_vehicles',

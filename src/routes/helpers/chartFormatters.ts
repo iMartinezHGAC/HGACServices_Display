@@ -1391,23 +1391,24 @@ export function makeValueCountPie<T = any>(
   }
 
   function getValueCountPieData(k: keyof T, ds: T[] = dataset) {
-    if (!ds) {
+    if (!ds || ds.length === 0) {
       return [];
     }
     const countMap: Record<string, number> = {};
     ds.forEach(item => {
       const val = String(item[k]);
-      // Optionally: skip undefined/empty
+      // Skip undefined/empty/null values
       if (!val) return;
-      if (val in countMap) countMap[val]++;
-      else countMap[val] = 1;
+      countMap[val] = (countMap[val] || 0) + 1;
     });
-    return Object.entries(countMap).map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }));
+    return Object.entries(countMap)
+      .map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }))
+      // Sort descending by count for better pie visuals (largest slices first)
+      .sort((a, b) => b.value - a.value);
   }
 
-  const humanPrimary = snakeToHuman(String(secondaryKey ?? primaryKey));
+  const humanPrimary = snakeToHuman(String(primaryKey));
   const parentData = getValueCountPieData(primaryKey);
-
 
   // Chart config compatible with your interface
   const charts: echarts.EChartsOption = {
@@ -1425,11 +1426,11 @@ export function makeValueCountPie<T = any>(
         data: parentData,
         label: {
           show: true,
-          position: 'outside', // Outside labels always shown
-          formatter: createLabelFormatter(true) // Category: value
+          position: 'outside',
+          formatter: createLabelFormatter(true) // e.g., Category: value
         },
         labelLine: {
-          show: true // Connecting lines for outside labels
+          show: true
         },
         emphasis: {
           itemStyle: {
@@ -1445,34 +1446,42 @@ export function makeValueCountPie<T = any>(
         radius: '50%',
         data: parentData,
         itemStyle: {
-          opacity: 0 // Makes the series invisible but labels can still show
+          opacity: 0 // Invisible series used only for conditional inner labels
         },
         label: {
           show: function(params: any) {
-            return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+            return params.percent! >= 5; // Show inside value only for slices ≥5%
           },
           position: 'inside',
           formatter: innerLabelFormatter,
-          opacity: 1 // Ensures label visibility
+          opacity: 1
         },
         labelLine: {
-          show: false // No lines for inside labels
+          show: false
         }
       }
     ]
   };
 
-  // Drilldown function available for controller to register
+  // Drilldown: when a primary slice is clicked, show unique secondary values (with counts) for the items in that slice
   function onDrilldown(params: any, chartInstance: echarts.ECharts) {
     const originalVal = params.data.originalName;
     if (!originalVal) return;
+
     const filteredDataset = dataset.filter(item => String(item[primaryKey]) === originalVal);
     const pieData = getValueCountPieData(secondaryKey, filteredDataset);
     const humanSecondary = snakeToHuman(String(secondaryKey));
 
+    // If no data in the drilled slice, do nothing (avoids empty chart)
+    if (pieData.length === 0) return;
+
     chartInstance.setOption({
-      title: { text: `${params.data.name} by ${humanSecondary}`, left: 'center' },
-      legend: { show: true },
+      title: {
+        text: `${params.data.name} by ${humanSecondary}`,
+        left: 'center'
+      },
+      tooltip: { trigger: 'item' },
+      legend: { orient: 'horizontal', left: 'left', bottom: 10 },
       series: [
         {
           name: `${params.data.name} by ${humanSecondary}`,
@@ -1481,11 +1490,18 @@ export function makeValueCountPie<T = any>(
           data: pieData,
           label: {
             show: true,
-            position: 'outside', // Outside labels always shown
-            formatter: createLabelFormatter(true) // Category: value
+            position: 'outside',
+            formatter: createLabelFormatter(true)
           },
           labelLine: {
-            show: true // Connecting lines for outside labels
+            show: true
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           }
         },
         {
@@ -1494,23 +1510,24 @@ export function makeValueCountPie<T = any>(
           radius: '50%',
           data: pieData,
           itemStyle: {
-            opacity: 0 // Makes the series invisible but labels can still show
+            opacity: 0
           },
           label: {
             show: function(params: any) {
-              return params.percent! >= 5; // Conditional: show inside value only if slice >=5% (adjust as needed)
+              return params.percent! >= 5;
             },
             position: 'inside',
             formatter: innerLabelFormatter,
-            opacity: 1 // Ensures label visibility
+            opacity: 1
           },
           labelLine: {
-            show: false // No lines for inside labels
+            show: false
           }
         }
       ]
     });
   }
+
   return {
     parent_table,
     chart: {
@@ -1520,7 +1537,6 @@ export function makeValueCountPie<T = any>(
     chartType: 'drilldown_pie',
   };
 }
-
 export function makeValueSumPie<T = any>(
   parent_table: string,
   dataset: T[],
