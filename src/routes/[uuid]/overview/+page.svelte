@@ -22,7 +22,6 @@
 	// Accumulate funding across ALL available collections
 	function accumulateFunding(subCollectionsMap: Record<string, any>) {
 		let total = 0;
-
 		Object.values(subCollectionsMap).forEach((group) => {
 			Object.values(group).forEach((section: any) => {
 				if (section?.items && Array.isArray(section.items)) {
@@ -37,7 +36,6 @@
 				}
 			});
 		});
-
 		return total;
 	}
 
@@ -89,6 +87,8 @@
 	});
 
   //$inspect('pbData', data)
+  $inspect('rtp', rtpSubs)
+  $inspect('tip', tipSubs)
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">

@@ -76,6 +76,222 @@ const isMonetary = (key: string): boolean => {
 };
 
 
+/**
+ * Revised Hierarchical Category Donut Chart
+ * 
+ * Key fixes for rendering issues:
+ * - Single title object (with subtext for breadcrumb/level info) instead of multiple titles – avoids potential conflicts.
+ * - Center total displayed via graphic elements (standard/reliable way for donut holes).
+ * - Back button as clickable graphic (only when drilled down).
+ * - Immediate visible donut on load with real data.
+ * - Supports arbitrary depth (your 4 levels).
+ * - Counts projects, handles empty values as "Uncategorized".
+ * 
+ * This should now render properly even with your current component (initial view visible immediately).
+ * 
+ * Note on your component: It currently blocks clicks after the first drilldown (isDrilledDown guard).
+ * For full multi-level drilldown, remove these lines from your component:
+ *   if (isDrilledDown) return;
+ *   isDrilledDown = true;
+ * The chart's own "← Back" graphic will then handle step-by-step navigation.
+ * Your existing "Back" button will still restore to the root view.
+ */
+export function makeHierarchicalCategoryDonut<T = any>(
+  parent_table: string,
+  dataset: T[],
+  categoryKeys: (keyof T)[],
+  title?: string
+): ChartType {
+  if (categoryKeys.length === 0) {
+    throw new Error('At least one category key is required.');
+  }
+
+  function snakeToHuman(str: string): string {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  let currentLevel = 0;
+  let currentFilters: Record<string, string> = {};
+
+  function getFilteredData(): T[] {
+    return dataset.filter((item: any) => {
+      return Object.entries(currentFilters).every(([key, val]) => String(item[key] ?? '') === val);
+    });
+  }
+
+  function computePieData(): { name: string; value: number }[] {
+    const filtered = getFilteredData();
+    if (currentLevel >= categoryKeys.length || filtered.length === 0) return [];
+
+    const currentCat = categoryKeys[currentLevel];
+    const countMap: Record<string, number> = {};
+
+    filtered.forEach((item: any) => {
+      let val = String(item[currentCat] ?? '').trim();
+      if (!val) val = 'Uncategorized';
+      countMap[val] = (countMap[val] || 0) + 1;
+    });
+
+    const entries = Object.entries(countMap);
+    entries.sort(([, a], [, b]) => b - a); // Descending by count
+
+    return entries.map(([rawName, value]) => ({
+      name: rawName, // Keep original (assume data has readable strings like "Roadway")
+      value
+    }));
+  }
+
+  function getBreadcrumb(): string {
+    const parts: string[] = [];
+    for (let i = 0; i < currentLevel; i++) {
+      const catKey = categoryKeys[i];
+      const val = currentFilters[String(catKey)];
+      if (val) {
+        parts.push(`${snakeToHuman(String(catKey))}: ${val}`);
+      }
+    }
+    return parts.join(' > ');
+  }
+
+  function buildOption(pieData: { name: string; value: number }[], filteredCount: number, showBack: boolean): echarts.EChartsOption {
+    const breadcrumb = getBreadcrumb();
+    const levelText = currentLevel === 0
+      ? `By ${snakeToHuman(String(categoryKeys[0]))}`
+      : breadcrumb;
+
+    const graphicElements: any[] = [
+      // Center total count
+      {
+        type: 'text',
+        left: 'center',
+        top: '40%',
+        style: {
+          text: filteredCount.toString(),
+          font: 'bold 36px sans-serif',
+          fill: '#333'
+        }
+      },
+      {
+        type: 'text',
+        left: 'center',
+        top: '55%',
+        style: {
+          text: 'Total Projects',
+          font: '14px sans-serif',
+          fill: '#999'
+        }
+      }
+    ];
+
+    if (showBack) {
+      graphicElements.push({
+        type: 'text',
+        left: 20,
+        top: 20,
+        style: {
+          text: '← Back',
+          font: '16px sans-serif',
+          fontWeight: 'bold',
+          fill: '#000',
+          cursor: 'pointer'
+        },
+        onclick: () => {
+          if (currentLevel > 0) {
+            const catToRemove = categoryKeys[currentLevel - 1];
+            delete currentFilters[String(catToRemove)];
+            currentLevel--;
+            const newPieData = computePieData();
+            const newFilteredCount = getFilteredData().length;
+            chartInstance?.setOption(buildOption(newPieData, newFilteredCount, currentLevel > 0));
+          }
+        }
+      });
+    }
+
+    return {
+      title: {
+        text: title ?? 'Projects by Category',
+        subtext: levelText,
+        left: 'center',
+        top: 10,
+        textStyle: { fontSize: 16, fontWeight: 'bold' },
+        subtextStyle: { fontSize: 14, color: '#666' }
+      },
+      graphic: graphicElements,
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => `${params.name}: ${params.value} projects (${params.percent?.toFixed(1)}%)`
+      },
+      legend: { orient: 'horizontal', left: 'left', bottom: 10 },
+      series: [
+        {
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          data: pieData,
+          emphasis: {
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+          },
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: '{b}\n{c} projects ({d}%)'
+          },
+          labelLine: { show: true }
+        },
+        {
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          data: pieData,
+          itemStyle: { opacity: 0 },
+          label: {
+            show: (params: any) => (params.percent ?? 0) >= 5,
+            position: 'inside',
+            formatter: '{c}',
+            fontWeight: 'bold',
+            color: '#fff'
+          },
+          labelLine: { show: false }
+        }
+      ]
+    };
+  }
+
+  // Initial setup
+  const initialPieData = computePieData();
+  const initialFilteredCount = getFilteredData().length;
+
+  const charts: echarts.EChartsOption = buildOption(initialPieData, initialFilteredCount, false);
+
+  let chartInstance: echarts.ECharts | null = null;
+
+  function onDrilldown(params: any, instance: echarts.ECharts) {
+    chartInstance = instance;
+
+    if (params.componentType !== 'series' || currentLevel >= categoryKeys.length - 1) return;
+
+    const clickedName = params.name;
+    const currentCat = categoryKeys[currentLevel];
+    currentFilters[String(currentCat)] = clickedName;
+    currentLevel++;
+
+    const newPieData = computePieData();
+    const newFilteredCount = getFilteredData().length;
+    const newOption = buildOption(newPieData, newFilteredCount, true);
+
+    instance.setOption(newOption);
+  }
+
+  return {
+    parent_table,
+    chart: {
+      charts,
+      onDrilldown
+    },
+    chartType: 'drilldown_donut'
+  };
+}
 
 /**
  * Creates a drilldown pie chart showing project counts (not funding) by program/plan,
@@ -611,7 +827,7 @@ export function makeDrilldownPie<T = any>(
     return pieData;
   }
 
-  console.log('chart log', dataset);
+  console.log(`chart log ${parent_table}`, dataset);
   console.log('pie data', parentData);
 
   // Chart config compatible with your interface

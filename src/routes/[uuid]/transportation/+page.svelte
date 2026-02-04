@@ -18,7 +18,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeHierarchicalCategoryDonut, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -40,7 +40,7 @@
 
 	$inspect('table data: ', tablesData);
 
-	console.log('test splt', splitSubtables(tablesData, '36_transportation_improvement_plan'));
+	console.log('test splt', selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let'));
 
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
@@ -105,29 +105,20 @@
 			splitSubtables(tablesData, '35_rtp').yr10_projects,
     'project_type',                      // The key to count unique values for
 			'10 Year RTP Projects: # of Projects grouped by Type '
+  ),   
+  makeValueCountPie(
+			'36_transportation_improvement_plan',
+    selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'tip') || [],
+    'project_type',                      // The key to count unique values for
+    'TIP Projects # of Projects grouped by Type'
   ),  
-		makeDrilldownPie(
+  makeValueCountPie(
 			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').tip,
-			[
-        'project_type',                      // The key to count unique values for
-        'project_category',
-        'project_subcategory',
-        'project_subcategory2'
-			],
-			'TIP Projects'
-		),
-		makeDrilldownPie(
-			'36_transportation_improvement_plan',
-			splitSubtables(tablesData, '36_transportation_improvement_plan').let,
-			[
-        'project_type',                      // The key to count unique values for
-        'project_category',
-        'project_subcategory',
-        'project_subcategory2'
-			],
-			'LET Projects'
-		),
+    selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let') || [],
+    'project_type',                      // The key to count unique values for
+    'LET Projects  # of Projects grouped by Type'
+  ),  
+
 		makeBar(
 			'37_clean_vehicles',
 			splitTableData(tablesData, '37_clean_vehicles'),
@@ -136,7 +127,7 @@
 		),
     {
       parent_table: "35_rtp",
-      table: splitSubtables(tablesData, '35_rtp').tip as PB_Record_Type,
+      table: selectSplitSubtable(tablesData, '35_rtp', 'rtp_projects') as PB_Record_Type,
       fullWidth: true
     },
     {

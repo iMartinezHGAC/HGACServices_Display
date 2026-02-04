@@ -89,9 +89,11 @@ let displayedCharts = $derived(
         />
 
       {:else}
+          <!--
         <div class="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
           No data. Consider using HART to manage you data
         </div>
+          -->
       {/if}
     </div>
   {/each}

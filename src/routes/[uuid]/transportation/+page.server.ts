@@ -3,7 +3,6 @@ import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResul
 import { GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
 import PocketBase from 'pocketbase'
-//import {PB_GENERIC_USER, PB_GENERIC_PASS} from "$env/static/private"
 
 async function fetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
   const defaultOptions: TableFetchOptions = {
@@ -18,8 +17,6 @@ async function fetchTable(pb: PocketBase, tableName: string, options: TableFetch
 
   try {
 
-    const lower_limit: number = Math.floor(Math.random() * 3);
-    const upper_limit: number = Math.floor(Math.random() * 300) + 100;
     let records = await pb.collection(tableName).getList(1, 1, {
       sort: mergedOptions.sort,
       expand: mergedOptions.expand,
@@ -62,11 +59,6 @@ async function getSubtableSchema(tableName: string) {
   return await res.json()
 }
 
-async function getProjectByID(tableName: string, matchedName: string) {
-  let res = await fetch(`${PB_URL}/api/collections/${tableName}/getproject/${matchedName}`)
-  return await res.json()
-}
-
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const juris_id = params.uuid
@@ -78,12 +70,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   //console.log("table names", tableNames)
   console.log('juris_id', juris_id)
-
-  /*
-  const entries = await locals.pb.collection('05_trash_bash').getFullList({
-    expand: 'collection_site_id'
-  })
-  */
 
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
@@ -119,7 +105,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     eventsData = await locals.pb.collection('events_json').getFullList({
       filter: filter
     })
-    console.log('Event Data if any', eventsData)
+    //console.log('Event Data if any', eventsData)
   } catch (err) {
     console.error('Error trying to get events data', err)
   }
