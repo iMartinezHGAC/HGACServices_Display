@@ -1,9 +1,9 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
-	import county_logo from '$lib/assets/harris_county.svg';
 	import type { DashboardType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
+	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
 
 	interface props {
 		chosenTab: string;
@@ -13,10 +13,6 @@
 	}
 
 	let { chosenTab, jurisdiction, logo_url, dashboard_groups }: props = $props();
-
-	function toSnakeCase(tabName: string) {
-		return tabName.split(' ').join('_');
-	}
 
 	function toEverettCase(tabName: string) {
 		return tabName.split(' ').join('%20');
@@ -34,12 +30,31 @@
 	$inspect('chosen tab', chosenTab);
 
 	const dynamicFontSize = $derived.by(() => {
-		if (jurisdiction.length > 13) return 'text-xl';
-		if (jurisdiction.length > 21) return 'text-lg';
+		if (jurisdiction.length > 21) return 'text-xl';
+		if (jurisdiction.length > 13) return 'text-lg';
 		return 'text-2xl';
 	});
 
 	const jurisId = jurisState();
+
+	// --- Reliable delayed spinner (no loops, hides immediately, shows only on slow loads) ---
+	let showSpinner = $state(false);
+
+	$effect(() => {
+		// Reset spinner on every navigation state change
+		showSpinner = false;
+
+		// If not navigating, nothing more to do
+		if (!$navigating) return;
+
+		// Schedule show after 300ms (cancels if navigation ends early)
+		const timeoutId = setTimeout(() => {
+			showSpinner = true;
+		}, 300);
+
+		// Cleanup: cancel timeout if navigation finishes before delay
+		return () => clearTimeout(timeoutId);
+	});
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
@@ -84,3 +99,13 @@
 	<div class="flex-grow"></div>
 	<img src={logo} alt="HGAC" class="right-4 h-24" />
 </div>
+
+{#if showSpinner}
+	<!-- Full-screen loading overlay -->
+	<div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/70 backdrop-blur-sm">
+		<svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+			<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+		</svg>
+	</div>
+{/if}

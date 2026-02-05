@@ -73,9 +73,9 @@
       postScript = "M"
       return (value/1000000).toPrecision(PRECISION).toLocaleString();
     }
-    else if (value > 1000) {
+    else if (value > 10000) {
       postScript = "K"
-      return (value/1000).toPrecision(PRECISION).toLocaleString();
+      return (value/10000).toPrecision(PRECISION).toLocaleString();
     }
     else return value
   }
