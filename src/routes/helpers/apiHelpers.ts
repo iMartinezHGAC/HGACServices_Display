@@ -36,3 +36,31 @@ export function GenerateFilter(subCollectionNames: string[], juris_id: string) {
     return `jurisdiction.id = "${juris_id}" && (${innerDateCondition})`;
   }
 }
+
+import PocketBase from 'pocketbase'
+import type { PB_Record_Type, TableFetchOptions } from '../../ambient';
+
+export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
+  const defaultOptions: TableFetchOptions = {
+    sort: '',
+    expand: '',
+    filter: '',
+    perPage: 50,
+  }
+  const mergedOptions = { ...defaultOptions, ...options }
+  let results = {}
+
+  try {
+    let records = await pb.collection(tableName).getFullList<PB_Record_Type[]>({
+      sort: mergedOptions.sort,
+      expand: mergedOptions.expand,
+      filter: mergedOptions.filter,
+      perPage: mergedOptions.perPage,
+    })
+    results = records
+  } catch (err) {
+    results = { error: err instanceof Error ? err.message : "Unknown error" }
+    console.error(err)
+  }
+  return results
+}

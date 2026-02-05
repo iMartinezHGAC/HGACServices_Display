@@ -24,8 +24,8 @@
 		let total = 0;
 		Object.values(subCollectionsMap).forEach((group) => {
 			Object.values(group).forEach((section: any) => {
-				if (section?.items && Array.isArray(section.items)) {
-					section.items.forEach((item: any) => {
+				if (section && Array.isArray(section)) {
+					section.forEach((item: any) => {
 						if (item && typeof item === 'object' && 'funding' in item) {
 							const value = Number(item.funding);
 							if (!isNaN(value)) {
@@ -44,12 +44,12 @@
 	// Safe combined data for project count pie – missing subtables treated as empty
 	const combinedProjectData = $derived([
 		{
-			RTP: rtpSubs['35_rtp_rtp_projects'] ?? { items: [] },
-			'10_year': rtpSubs['35_rtp_yr10_projects'] ?? { items: [] }
+			RTP: rtpSubs['35_rtp_rtp_projects'] ??  [] ,
+			'10_year': rtpSubs['35_rtp_yr10_projects'] ??  [] 
 		},
 		{
-			TIP: tipSubs['36_transportation_improvement_plan_tip'] ?? { items: [] },
-			LET: tipSubs['36_transportation_improvement_plan_let'] ?? { items: [] }
+			TIP: tipSubs['36_transportation_improvement_plan_tip'] ??  [] ,
+			LET: tipSubs['36_transportation_improvement_plan_let'] ??   [] 
 		}
 	]);
 
@@ -86,9 +86,11 @@
 		chartType: 'indicator'
 	});
 
-  //$inspect('pbData', data)
-  $inspect('rtp', rtpSubs)
-  $inspect('tip', tipSubs)
+  $inspect('pbData', data)
+  $inspect('tip subtables', tipSubs)
+  $inspect('rtp subtables', rtpSubs)
+  $inspect('combined', combinedProjectData)
+  $inspect('let data', letData)
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">

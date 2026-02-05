@@ -1,35 +1,8 @@
 import { PB_URL } from '$env/static/private';
 import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
-import { GenerateFilter } from '../../helpers/apiHelpers';
+import { FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
-import PocketBase from 'pocketbase'
 
-async function fetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
-  const defaultOptions: TableFetchOptions = {
-    sort: '',
-    expand: '',
-    filter: '',
-    perPage: 50,
-  }
-
-  const mergedOptions = { ...defaultOptions, ...options }
-  let results = {}
-
-  try {
-
-    let records = await pb.collection(tableName).getList(1, 1, {
-      sort: mergedOptions.sort,
-      expand: mergedOptions.expand,
-      filter: mergedOptions.filter,
-      perPage: mergedOptions.perPage,
-    })
-    results = records
-  } catch (err) {
-    results = { error: err instanceof Error ? err.message : "Unknown error" }
-    console.error(err)
-  }
-  return results
-}
 async function getSchema(tableName: string): Promise<SchemaType[]> {
   try {
     const response = await fetch(`${PB_URL}/api/collections/${tableName}/schema`);
@@ -77,7 +50,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   for (let i = 0; i < tableNames.length; i++) {
     let subtable = await getSubtableSchema(tableNames[i]) ?? [""]
     console.log('subtables if any', subtable)
-    tablesData[tableNames[i]] = await fetchTable(locals.pb, tableNames[i], {
+    tablesData[tableNames[i]] = await FetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
       filter: GenerateFilter(subtable, juris_id),
       expand: subtable.join(', ') // ""

@@ -16,6 +16,9 @@
 
 	const { project, charts, additionalWork, subtitle }: cardProps = $props();
 
+  $inspect('project', project)
+  $inspect('charts', charts)
+
 	let linkUrls = $derived.by(() => {
 		if (project.expand && project.expand.links) {
 			return project.expand.links.map(
@@ -39,6 +42,7 @@
 		console.log(graphState.graph);
 		exportChartToPDF(graphState.graph, project.program_name + ' - Harris County');
 	}
+
 	function toGraph(vector: HTMLDivElement) {
 		graphState.clear();
 		graphState.add(vector as HTMLDivElement);

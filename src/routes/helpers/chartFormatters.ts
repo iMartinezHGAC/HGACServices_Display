@@ -322,8 +322,8 @@ export function makeProjectCountDrilldownPie<T = any>(
   dataset.forEach((group) => {
     if (typeof group === 'object' && group !== null) {
       Object.entries(group).forEach(([programKey, info]: [string, any]) => {
-        if (info && Array.isArray(info.items)) {
-          const items = info.items;
+        if (info && Array.isArray(info)) {
+          const items = info;
           itemsMap[programKey] = items;
 
           let totalFunding = 0;
@@ -2255,9 +2255,9 @@ function isInvalid(data: any) {
   return false
 }
 
-export function splitTableData(tablesData: TableDataResult, tableName: string): any[] {
+export function splitTableData(tablesData: TableDataResult, tableName: string): PB_Record_Type[] {
   // Safely access items, default to empty array if table or items missing/malformed
-  const items = tablesData?.[tableName]?.items;
+  const items = tablesData?.[tableName];
   return Array.isArray(items) ? items : [];
   // Removed the isInvalid check + null return – charts handle empty arrays better than null
 }
@@ -2420,11 +2420,19 @@ export function isIndicatorEmptyOrZero(indicator: IndicatorType | undefined): bo
   }
 }
 
-export function isTableEmptyOrAllZero(table: PB_Record_Type | EventType[] | undefined): boolean {
+export function isTableEmptyOrAllZero(
+  table: PB_Record_Type | EventType[] | null | undefined
+): boolean {
   if (!table) {
     return true;
   }
-  return !hasNonZeroNumber(table);
+
+  if (Array.isArray(table)) {
+    return table.length === 0;
+  }
+
+  // Single record case (rare, but your component supports it)
+  return Object.keys(table).length === 0;
 }
 
 export function isChartAndIndicatorEmptyOrZero(chartType: ChartType): boolean {

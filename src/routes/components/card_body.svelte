@@ -36,13 +36,14 @@
 
 $inspect('card names', cardNames)
 
+
   cardData.forEach(card => {
     if(areAllChartsEmptyOrZero(card.echarts)) {
       cardNames = cardNames.filter(cardName => cardName !== card.program.program_name)
     }
   })
 
-	//$inspect('card data', cardData);
+	$inspect('card data', cardData);
 </script>
 
 {#snippet formattedEntryText(cardName: string)}

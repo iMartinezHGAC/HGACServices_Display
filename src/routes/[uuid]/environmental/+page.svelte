@@ -12,14 +12,14 @@
 		ChartType,
 		CardDataType,
 		EventType,
-
 		PB_Record_Type
-
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
 	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
+
+  const water_innovation = '13_water_innovation'
 
 	let {
 		data
@@ -38,10 +38,10 @@
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
-	//$inspect('table data: ', tablesData);
+	$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
-	// console.log('test safe',  splitTableData(tablesData, '03_wqmp'));
-	 console.log('test table',  splitTableData(tablesData, '03_wqmp'));
+	 console.log('test table',  selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips'));
+	 console.log('test water',  splitTableData(tablesData, water_innovation));
 	//console.log('split table data', 
 //accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
 //)
@@ -180,15 +180,16 @@
 		),
     {
       parent_table: "10_parks_and_natural_areas",
-      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas','awards') as PB_Record_Type
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas','awards')
     },
     {
       parent_table: "10_parks_and_natural_areas",
-      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips') as PB_Record_Type
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips')
     },
     {
-      parent_table: "13_water_innovation",
-      table: splitTableData(tablesData, '13_water_innovation') as PB_Record_Type
+      parent_table: water_innovation,
+      table: splitTableData(tablesData, water_innovation), 
+      fullWidth: true
     },
 	)
 

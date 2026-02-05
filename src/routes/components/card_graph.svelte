@@ -53,6 +53,8 @@ let displayedCharts = $derived(
       ? charts
       : charts.slice(0, 2)
   );
+
+  $inspect('displayed charts', displayedCharts)
 </script>
 
 <div>
@@ -76,7 +78,7 @@ let displayedCharts = $derived(
           symbol_pre={chart.indicator.indicatorSymPre}
         />
 
-      {:else if chart.table && !isTableEmptyOrAllZero(chart.table)}
+      {:else if chart.table}
 
         <Table data={chart.table} columns={chart.columns} />
 
