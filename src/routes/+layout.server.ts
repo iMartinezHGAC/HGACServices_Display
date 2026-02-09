@@ -12,9 +12,12 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
   console.log('juris_id in layout', juris_id)
 
   try {
-    const authData = await locals.pb.collection('users').authWithPassword(PB_GENERIC_USER, PB_GENERIC_PASS)
+    await locals.pb.collection('users').authWithPassword(PB_GENERIC_USER, PB_GENERIC_PASS);
+    if (!locals.pb.authStore.isValid) {
+      throw new Error('Generic auth failed – invalid token');
+    }
   } catch (error) {
-    console.log(error)
+    console.error('Generic authentication failed:', error);
   }
 
 
