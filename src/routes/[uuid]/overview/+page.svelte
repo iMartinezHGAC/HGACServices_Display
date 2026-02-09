@@ -2,10 +2,12 @@
 	import type { PageData } from '../../$types';
 	import { makeDrilldownMultPie, makeProjectCountDrilldownPie, splitTableData } from '../../helpers/chartFormatters';
 	import RenderEchart from '../../components/renderEchart.svelte';
-	import type { ChartType } from '../../../ambient';
+	import type { ChartType, PB_Record_Type, ProgramType } from '../../../ambient';
 	import Indicator from '../../components/indicator.svelte';
 
-	const { data }: { data: PageData } = $props();
+	const { data }: { data: {
+    pbData: PB_Record_Type[],
+  }} = $props();
 
 	// Map subCollections by collection name – avoids any index-shifting bugs if a collection fetch fails/skips
 	const subCollectionsByTable = $derived(
@@ -86,11 +88,11 @@
 		chartType: 'indicator'
 	});
 
-  $inspect('pbData', data)
-  $inspect('tip subtables', tipSubs)
-  $inspect('rtp subtables', rtpSubs)
-  $inspect('combined', combinedProjectData)
-  $inspect('let data', letData)
+  //$inspect('pbData', data)
+  //$inspect('tip subtables', tipSubs)
+  //$inspect('rtp subtables', rtpSubs)
+  //$inspect('combined', combinedProjectData)
+  //$inspect('let data', letData)
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">

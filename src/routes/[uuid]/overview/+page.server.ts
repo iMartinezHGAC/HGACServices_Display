@@ -1,19 +1,9 @@
 import { PB_URL } from "$env/static/private";
-import PocketBase from 'pocketbase'
 import type { PageServerLoad } from "./$types";
 import type { CollectionWSubType, TableDataResult, TableFetchOptions } from "../../../ambient";
-import { FetchTable, GenerateFilter, GetFiveQuarters } from "../../helpers/apiHelpers";
+import { FetchTable, GenerateFilter, GetFiveQuarters, getSubtableSchema } from "../../helpers/apiHelpers";
 
 
-async function getSchema(tableName: string) {
-  let res = await fetch(`${PB_URL}/api/collections/${tableName}/schema`)
-  return await res.json()
-}
-
-async function getSubtableSchema(tableName: string) {
-  let res = await fetch(`${PB_URL}/api/collections/${tableName}/dashboard-schema`)
-  return await res.json()
-}
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
@@ -22,15 +12,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   for (const table of collections) {
     console.log('Table to get subtables', table);
-    let subCollectionsNames = await getSubtableSchema(table);
+    let subCollectionsNames = await getSubtableSchema(table, PB_URL);
     console.log('Subtables RAW', subCollectionsNames);
 
-    const filter = `jurisdiction.name = "${params.uuid}"`;
-    const expand = subCollectionsNames.join(',');
     let joinedSubtables = ""
     if (subCollectionsNames && subCollectionsNames.length > 0) joinedSubtables = subCollectionsNames.join(',')
-
-    let { start, now } = GetFiveQuarters()
 
     let mainResponse = await FetchTable(locals.pb, table, {
       perPage: 1000,
@@ -61,13 +47,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
           }
         }
       }
-
-      // Mimic the structure of fetchTable response
-      const subRecord = {
-        totalItems: allSubs.length,
-        totalPages: 1,
-        items: allSubs,
-      };
 
       subCollections[subTable] = allSubs;
     }

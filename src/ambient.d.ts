@@ -1,4 +1,5 @@
 import * as echarts from 'echarts'
+import type { number } from 'echarts/core'
 
 type JurisdictionType = {
   collectionId: string,
@@ -115,6 +116,18 @@ interface ProgramExpand {
   links: any[]; // or more specifically typed if possible
 }
 
+type TabType = {
+  collectionId: string
+  collectionName: string,
+  id: string,
+  tab_name: string,
+  sort_order: number,
+  tab_color: string,
+  tab_text_light_mode: boolean,
+  created: Date,
+  updated: Date
+}
+
 interface ProgramType {
   active_directory_group: string;
   blurb?: string;
@@ -125,7 +138,7 @@ interface ProgramType {
   links: any[]; // or more specifically typed if possible
   parent_table: string;
   program_name: string;
-  dashboard_group?: string;
+  dashboard_tabs: TabType;
 }
 
 type PB_Record_Type = {

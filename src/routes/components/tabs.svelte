@@ -23,7 +23,7 @@
 </script>
 
 <button onclick={chooseEvent}>
-	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={path}
+	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={path} rel="prefetch"
 		>{snakeToHuman(tabText)}</a
 	>
 </button>

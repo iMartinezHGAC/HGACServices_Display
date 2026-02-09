@@ -19,7 +19,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeGroupedBar, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeGroupedBar, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -40,12 +40,10 @@
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
 	//$inspect('table data: ', tablesData);
-
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
-
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
-
 	//$inspect('data', data);
+
 	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
@@ -56,13 +54,16 @@
 		'to_date'
 	];
 
+  const lcProcessed = combineRelatedRecords(
+    tablesData,
+    '14_livable_centers',
+    ['studies'],
+    ['year', 'study_name', 'status', 'study_progress', 'cost', 'awards'  ] // optional – omit for auto columns
+  );
+
 	charts.push(
 
-  {
-    parent_table: "14_livable_centers",
-    table: selectSplitSubtable(tablesData, '14_livable_centers', 'studies') as PB_Record_Type,
-    fullWidth: true
-  },
+
   makeValueCountPie(
     '14_livable_centers', 
 			splitSubtables(tablesData, '14_livable_centers').studies,
@@ -84,6 +85,12 @@
       ],
       "Assistance Provided"
     ),
+  {
+    parent_table: "14_livable_centers",
+    table: lcProcessed?.data,
+    columns: lcProcessed?.columns,
+    fullWidth: true
+  },
     /*
     makeValueCountPie(
     '14_livable_centers', 

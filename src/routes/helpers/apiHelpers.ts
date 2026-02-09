@@ -19,7 +19,7 @@ export function GetFiveQuarters() {
 export function GenerateFilter(subCollectionNames: string[], juris_id: string) {
   const { start: startISO, now: nowISO } = GetFiveQuarters();
 
-  const innerDateCondition = `from_date <= "${nowISO}"`;
+  const innerDateCondition = `from_date >= "${startISO}"`;
 
   if (subCollectionNames && subCollectionNames.length > 0) {
     const subConditions = subCollectionNames.map(
@@ -63,4 +63,15 @@ export async function FetchTable(pb: PocketBase, tableName: string, options: Tab
     console.error(err)
   }
   return results
+}
+
+
+export async function getSchema(tableName: string, PB_URL: string) {
+  let res = await fetch(`${PB_URL}/api/collections/${tableName}/schema`)
+  return await res.json()
+}
+
+export async function getSubtableSchema(tableName: string, PB_URL: string) {
+  let res = await fetch(`${PB_URL}/api/collections/${tableName}/dashboard-schema`)
+  return await res.json()
 }

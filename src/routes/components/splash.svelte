@@ -10,9 +10,10 @@
 		jurisdiction: string;
     logo_url: string | null;
 		dashboard_groups: DashboardType[];
+    dash_count: Record<string, number>
 	}
 
-	let { chosenTab, jurisdiction, logo_url, dashboard_groups }: props = $props();
+	let { chosenTab, jurisdiction, logo_url, dashboard_groups, dash_count }: props = $props();
 
 	function toEverettCase(tabName: string) {
 		return tabName.split(' ').join('%20');
@@ -55,6 +56,22 @@
 		// Cleanup: cancel timeout if navigation finishes before delay
 		return () => clearTimeout(timeoutId);
 	});
+
+  /**
+ * Checks if a dashboard tab has any active programs (i.e., programs with non-empty parent tables)
+ * 
+ * @param dashboardTabsCounts - The filtered counts object where keys are dashboard tab IDs
+ *                            and values are the number of active programs for that tab
+ * @param dash_id - The dashboard tab ID to check (as string)
+ * @returns true if the tab exists in the counts (meaning it has at least one active program),
+ *          false otherwise
+ */
+export function hasActiveTab(
+  dashboardTabsCounts: Record<string, number>,
+  dash_id: string
+): boolean {
+  return dash_id in dashboardTabsCounts;
+}
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
@@ -62,10 +79,10 @@
 		<Tabs
 			tabText={dash.tab_name}
 			path={dash.tab_name}
-			color="#334155"
+			color="#f8fafc"
 			setChosen={handleSetChosen}
 			uuid={jurisId.uuid}
-			textLight={dash.tab_text_light_mode}
+			textLight={false}
 		/>
 	{:else}
 		<Tabs
@@ -93,7 +110,9 @@
 	<div class="flex-grow"></div>
 	<div class="flex flex-wrap items-end justify-start overflow-y-auto">
 		{#each dashboard_groups as dash}
+      {#if hasActiveTab(dash_count, dash.id)}
 			{@render tabSnippet(dash)}
+      {/if}
 		{/each}
 	</div>
 	<div class="flex-grow"></div>
