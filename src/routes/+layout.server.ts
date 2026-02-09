@@ -27,7 +27,14 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     dash_tabs = { error: err instanceof Error ? err.message : "Unknown error" }
   }
 
-  const programs = await locals.pb.collection('programs').getFullList<ProgramType>();
+  let programs: ProgramType[] = [];
+  try {
+    programs = await locals.pb.collection('programs').getFullList<ProgramType>();
+  } catch (err) {
+    console.error('Failed to fetch programs:', err);
+    // Fallback – either empty array or an error object, depending on what your UI expects
+    programs = [];
+  }
 
   // Build initial counts
   const dashboardTabsCounts: Record<string, number> = programs.reduce((acc, program) => {
