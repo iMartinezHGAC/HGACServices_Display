@@ -1,7 +1,6 @@
 import { redirect } from "@sveltejs/kit"
 import type { LayoutServerLoad } from "./$types"
 import { PB_GENERIC_USER, PB_GENERIC_PASS, PB_URL } from "$env/static/private"
-import type { ProgramType } from "../ambient"
 import { GenerateFilter, getSubtableSchema } from "./helpers/apiHelpers"
 
 export const load: LayoutServerLoad = async ({ locals, url, params }) => {
