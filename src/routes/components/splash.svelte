@@ -72,6 +72,16 @@ export function hasActiveTab(
 ): boolean {
   return dash_id in dashboardTabsCounts;
 }
+
+  const overview: DashboardType = {
+    id: '00',
+    tab_name: "overview",
+    sort_order: 0,
+    tab_color: '#f8fafc',
+    tab_text_light_mode: false,
+    collectionId: 'pbc_575699702',
+    collectionName: 'dashboard_tabs',
+  }
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
@@ -109,9 +119,10 @@ export function hasActiveTab(
 	</div>
 	<div class="flex-grow"></div>
 	<div class="flex flex-wrap items-end justify-start overflow-y-auto">
+    {@render tabSnippet(overview)}
 		{#each dashboard_groups as dash}
       {#if hasActiveTab(dash_count, dash.id)}
-			{@render tabSnippet(dash)}
+        {@render tabSnippet(dash)}
       {/if}
 		{/each}
 	</div>

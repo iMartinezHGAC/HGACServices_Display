@@ -178,14 +178,14 @@ interface DashboardType {
   tab_name: string,
   sort_order: number,
   tab_color: string,
-  collectionId: string,
-  collectionName: string,
-  created: string,
   id: string,
   sort_order: number,
   tab_name: string,
   tab_text_light_mode: boolean,
-  updated: Date,
+  collectionId?: string,
+  collectionName?: string,
+  created?: string,
+  updated?: Date,
 }
 
 
