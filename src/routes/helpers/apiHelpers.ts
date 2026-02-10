@@ -16,25 +16,30 @@ export function GetFiveQuarters() {
   return { start: startISO, now: nowISO };
 }
 
-export function GenerateFilter(subCollectionNames: string[], juris_id: string) {
-  const { start: startISO, now: nowISO } = GetFiveQuarters();
+export function GenerateFilter(subCollectionNames: string[] = [], juris_id: string) {
+  const { start: startISO } = GetFiveQuarters();
 
-  const innerDateCondition = `from_date >= "${startISO}"`;
+  // Strict exact match on single relation field (excludes empty "", null, N/A, or any wrong ID)
+  const jurisdictionCondition = `jurisdiction = "${juris_id}"`;
 
-  if (subCollectionNames && subCollectionNames.length > 0) {
+  let dateCondition: string;
+
+  if (subCollectionNames.length > 0) {
+    // For each subtable (assumed multiple relation): at least one subrecord has recent from_date
     const subConditions = subCollectionNames.map(
-      (name) => `(${name}.${innerDateCondition})`
+      (name) => `${name}.from_date ?>= "${startISO}"`
     );
 
-    const overlappingCondition =
+    dateCondition =
       subConditions.length > 1
         ? `(${subConditions.join(" || ")})`
         : subConditions[0];
-
-    return `jurisdiction.id = "${juris_id}" && ${overlappingCondition}`;
   } else {
-    return `jurisdiction.id = "${juris_id}" && (${innerDateCondition})`;
+    // No subtables: check main record date
+    dateCondition = `from_date >= "${startISO}"`;
   }
+
+  return `${jurisdictionCondition} && ${dateCondition}`;
 }
 
 import PocketBase from 'pocketbase'
