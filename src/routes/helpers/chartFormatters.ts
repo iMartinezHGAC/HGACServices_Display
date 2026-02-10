@@ -138,7 +138,7 @@ const getStandardPieSeries = (
     },
   ];
 
-// === All exported functions (names unchanged) ===
+// === Chart Functions (names unchanged) ===
 
 export function makeHierarchicalCategoryDonut<T = any>(
   parent_table: string,
@@ -773,28 +773,6 @@ export function makeDrilldownMultPie<T = any>(
 
     chartInstance.setOption({
       title: { subtext: getSubtext() },
-      graphic: currentLevel > 0
-        ? [
-          {
-            type: "text",
-            left: 10,
-            top: 10,
-            style: { text: "← Back", fontWeight: "bold", cursor: "pointer" },
-            onclick: () => {
-              if (currentLevel === 0) return;
-              const prevCat = categoryKeys[currentLevel - 1];
-              delete currentFilters[prevCat];
-              currentLevel--;
-              const backData = computePieData(currentLevel, currentFilters);
-              chartInstance.setOption({
-                title: { subtext: getSubtext() },
-                graphic: currentLevel > 0 ? [this] : [],
-                series: getStandardPieSeries(backData, "50%"),
-              });
-            },
-          },
-        ]
-        : [],
       series: getStandardPieSeries(newPieData, "50%"),
     });
   };
@@ -1103,7 +1081,7 @@ export function makeBar<T = any>(
     return {
       parent_table,
       chart: { charts: getNoDataOption(snakeToHuman(String(key2))) },
-      chartType: "barchart", // assuming this is used somewhere
+      chartType: "barchart",
     };
   }
 
@@ -1187,15 +1165,18 @@ export function makeGroupedBar<T = any>(
   };
 }
 
-/* === Utility functions (unchanged except minor cleanups) === */
+/* === All Small Utility Functions (unchanged from original, minor cleanups only) === */
+
 export function combineRelatedRecords(
   tablesData: Record<string, any>,
   parentCollection: string,
   relatedFields: string[],
   columnOrder: string[] = []
-) {
+): { data: any[] | null; columns: string[] } | null {
   const response = tablesData[parentCollection];
-  if (!response?.items?.[0]?.expand) return null;
+  if (!response?.items?.[0]?.expand) {
+    return null;
+  }
 
   const expand = response.items[0].expand;
   const combinedRecords: any[] = [];
@@ -1209,12 +1190,18 @@ export function combineRelatedRecords(
 
     for (const record of relArray) {
       const newRecord = { ...record };
-      if (hasMultipleSources) newRecord.source = snakeToHuman(field);
+
+      if (hasMultipleSources) {
+        newRecord.source = snakeToHuman(field);
+      }
+
       combinedRecords.push(newRecord);
     }
   }
 
-  if (combinedRecords.length === 0) return null;
+  if (combinedRecords.length === 0) {
+    return null;
+  }
 
   const excludedKeys = [
     "collectionId",
@@ -1235,10 +1222,13 @@ export function combineRelatedRecords(
   let columns: string[];
   if (columnOrder.length > 0) {
     columns = [...columnOrder];
-    if (hasMultipleSources && !columns.includes("source")) columns.unshift("source");
+    if (hasMultipleSources && !columns.includes("source")) {
+      columns.unshift("source");
+    }
   } else {
     const seen = new Set<string>();
     const keys: string[] = [];
+
     combinedRecords.forEach((r) => {
       Object.keys(r).forEach((k) => {
         if (!excludedKeys.includes(k) && !seen.has(k)) {
@@ -1247,17 +1237,22 @@ export function combineRelatedRecords(
         }
       });
     });
+
     if (hasMultipleSources) {
-      const idx = keys.indexOf("source");
-      if (idx !== -1) {
-        keys.splice(idx, 1);
+      const sourceIdx = keys.indexOf("source");
+      if (sourceIdx !== -1) {
+        keys.splice(sourceIdx, 1);
         keys.unshift("source");
       }
     }
+
     columns = keys;
   }
 
-  return { data: combinedRecords, columns };
+  return {
+    data: combinedRecords,
+    columns,
+  };
 }
 
 export const truncateDate = <T = any>(input: T): T | string =>
@@ -1269,7 +1264,109 @@ function isInvalid(data: any) {
   return data === undefined || data === null;
 }
 
-/* Emptiness checks – simplified */
+export function splitTableData(tablesData: TableDataResult, tableName: string): any[] {
+  const items = tablesData?.[tableName];
+  return Array.isArray(items) ? items : [];
+}
+
+export function mapTableData(data: any[] | any, field: string) {
+  if (isInvalid(data)) {
+    return null;
+  }
+  if (Array.isArray(data)) {
+    return data.map((row: any) => row[field]);
+  } else if (typeof data === "object") {
+    return data[field];
+  }
+  return data;
+}
+
+export function splitAndMapTable(tableData: TableDataResult, tableName: string, field: string) {
+  const table = splitTableData(tableData, tableName);
+  return mapTableData(table, field);
+}
+
+export function splitExpandedMapTable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const table = splitSubtables(tableData, tableName)[chosenSubtable];
+  return mapTableData(table, field);
+}
+
+export function splitSubtables(tablesData: TableDataResult, tableName: string) {
+  const splitData = splitTableData(tablesData, tableName);
+  if (!splitData || splitData.length === 0) return null;
+  const data = splitData[0];
+  if (isInvalid(data)) return null;
+  return data.expand;
+}
+
+export function selectSplitSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string) {
+  const subtables = splitSubtables(tableData, tableName);
+  if (subtables === null || !(chosenSubtable in subtables)) {
+    return null;
+  }
+  const data = subtables[chosenSubtable];
+  if (isInvalid(data)) {
+    return null;
+  }
+  return data;
+}
+
+export function mapSelectedSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const data = selectSplitSubtable(tableData, tableName, chosenSubtable);
+  return mapTableData(data, field);
+}
+
+export function safeSelectObjectField<T extends object>(table: T | null | undefined, field: keyof T) {
+  if (!table) return null;
+  const data = table[field];
+  if (isInvalid(data)) return null;
+  return data;
+}
+
+export function accumulateArray(numArray: number[] | null) {
+  return numArray?.reduce((acc: number, val) => acc + val, 0) ?? 0;
+}
+
+export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
+  const data = selectSplitSubtable(tableData, tableName, chosenSubtable);
+  if (data === null) {
+    return null;
+  }
+  const mappedData = mapTableData(data, field);
+  if (mappedData === null) {
+    return null;
+  }
+  if (typeof mappedData === "number") {
+    return mappedData;
+  }
+  if (Array.isArray(mappedData)) {
+    return accumulateArray(mappedData as number[]);
+  }
+  return null;
+}
+
+export function accumulateMappedField(tableData: TableDataResult, tableName: string, field: string) {
+  const data = splitAndMapTable(tableData, tableName, field);
+  return accumulateArray(data as number[] | null);
+}
+
+export function collectAllSubrecords(tablesData: TableDataResult, tableName: string, subtable: string): any[] {
+  const items = splitTableData(tablesData, tableName);
+  if (!items) return [];
+  return items.reduce((acc: any[], item: any) => {
+    if (item.expand && item.expand[subtable]) {
+      const sub = item.expand[subtable];
+      if (Array.isArray(sub)) {
+        acc.push(...sub);
+      } else if (sub) {
+        acc.push(sub);
+      }
+    }
+    return acc;
+  }, []);
+}
+
+/* === Emptiness Checks (simplified) === */
 export const isChartEmptyOrAllZero = (chartType: ChartType): boolean => {
   const option = (chartType.chart?.charts ?? {}) as EChartsOption;
   const series = Array.isArray(option.series)
@@ -1278,7 +1375,7 @@ export const isChartEmptyOrAllZero = (chartType: ChartType): boolean => {
       ? [option.series]
       : [];
   return series.every(
-    (s) => !s?.data || (Array.isArray(s.data) && s.data.every((d: any) => (d?.value ?? 0) === 0))
+    (s) => !s?.data || (Array.isArray(s.data) && s.data.every((d: any) => (d?.value ?? 0) === 0 || d?.value == null))
   );
 };
 
@@ -1292,6 +1389,9 @@ export const isTableEmptyOrAllZero = (
   table: any[] | null | undefined
 ): boolean => !table || table.length === 0;
 
+export const isChartAndIndicatorEmptyOrZero = (chartType: ChartType): boolean =>
+  isChartEmptyOrAllZero(chartType) && isIndicatorEmptyOrZero(chartType.indicator);
+
 export const isAllComponentsEmptyOrZero = (chartType: ChartType): boolean =>
   isChartEmptyOrAllZero(chartType) &&
   isIndicatorEmptyOrZero(chartType.indicator) &&
@@ -1299,15 +1399,3 @@ export const isAllComponentsEmptyOrZero = (chartType: ChartType): boolean =>
 
 export const areAllChartsEmptyOrZero = (chartTypes: ChartType[]): boolean =>
   chartTypes.every(isAllComponentsEmptyOrZero);
-
-/* Other small utilities unchanged */
-export function splitTableData(tablesData: TableDataResult, tableName: string) {
-  return Array.isArray(tablesData?.[tableName]) ? tablesData[tableName] : [];
-}
-
-export function mapTableData(data: any[], field: string) {
-  if (!data || !Array.isArray(data)) return null;
-  return data.map((row: any) => row[field]);
-}
-
-/* ... (rest of small utilities remain as-is) */
