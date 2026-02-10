@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { PageData } from '../../$types';
 	import { makeDrilldownMultPie, makeProjectCountDrilldownPie, splitTableData } from '../../helpers/chartFormatters';
 	import RenderEchart from '../../components/renderEchart.svelte';
 	import type { ChartType, PB_Record_Type, ProgramType } from '../../../ambient';
@@ -9,12 +8,12 @@
     pbData: PB_Record_Type[],
   }} = $props();
 
-	// Map subCollections by collection name – avoids any index-shifting bugs if a collection fetch fails/skips
-	const subCollectionsByTable = $derived(
-		Object.fromEntries(
-			data.pbData.map((entry) => [entry.collection, entry.subCollections ?? {}])
-		)
-	);
+  const pbData = $derived(data.pbData)
+const subCollectionsByTable = $derived(
+	Object.fromEntries(
+		(pbData ?? []).map((entry) => [entry.collection, entry.subCollections ?? {}])
+	)
+);
 
 	// Explicit, safe access – missing collections become empty objects
 	const towSubs = subCollectionsByTable['34_gc_tow_and_go'] ?? {};

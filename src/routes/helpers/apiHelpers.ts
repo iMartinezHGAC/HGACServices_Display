@@ -16,17 +16,28 @@ export function GetFiveQuarters() {
   return { start: startISO, now: nowISO };
 }
 
-export function GenerateFilter(subCollectionNames: string[] = [], juris_id: string) {
+export function GenerateFilter(
+  subCollectionNames: string[] | null | undefined,
+  juris_id: string | undefined // Also guard juris_id for safety
+) {
+  // Ensure subCollectionNames is always a valid array
+  const subs = Array.isArray(subCollectionNames) ? subCollectionNames : [];
+
+  // Guard juris_id – if missing/undefined, return empty filter (no records)
+  if (!juris_id) {
+    console.warn("GenerateFilter called with missing juris_id – returning empty filter");
+    return "id = ''"; // Invalid on purpose → no records match
+  }
+
   const { start: startISO } = GetFiveQuarters();
 
-  // Strict exact match on single relation (excludes empty "", null, N/A/wrong ID)
   const jurisdictionCondition = `jurisdiction = "${juris_id}"`;
 
   let dateCondition: string;
 
-  if (subCollectionNames.length > 0) {
-    // Critical: NO space between subfield and ?operator (per official PocketBase syntax examples)
-    const subConditions = subCollectionNames.map(
+  if (subs.length > 0) {
+    // No space before ? operator (critical for PocketBase filter parsing)
+    const subConditions = subs.map(
       (name) => `${name}.from_date?>= "${startISO}"`
     );
 
@@ -38,7 +49,6 @@ export function GenerateFilter(subCollectionNames: string[] = [], juris_id: stri
     dateCondition = `from_date >= "${startISO}"`;
   }
 
-  // Optional grouping parens for clarity/safety
   return `(${jurisdictionCondition}) && (${dateCondition})`;
 }
 
