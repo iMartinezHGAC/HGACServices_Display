@@ -40,7 +40,7 @@ export function GenerateFilter(subCollectionNames: string[], juris_id: string) {
 import PocketBase from 'pocketbase'
 import type { PB_Record_Type, TableFetchOptions } from '../../ambient';
 
-export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<Object> {
+export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<PB_Record_Type[] | { error: string }> {
   const defaultOptions: TableFetchOptions = {
     sort: '',
     expand: '',
@@ -51,18 +51,18 @@ export async function FetchTable(pb: PocketBase, tableName: string, options: Tab
   let results = {}
 
   try {
-    let records = await pb.collection(tableName).getFullList<PB_Record_Type[]>({
+    let records = await pb.collection(tableName).getFullList<PB_Record_Type>({
+      // note: getFullList handles pagination internally; perPage is the batch size
       sort: mergedOptions.sort,
       expand: mergedOptions.expand,
       filter: mergedOptions.filter,
-      perPage: mergedOptions.perPage,
-    })
-    results = records
+      batch: mergedOptions.perPage, // use 'batch' if your SDK expects it, otherwise perPage works
+    });
+    return records; // always array on success
   } catch (err) {
-    results = { error: err instanceof Error ? err.message : "Unknown error" }
-    console.error(err)
+    console.error(`Error fetching ${tableName}:`, err);
+    return []; // always return array, even on error
   }
-  return results
 }
 
 
