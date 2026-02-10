@@ -23,7 +23,6 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     console.log("Generic authentication successful");
   } catch (error) {
     console.error("Generic authentication failed:", error);
-    // Continue with unauthenticated client – downstream fetches will likely fail gracefully
   }
 
   // Fetch dashboard_tabs with error handling
@@ -41,70 +40,78 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     programs = await locals.pb.collection("programs").getFullList<ProgramType>();
   } catch (err) {
     console.error("Failed to fetch programs:", err);
-    programs = []; // Fallback to empty array so UI can still render (counts will be zero)
+    programs = [];
   }
 
-  // Default/full counts when no jurisdiction is selected or programs failed to load
-  let dashboardTabsCounts: Record<string, number> = programs.reduce((acc, program) => {
-    if (program.dashboard_tabs) {
+  // Always initialize full counts (safe even with bad/missing data)
+  let dashboardTabsCounts: Record<string, number> = {};
+  if (Array.isArray(programs)) {
+    dashboardTabsCounts = programs.reduce((acc, program) => {
       const tab = program.dashboard_tabs;
-      acc[tab] = (acc[tab] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+      if (typeof tab === "string" && tab.trim() !== "") {
+        acc[tab] = (acc[tab] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+  }
 
   console.log("Initial dashboardTabsCounts:", dashboardTabsCounts);
 
   // Only perform jurisdiction-specific checks/subtractions if we have a valid juris_id
   if (juris_id) {
-    const tabsToSubtract: string[] = [];
+    try {
+      const tabsToSubtract: string[] = [];
 
-    const checkPromises = programs.map(async (program: ProgramType) => {
-      if (!program.dashboard_tabs || !program.parent_table) {
-        console.log(`Skipping program "${program.program_name || program.id}" – no dashboard_tabs or parent_table`);
-        return;
-      }
+      const checkPromises = programs.map(async (program: ProgramType) => {
+        const tab = program.dashboard_tabs;
+        const table = program.parent_table;
 
-      const tab = program.dashboard_tabs;
-      const table = program.parent_table;
-
-      console.log(`Checking program "${program.program_name || program.id}" (tab: ${tab}, table: ${table})`);
-
-      try {
-        let subCollectionsNames = await getSubtableSchema(table, PB_URL);
-
-        // Peek to see if any record exists for this jurisdiction
-        const peek = await locals.pb.collection(table).getFirstListItem("", {
-          filter: GenerateFilter(subCollectionsNames, juris_id),
-        });
-
-        console.log(`  → ${table} has data (no subtraction)\nproof: ${JSON.stringify(peek)}`);
-      } catch (error: any) {
-        if (error?.status === 404 || error?.isAbort) {
-          console.log(`  → ${table} is empty or not found (will subtract 1 from tab ${tab})`);
-          tabsToSubtract.push(tab);
-        } else {
-          console.error(`  → Unexpected error checking ${table}:`, error);
+        if (typeof tab !== "string" || !tab || typeof table !== "string" || !table) {
+          console.log(`Skipping program "${program.program_name || program.id}" – invalid dashboard_tabs or parent_table`);
+          return;
         }
-      }
-    });
 
-    await Promise.all(checkPromises);
+        console.log(`Checking program "${program.program_name || program.id}" (tab: ${tab}, table: ${table})`);
 
-    console.log("Tabs to subtract:", tabsToSubtract);
-    console.log("Number of subtractions:", tabsToSubtract.length);
+        try {
+          let subCollectionsNames = await getSubtableSchema(table, PB_URL);
 
-    // Apply subtractions
-    tabsToSubtract.forEach((tab) => {
-      if (dashboardTabsCounts[tab] !== undefined) {
-        dashboardTabsCounts[tab]--;
-        if (dashboardTabsCounts[tab] <= 0) {
-          delete dashboardTabsCounts[tab];
+          // Peek to see if any record exists for this jurisdiction
+          const peek = await locals.pb.collection(table).getFirstListItem("", {
+            filter: GenerateFilter(subCollectionsNames, juris_id),
+          });
+
+          console.log(`  → ${table} has data (no subtraction)`, peek);
+        } catch (error: any) {
+          if (error?.status === 404 || error?.isAbort) {
+            console.log(`  → ${table} is empty or not found (will subtract 1 from tab ${tab})`);
+            tabsToSubtract.push(tab);
+          } else {
+            console.error(`  → Unexpected error checking ${table}:`, error);
+          }
         }
-      }
-    });
+      });
 
-    console.log("Final dashboardTabsCounts (after subtraction):", dashboardTabsCounts);
+      await Promise.all(checkPromises);
+
+      console.log("Tabs to subtract:", tabsToSubtract);
+      console.log("Number of subtractions:", tabsToSubtract.length);
+
+      // Apply subtractions
+      tabsToSubtract.forEach((tab) => {
+        if (typeof tab === "string" && dashboardTabsCounts[tab] !== undefined) {
+          dashboardTabsCounts[tab]--;
+          if (dashboardTabsCounts[tab] <= 0) {
+            delete dashboardTabsCounts[tab];
+          }
+        }
+      });
+
+      console.log("Final dashboardTabsCounts (after subtraction):", dashboardTabsCounts);
+    } catch (err) {
+      console.error("Unexpected error during jurisdiction-specific tab counting – falling back to full counts:", err);
+      // dashboardTabsCounts remains the initial full counts (safe fallback)
+    }
   } else {
     console.log("No juris_id – using full/unsubtracted dashboardTabsCounts");
   }

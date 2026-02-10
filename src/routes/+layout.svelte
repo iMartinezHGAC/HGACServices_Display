@@ -17,25 +17,24 @@
 	const jurisId = jurisState();
 
 	let jurisdiction = $derived.by(() => {
-		if (jurisId.jurisdiction) return jurisId.jurisdiction.name;
-    else return '';
+		return jurisId.jurisdiction?.name ?? '';
 	});
 
-  let logo_url = $derived.by(()=>{
-    if(jurisId.logo_url) return jurisId.logo_url
-    else return null
-  })
+	let logo_url = $derived.by(() => {
+		return jurisId.logo_url ?? null;
+	});
 
-	function toSnakeCase(tabName: string) {
-		return tabName.split(' ').join('_');
+	function toSnakeCase(str: string = ''): string {
+		return str.split(' ').join('_');
 	}
 
-	function getEndOfPath(tabName: string) {
-		const segments = tabName.split('/').filter((segment) => segment !== '');
+	function getEndOfPath(path: string = ''): string {
+		const segments = path.split('/').filter((segment) => segment !== '');
 		return segments[segments.length - 1] || '';
 	}
 
-	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
+	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID ?? '').toLowerCase()));
+
 	$inspect('data layout', data.dash_count);
 </script>
 
