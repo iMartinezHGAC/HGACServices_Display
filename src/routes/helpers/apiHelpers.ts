@@ -19,15 +19,15 @@ export function GetFiveQuarters() {
 export function GenerateFilter(subCollectionNames: string[] = [], juris_id: string) {
   const { start: startISO } = GetFiveQuarters();
 
-  // Strict exact match on single relation field (excludes empty "", null, N/A, or any wrong ID)
+  // Strict exact match on single relation (excludes empty "", null, N/A/wrong ID)
   const jurisdictionCondition = `jurisdiction = "${juris_id}"`;
 
   let dateCondition: string;
 
   if (subCollectionNames.length > 0) {
-    // For each subtable (assumed multiple relation): at least one subrecord has recent from_date
+    // Critical: NO space between subfield and ?operator (per official PocketBase syntax examples)
     const subConditions = subCollectionNames.map(
-      (name) => `${name}.from_date ?>= "${startISO}"`
+      (name) => `${name}.from_date?>= "${startISO}"`
     );
 
     dateCondition =
@@ -35,11 +35,11 @@ export function GenerateFilter(subCollectionNames: string[] = [], juris_id: stri
         ? `(${subConditions.join(" || ")})`
         : subConditions[0];
   } else {
-    // No subtables: check main record date
     dateCondition = `from_date >= "${startISO}"`;
   }
 
-  return `${jurisdictionCondition} && ${dateCondition}`;
+  // Optional grouping parens for clarity/safety
+  return `(${jurisdictionCondition}) && (${dateCondition})`;
 }
 
 import PocketBase from 'pocketbase'

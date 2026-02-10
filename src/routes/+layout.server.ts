@@ -1,4 +1,4 @@
-// +layout.server.ts (revised – robust with correct filter)
+// +layout.server.ts (revised – safer subtraction + auth diagnostics)
 import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { PB_GENERIC_USER, PB_GENERIC_PASS, PB_URL } from "$env/static/private";
@@ -12,10 +12,12 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
   const juris_id = params.uuid;
   console.log("juris_id in layout", juris_id);
 
+  // Generic authentication with diagnostics
   try {
     await locals.pb.collection("users").authWithPassword(PB_GENERIC_USER, PB_GENERIC_PASS);
-    if (!locals.pb.authStore.isValid) throw new Error("Invalid token");
-    console.log("Generic authentication successful");
+    console.log("Generic authentication attempted");
+    console.log("authStore.isValid:", locals.pb.authStore.isValid);
+    console.log("authStore.model id:", locals.pb.authStore.model?.id ?? "none");
   } catch (error) {
     console.error("Generic authentication failed:", error);
   }
@@ -50,15 +52,12 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
 
     await Promise.all(
       programs.map(async (program: ProgramType) => {
-        if (!program.dashboard_tabs || !program.parent_table) {
-          console.log(`Skipping program "${program.program_name || program.id}" – missing data`);
-          return;
-        }
+        if (!program.dashboard_tabs || !program.parent_table) return;
 
         const tab = program.dashboard_tabs;
         const table = program.parent_table;
 
-        console.log(`\n--- Checking program "${program.program_name || program.id}" (tab: ${tab}, table: ${table}) ---`);
+        console.log(`\n--- Checking program (tab: ${tab}, table: ${table}) ---`);
 
         try {
           const subCollectionsNames = await getSubtableSchema(table, PB_URL) ?? [];
@@ -66,19 +65,18 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
           const filter = GenerateFilter(subCollectionsNames, juris_id);
 
           console.log(`  Subtables: ${subCollectionsNames.join(", ") || "none"}`);
-          console.log(`  Generated filter: ${filter}`);
+          console.log(`  Filter: ${filter}`);
 
           await locals.pb.collection(table).getFirstListItem("", { filter });
 
-          console.log(`  → Found matching record(s) → no subtraction`);
+          console.log(`  → Has relevant data → no subtraction`);
         } catch (error: any) {
-          if (error?.status === 404 || error?.isAbort) {
+          if (error?.status === 404) {
             console.log(`  → No relevant data (404) → subtracting tab ${tab}`);
             tabsToSubtract.push(tab);
           } else {
-            console.error(`  → Error checking ${table}:`, error);
-            // Conservative: subtract on unexpected error to avoid over-counting invalid tabs
-            tabsToSubtract.push(tab);
+            console.error(`  → Check failed for ${table} (status: ${error?.status ?? "unknown"}):`, error);
+            // DO NOT subtract on non-404 errors (e.g., permission, invalid filter, auth) – matches original behavior
           }
         }
       })
@@ -94,8 +92,6 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     });
 
     console.log("Final dashboardTabsCounts:", dashboardTabsCounts);
-  } else {
-    console.log("No juris_id – using full counts");
   }
 
   return {

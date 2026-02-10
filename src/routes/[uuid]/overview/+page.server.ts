@@ -1,3 +1,4 @@
+// +page.server.ts (revised – fixed response handling + consistent with filter)
 import { PB_URL } from "$env/static/private";
 import type { PageServerLoad } from "./$types";
 import { FetchTable, GenerateFilter, getSubtableSchema } from "../../helpers/apiHelpers";
@@ -11,12 +12,16 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     console.log('Processing table', table);
 
     try {
-      const subCollectionsNames = await getSubtableSchema(table, PB_URL) ?? [];
+      const subCollectionsNames = (await getSubtableSchema(table, PB_URL)) ?? [];
       console.log('Subtables', subCollectionsNames);
 
       const joinedSubtables = subCollectionsNames.length > 0 ? subCollectionsNames.join(',') : '';
 
       const filter = GenerateFilter(subCollectionsNames, juris_id);
+      console.log('Generated filter for data load:', filter);
+
+
+
       const mainResponse = await FetchTable(locals.pb, table, {
         perPage: 1000,
         filter: GenerateFilter(subCollectionsNames, juris_id),
@@ -25,9 +30,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
       const mainRecords = Array.isArray(mainResponse) ? mainResponse : [];
 
-      if ('error' in mainResponse) {
-        console.error(`Error fetching table ${table}:`, mainResponse.error);
-      } const subCollections: { [key: string]: any[] } = {};
+
+
+      const subCollections: { [key: string]: any[] } = {};
 
       for (const name of subCollectionsNames) {
         const subTable = `${table}_${name}`;
@@ -55,16 +60,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       });
     } catch (error: any) {
       console.error(`Failed to load data for table ${table}:`, error);
-      // Push partial/empty data to avoid breaking the page
       pbData.push({
         collection: table,
         subCollections: {},
-        error: error instanceof Error ? error.message : "Unknown error loading table",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
 
-  return {
-    pbData,
-  };
+  return { pbData };
 };
+
