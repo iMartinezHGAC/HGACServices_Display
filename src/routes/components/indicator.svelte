@@ -50,7 +50,7 @@
     symbol_post?: string, 
   }
 
-  let {
+ let {
     above = false,
     below = false,
     aboveText = "",

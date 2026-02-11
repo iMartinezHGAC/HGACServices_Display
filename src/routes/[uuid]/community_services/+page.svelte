@@ -61,6 +61,8 @@
     ['year', 'study_name', 'status', 'study_progress', 'cost', 'awards'  ] // optional – omit for auto columns
   );
 
+  console.log('processe')
+
 	charts.push(
 
 

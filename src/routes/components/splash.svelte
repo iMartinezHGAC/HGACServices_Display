@@ -1,6 +1,6 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
-	import type { DashboardType } from '../../ambient';
+	import type { DashboardType, TabCountType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
@@ -10,7 +10,7 @@
 		jurisdiction: string;
     logo_url: string | null;
 		dashboard_groups: DashboardType[];
-    dash_count: Record<string, number>
+    dash_count: TabCountType[]
 	}
 
 	let { chosenTab, jurisdiction, logo_url, dashboard_groups, dash_count }: props = $props();
@@ -67,10 +67,38 @@
  *          false otherwise
  */
 export function hasActiveTab(
-  dashboardTabsCounts: Record<string, number>,
-  dash_id: string
+  coded_tabs: CodedTabCounts,
+  dash_id: keyof CodedTabCounts
 ): boolean {
-  return dash_id in dashboardTabsCounts;
+  return coded_tabs[dash_id] > 0
+}
+
+  const tabCodeMap = {
+  workforce: "41",
+  environmental: "64",
+  has_enterprise_solutions: "71",
+  economic_development: "55",
+  aging_disability: "07",
+  community_services: "92",
+  public_safety: "74",
+  transportation: "76",
+} as const;
+
+type CodedTabCounts = {
+  [K in keyof typeof tabCodeMap as typeof tabCodeMap[K]]: number;
+};
+
+function mapToCodedTabs(data: TabCountType): CodedTabCounts {
+  return {
+    "41": data.workforce,
+    "64": data.environmental,
+    "71": data.has_enterprise_solutions,
+    "55": data.economic_development,
+    "07": data.aging_disability,
+    "92": data.community_services,
+    "74": data.public_safety,
+    "76": data.transportation,
+  };
 }
 
   const overview: DashboardType = {
@@ -82,6 +110,9 @@ export function hasActiveTab(
     collectionId: 'pbc_575699702',
     collectionName: 'dashboard_tabs',
   }
+
+  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
+  
 </script>
 
 {#snippet tabSnippet(dash: DashboardType)}
@@ -121,7 +152,7 @@ export function hasActiveTab(
 	<div class="flex flex-wrap items-end justify-start overflow-y-auto">
     {@render tabSnippet(overview)}
 		{#each dashboard_groups as dash}
-      {#if hasActiveTab(dash_count, dash.id)}
+      {#if hasActiveTab(codedTabs, dash.id as keyof CodedTabCounts)}
         {@render tabSnippet(dash)}
       {/if}
 		{/each}

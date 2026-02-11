@@ -252,3 +252,19 @@ type ImageRecord = {
   created: string,
   updated: string,
 }
+
+type TabCountType = {
+  collectionId: string;
+  collectionName: string;
+  id: string;
+  jurisdiction: JurisdictionType;
+  jurisdiction_name: string;
+  workforce: number;
+  environmental: number;
+  has_enterprise_solutions: number;
+  economic_development: number;
+  aging_disability: number;
+  community_services: number;
+  public_safety: number;
+  transportation: number;
+};

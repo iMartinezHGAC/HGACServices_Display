@@ -65,20 +65,20 @@
         {#each records as record}
           <tr>
             {#each allKeys as key}
-<td class="px-4 py-2 border border-gray-300">
-  {#if key in record}
-    {@const val = record[key]}
-    {#if typeof val === 'string' || typeof val === 'number' || val instanceof Date}
-      {val instanceof Date ? val.toISOString().split('T')[0] : val}
-    {:else if Array.isArray(val)}
-      {val.length} item(s) <!-- or val.join(', ') if strings -->
-    {:else}
-      [Complex data] <!-- or JSON.stringify(val) for debug -->
-    {/if}
-  {:else}
-    -
-  {/if}
-</td>
+              <td class="px-4 py-2 border border-gray-300">
+                {#if key in record}
+                  {@const val = record[key]}
+                  {#if typeof val === 'string' || typeof val === 'number' || val instanceof Date}
+                    {val instanceof Date ? val.toISOString().split('T')[0] : val}
+                  {:else if Array.isArray(val)}
+                    {val.length} item(s) <!-- or val.join(', ') if strings -->
+                  {:else}
+                    [Complex data] <!-- or JSON.stringify(val) for debug -->
+                  {/if}
+                {:else}
+                  -
+                {/if}
+              </td>
             {/each}
           </tr>
         {/each}
