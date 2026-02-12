@@ -185,14 +185,14 @@ const option: echarts.EChartsOption = {
     title: {
       text: title,
       left: "center",
-      textStyle: { fontWeight: "normal", fontSize: 18 },
+      textStyle: { fontWeight: "normal", fontSize: 18, fontFamily: 'Metropolis' },
     },
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
       formatter: (params: any) => {
         const actualParam = params.find((p: any) => p.seriesName === "Actual");
-        const gapParam = params.find((p: any) => p.seriesName === "Remaining to Potential");
+        const gapParam = params.find((p: any) => p.seriesName === "Available Programs");
         const actual = actualParam?.value ?? 0;
         const gap = gapParam?.value ?? 0;
         const total = actual + gap;
@@ -200,14 +200,14 @@ const option: echarts.EChartsOption = {
       },
     },
     legend: {
-      data: ["Actual", "Remaining to Potential"],
+      data: ["Actual", "Available Programs"],
       top: 30,
     },
-grid: {
+    grid: {
       left: 70,
       right: 50,
-      bottom: 20,   // More room for rotated labels
-      top: 100,      // More top space to push bars down and give vertical breathing room
+      bottom: 20,
+      top: 100,
       containLabel: true,
     },
     xAxis: {
@@ -241,12 +241,15 @@ grid: {
         },
       },
       {
-        name: "Remaining to Potential",
+        name: "Available Programs",
         type: "bar",
         stack: "total",
         barWidth: "60px",
         data: gapData,
-        itemStyle: { color: "#91cc75" },
+        itemStyle: {
+          color: "#cccccc",  // light grey
+          opacity: 0.5,      // 80% opacity for a faded/projected look
+        },
         emphasis: { focus: "series" },
         label: {
           show: true,
@@ -265,8 +268,7 @@ grid: {
     chartType: "stackedbarchart",
   };
 }
-
-  let plapChart = makeActualPotentialStackedBar(dataActual, dataPotential, "In use vs Potential")
+  let plapChart = makeActualPotentialStackedBar(dataActual, dataPotential, "Program Utilization")
 
 </script>
 
