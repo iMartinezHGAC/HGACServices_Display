@@ -90,28 +90,29 @@ type CodedTabCounts = {
 
 function mapToCodedTabs(data: TabCountType): CodedTabCounts {
   return {
-    "41": data.workforce,
-    "64": data.environmental,
+    "41": data.has_workforce,
+    "64": data.has_environmental,
     "71": data.has_enterprise_solutions,
-    "55": data.economic_development,
-    "07": data.aging_disability,
-    "92": data.community_services,
-    "74": data.public_safety,
-    "76": data.transportation,
+    "55": data.has_economic_development,
+    "07": data.has_aging_disability,
+    "92": data.has_community_services,
+    "74": data.has_public_safety,
+    "76": data.has_transportation,
   };
 }
 
+  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
   const overview: DashboardType = {
     id: '00',
     tab_name: "overview",
     sort_order: 0,
     tab_color: '#f8fafc',
-    tab_text_light_mode: false,
+    tab_text_lightmode: false,
     collectionId: 'pbc_575699702',
     collectionName: 'dashboard_tabs',
   }
 
-  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
+  //$inspect('coded tabs', codedTabs)
   
 </script>
 

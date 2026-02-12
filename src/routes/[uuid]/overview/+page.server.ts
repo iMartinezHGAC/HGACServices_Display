@@ -2,11 +2,32 @@
 import { PB_URL } from "$env/static/private";
 import type { PageServerLoad } from "./$types";
 import { FetchTable, GenerateFilter, getSubtableSchema } from "../../helpers/apiHelpers";
+import type { PotentialTabType, TabCountType } from "../../../ambient";
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
   const juris_id = params.uuid;
   const pbData: Array<{ collection: string; subCollections: Record<string, any[]>; error?: string }> = [];
+
+  let potentialTabTotal: PotentialTabType[]
+  try {
+    potentialTabTotal = await locals.pb.collection("dashboard_potential_project_count").getFullList<PotentialTabType>();
+  } catch (err) {
+    console.error("Failed to fetch programs:", err);
+    potentialTabTotal = [];
+  }
+
+  let tabCounts: TabCountType[]
+  try {
+    tabCounts = await locals.pb.collection("tab_visibility").getFullList<TabCountType>({
+      filter: `jurisdiction.id = '${juris_id}'`
+    });
+  } catch (err) {
+    console.error("Failed to fetch programs:", err);
+    tabCounts = [];
+  }
+
+
 
   for (const table of collections) {
     console.log('Processing table', table);
@@ -68,6 +89,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     }
   }
 
-  return { pbData };
+  return {
+    pbData: pbData,
+    potential_tabs: potentialTabTotal,
+    dash_count: tabCounts,
+  };
 };
 

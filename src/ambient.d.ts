@@ -259,12 +259,19 @@ type TabCountType = {
   id: string;
   jurisdiction: JurisdictionType;
   jurisdiction_name: string;
-  workforce: number;
-  environmental: number;
+  has_workforce: number;
+  has_environmental: number;
   has_enterprise_solutions: number;
-  economic_development: number;
-  aging_disability: number;
-  community_services: number;
-  public_safety: number;
-  transportation: number;
+  has_economic_development: number;
+  has_aging_disability: number;
+  has_community_services: number;
+  has_public_safety: number;
+  has_transportation: number;
+};
+
+type PotentialTabType = {
+  collectionId: string;
+  collectionName: string;
+  id: string;
+  tab_project_count: number;
 };
