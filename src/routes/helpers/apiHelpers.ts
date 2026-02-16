@@ -53,7 +53,7 @@ export function GenerateFilter(
 }
 
 import PocketBase from 'pocketbase'
-import type { PB_Record_Type, TableFetchOptions } from '../../ambient';
+import type { AdworkType, PB_Record_Type, TableFetchOptions } from '../../ambient';
 
 export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<PB_Record_Type[] | { error: string }> {
   const defaultOptions: TableFetchOptions = {
@@ -89,4 +89,31 @@ export async function getSchema(tableName: string, PB_URL: string) {
 export async function getSubtableSchema(tableName: string, PB_URL: string) {
   let res = await fetch(`${PB_URL}/api/collections/${tableName}/dashboard-schema`)
   return await res.json()
+}
+
+export function buildAdworkFilter(tableNames: string[], juris_id: string) {
+  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`);
+  const filterAdwork = filterPartsAdwork.join(' || ');
+
+  // Critical fix: For multiple relations, use "?=" to mean "at least one" related record matches
+  // Without the "?", PocketBase treats it as "all must match" or fails to match subfields properly.
+  const jurisFilterPart = juris_id ? `jurisdiction.id ?= "${juris_id.replace(/"/g, '\\"')}"` : '';
+
+  // Combine: (existing OR conditions) && jurisdiction condition
+  let filter = '';
+
+  if (filterAdwork) {
+    filter = `(${filterAdwork})`;
+  }
+
+  if (jurisFilterPart) {
+    if (filter) {
+      filter = `${filter} && ${jurisFilterPart}`;
+    } else {
+      filter = jurisFilterPart;
+    }
+  }
+
+  //console.log('Generated filter:', filter || '(no filter)');
+  return filter
 }
