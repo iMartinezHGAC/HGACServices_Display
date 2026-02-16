@@ -123,10 +123,10 @@ let displayedCharts = $derived(
             />
         {/if}
 				{/each}
-				{#if itemsToShow.length > 3}
+				{#if additionalWork && additionalWork.length > 3}
 					<div class="expand-toggle">
-						<button onclick={toggleExpanded}>
-							{expanded ? 'Show Fewer' : `Show All (${itemsToShow.length - 3} more)`}
+						<button onclick={toggleExpanded} class={'bg-lime-400 p-2 rounded opacity-80 cursor-pointer'}>
+							{expanded ? 'Show Fewer' : `Show All (${additionalWork.length - 3} more)`}
 						</button>
 					</div>
 			{:else}

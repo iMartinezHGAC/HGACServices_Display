@@ -70,24 +70,47 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   let projectDetails: AdworkType[] = []
-  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
+  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`);
   const filterAdwork = filterPartsAdwork.join(' || ');
+
+  // Critical fix: For multiple relations, use "?=" to mean "at least one" related record matches
+  // Without the "?", PocketBase treats it as "all must match" or fails to match subfields properly.
+  const jurisFilterPart = juris_id ? `jurisdiction.id ?= "${juris_id.replace(/"/g, '\\"')}"` : '';
+
+  // Combine: (existing OR conditions) && jurisdiction condition
+  let filter = '';
+
+  if (filterAdwork) {
+    filter = `(${filterAdwork})`;
+  }
+
+  if (jurisFilterPart) {
+    if (filter) {
+      filter = `${filter} && ${jurisFilterPart}`;
+    } else {
+      filter = jurisFilterPart;
+    }
+  }
+
+  // Optional: Log the filter for debugging
+  console.log('Generated filter:', filter || '(no filter)');
+
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: filterAdwork,
+      filter: filter || undefined,  // PocketBase ignores empty/undefined filters
       expand: 'program'
-    })
-    console.log('Project Details if any', projectDetails)
+    });
+    console.log('Project Details if any', projectDetails);
   } catch (err) {
-    console.error('Error trying to get project details', err)
+    console.error('Error trying to get project details', err);
   }
 
   let eventsData: EventType[] = []
   const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
-  const filter = filterParts.join(' || ');
+  const eventFilter = filterParts.join(' || ');
   try {
     eventsData = await locals.pb.collection('events_json').getFullList({
-      filter: filter
+      filter: eventFilter
     })
     console.log('Event Data if any', eventsData)
   } catch (err) {
