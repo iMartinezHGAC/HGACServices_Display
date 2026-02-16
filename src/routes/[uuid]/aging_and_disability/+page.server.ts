@@ -1,13 +1,12 @@
-
 import { PB_URL } from '$env/static/private';
-import type { AdworkType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
+import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult } from '../../../ambient';
 import { FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
+
 
 async function getSchema(tableName: string): Promise<SchemaType[]> {
   try {
     const response = await fetch(`${PB_URL}/api/collections/${tableName}/schema`);
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -21,7 +20,6 @@ async function getSchema(tableName: string): Promise<SchemaType[]> {
 
 async function useGetSchema(tableName: string = "05_trash_bash"): Promise<SchemaMultiType> {
   const schema = await getSchema(tableName);
-
   return {
     tableName,
     schema
@@ -49,7 +47,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   console.log("table names", tableNames)
 
-
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
 
@@ -71,12 +68,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const filterAdwork = filterPartsAdwork.join(' || ');
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: filterAdwork
+      filter: filterAdwork,
+      expand: 'program'
     })
-    //console.log('Project Details if any', projectDetails)
+    console.log('Project Details if any', projectDetails)
   } catch (err) {
     console.error('Error trying to get project details', err)
   }
+
+  console.log(projectDetails)
 
   let eventsData: EventType[] = []
   const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
@@ -85,7 +85,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     eventsData = await locals.pb.collection('events_json').getFullList({
       filter: filter
     })
-    console.log('Event Data if any', eventsData)
+    //console.log('Event Data if any', eventsData)
   } catch (err) {
     console.error('Error trying to get events data', err)
   }

@@ -36,7 +36,6 @@
 	}
 
 	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
-	$inspect('data layout', data.dash_count);
 </script>
 
 <main

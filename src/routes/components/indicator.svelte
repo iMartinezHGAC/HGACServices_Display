@@ -60,7 +60,7 @@
     symbol_post = "",
   }: propTypes = $props()
 
-  $inspect("Above text: ", aboveText)
+  $inspect("INDICATOR: ", symbol_pre)
   let postScript = ""
   const PRECISION = 3
 

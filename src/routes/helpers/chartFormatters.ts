@@ -1330,11 +1330,11 @@ export function accumulateArray(numArray: number[] | null) {
 export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
   const data = selectSplitSubtable(tableData, tableName, chosenSubtable);
   if (data === null) {
-    return null;
+    return 0;
   }
   const mappedData = mapTableData(data, field);
   if (mappedData === null) {
-    return null;
+    return 0;
   }
   if (typeof mappedData === "number") {
     return mappedData;
@@ -1342,7 +1342,7 @@ export function accumulateMappedFieldSubtable(tableData: TableDataResult, tableN
   if (Array.isArray(mappedData)) {
     return accumulateArray(mappedData as number[]);
   }
-  return null;
+  return 0;
 }
 
 export function accumulateMappedField(tableData: TableDataResult, tableName: string, field: string) {

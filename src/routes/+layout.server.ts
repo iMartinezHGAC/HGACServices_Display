@@ -11,7 +11,7 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
   }
 
   const juris_id = params.uuid;
-  console.log("juris_id in layout", juris_id);
+  //console.log("juris_id in layout", juris_id);
 
   // Generic authentication with diagnostics
   try {

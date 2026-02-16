@@ -282,6 +282,7 @@ const option: echarts.EChartsOption = {
 				aboveText={fundingIndicator.indicator.indicatorName}
 				belowText={''}
 				numericValue={fundingIndicator.indicator.indicatorVal as number}
+        symbol_pre={fundingIndicator.indicator?.indicatorSymPre}
 			/>
 		</div>
 

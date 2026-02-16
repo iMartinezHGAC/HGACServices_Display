@@ -23,6 +23,7 @@
 	const targetIndex = cardData.findIndex(
 		(item) => item.program?.parent_table === '34_gc_tow_and_go'
 	);
+
 	if (targetIndex !== -1) {
 		const [targetData] = cardData.splice(targetIndex, 1);
 		cardData.unshift(targetData);
