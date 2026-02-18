@@ -6,7 +6,7 @@
     collectionId: string;
     collectionName: string;
     id: string;
-    [key: string]: string | number | Date;
+    [key: string]: string | number | Date | any;
   };
 
   interface Props {
@@ -46,9 +46,34 @@
           return computedKeys;
         })()
     : null
+
+  // Detect if the *header* (displayed text) represents money
+  function isMonetaryField(key: string): boolean {
+    const keywords = [
+      'cost', 'budget', 'dollar', 'dollars', 'price', 'fee', 'payment',
+      'expense', 'revenue', 'income', 'profit', 'salary', 'funding',
+      'amount', 'total', 'charge', 'balance', 'paid', 'due', 'spend', 'value'
+    ];
+    const lowerKey = key.toLowerCase();
+    const lowerHeader = snakeToHuman(key).toLowerCase();   // this is what the user sees
+    return keywords.some(word => lowerKey.includes(word) || lowerHeader.includes(word));
+  }
+
+  // Format numbers with commas + $ when header sounds like money
+  function formatDisplayValue(key: string, val: any): string {
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    if (typeof val === 'number') {
+      const numStr = val.toLocaleString('en-US');
+      return isMonetaryField(key) ? `$${numStr}` : numStr;
+    }
+    if (typeof val === 'string') return val;
+    if (Array.isArray(val)) return `${val.length} item(s)`;
+    return val != null ? String(val) : '-';
+  }
 </script>
 
-<!-- Outer wrapper provides horizontal scrolling if table is wide + vertical limit -->
 <div class="w-full overflow-x-auto max-h-96">
   <table class="table-auto border-collapse border border-gray-400 mx-auto">
     {#if records && allKeys}
@@ -65,16 +90,11 @@
         {#each records as record}
           <tr>
             {#each allKeys as key}
-              <td class="px-4 py-2 border border-gray-300">
+              {@const val = key in record ? record[key] : null}
+              {@const isNumeric = typeof val === 'number'}
+              <td class="px-4 py-2 border border-gray-300 {isNumeric ? 'text-right font-medium' : ''}">
                 {#if key in record}
-                  {@const val = record[key]}
-                  {#if typeof val === 'string' || typeof val === 'number' || val instanceof Date}
-                    {val instanceof Date ? val.toISOString().split('T')[0] : val}
-                  {:else if Array.isArray(val)}
-                    {val.length} item(s) <!-- or val.join(', ') if strings -->
-                  {:else}
-                    [Complex data] <!-- or JSON.stringify(val) for debug -->
-                  {/if}
+                  {formatDisplayValue(key, val)}
                 {:else}
                   -
                 {/if}
