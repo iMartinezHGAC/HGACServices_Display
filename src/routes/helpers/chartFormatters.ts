@@ -8,7 +8,38 @@ import type {
   IndicatorType,
   EventType,
 } from "../../ambient";
+
 import type { EChartsOption, DefaultLabelFormatterCallbackParams } from "echarts";
+
+/**
+ * Normalizes a category name by:
+ * - Trimming leading/trailing whitespace
+ * - Collapsing multiple consecutive spaces into a single space
+ * - Optionally converting to a consistent case (default: title case via snakeToHuman)
+ * 
+ * @param value The raw category value (string or anything convertible to string)
+ * @param humanize Whether to apply snakeToHuman after cleaning (default: true)
+ * @returns Cleaned and optionally humanized string, or empty string if input was falsy
+ */
+export function cleanCategoryName(
+  value: any,
+  humanize: boolean = true
+): string {
+  if (value == null) return ""; // null, undefined → empty
+
+  let str = String(value).trim();           // Remove leading/trailing whitespace
+  if (!str) return "";                      // After trim it's empty → return empty
+
+  str = str.replace(/\s+/g, " ");           // Collapse all whitespace sequences → single space
+
+  // Optional: apply snakeToHuman (which also capitalizes words)
+  if (humanize) {
+    str = snakeToHuman(str);
+  }
+
+  return str;
+}
+
 
 // === Shared Formatters ===
 const formatNumber = (value: number | string | undefined): string => {
@@ -358,11 +389,15 @@ export function makeProjectCountDrilldownPie<T = any>(
       let ptype = item.project_type?.trim() || "Other";
       if (!ptype || ptype === "NULL") ptype = "Other";
 
-      if (!typeMap[ptype]) typeMap[ptype] = { count: 0, totalFunding: 0, projects: [] };
+      const cleanPtype = cleanCategoryName(ptype, true); // ← here
+
+      if (!typeMap[cleanPtype]) {
+        typeMap[cleanPtype] = { count: 0, totalFunding: 0, projects: [] };
+      }
 
       const funding = Number(item.funding) || 0;
-      typeMap[ptype].totalFunding += funding;
-      typeMap[ptype].count += 1;
+      typeMap[cleanPtype].totalFunding += funding;
+      typeMap[cleanPtype].count += 1;
       typeMap[ptype].projects.push({
         name: item.project_name?.trim() || "Unnamed Project",
         funding,
@@ -650,7 +685,12 @@ export function makeTableDrilldownPie<T = any>(
     if (items.length === 0) return [];
 
     const fieldSet = new Set<string>();
-    items.forEach((item) => Object.keys(item).forEach((k) => fieldSet.add(k)));
+    items.forEach((item) => {
+      Object.keys(item).forEach((k) => {
+        const cleanField = cleanCategoryName(k, false); // field names usually don't need humanize
+        if (cleanField) fieldSet.add(cleanField);
+      });
+    });
 
     return Array.from(fieldSet).map((field) => {
       const unique = new Set(
@@ -658,7 +698,7 @@ export function makeTableDrilldownPie<T = any>(
           .map((i) => JSON.stringify(i[field]))
           .filter((v) => v !== "null" && v !== "undefined")
       );
-      return { name: snakeToHuman(field), value: unique.size };
+      return { name: field, value: unique.size }; // already cleaned
     });
   };
 
@@ -708,6 +748,8 @@ export function makeDrilldownMultPie<T = any>(
   let currentLevel = 0;
   let currentFilters: Partial<Record<keyof T, string>> = {};
 
+
+  //If something breaks its this
   const computePieData = (
     level: number,
     filters: Partial<Record<keyof T, string>>
@@ -716,17 +758,23 @@ export function makeDrilldownMultPie<T = any>(
       Object.entries(filters).every(([cat, val]) => String(item[cat as keyof T]) === val)
     );
 
-    const currentCat = categoryKeys[level];
-    const sumMap: Record<string, number> = {};
+    const currentCat = categoryKeys[currentLevel];
+    const countMap: Record<string, number> = {};
 
-    filteredData.forEach((item) => {
-      const catVal = String(item[currentCat]);
-      if (!catVal) return;
-      const val = Number(item[valueKey]) || 0;
-      sumMap[catVal] = (sumMap[catVal] || 0) + val;
+    filteredData.forEach((item: any) => {
+      const rawVal = String(item[currentCat] ?? "").trim();
+      const cleanVal = cleanCategoryName(rawVal, true); // ← apply here
+      if (!cleanVal) {
+        // Optionally treat empty as "Uncategorized"
+        countMap["Uncategorized"] = (countMap["Uncategorized"] || 0) + 1;
+      } else {
+        countMap[cleanVal] = (countMap[cleanVal] || 0) + 1;
+      }
     });
 
-    return Object.entries(sumMap).map(([name, value]) => ({ name, value }));
+    return Object.entries(countMap)
+      .sort(([, a], [, b]) => b - a)
+      .map(([name, value]) => ({ name, value }));
   };
 
   const getSubtext = (): string => {
@@ -798,11 +846,14 @@ export function makeValueCountPie<T = any>(
   const getValueCountPieData = (k: keyof T, ds: T[] = dataset) => {
     const countMap: Record<string, number> = {};
     ds.forEach((item) => {
-      const val = String(item[k]);
-      if (val) countMap[val] = (countMap[val] || 0) + 1;
+      const rawVal = String(item[k]);
+      const cleanVal = cleanCategoryName(rawVal, true);
+      if (cleanVal) {
+        countMap[cleanVal] = (countMap[cleanVal] || 0) + 1;
+      }
     });
     return Object.entries(countMap)
-      .map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }))
+      .map(([name, value]) => ({ name, value, originalName: name })) // originalName can stay raw if needed
       .sort((a, b) => b.value - a.value);
   };
 
@@ -858,13 +909,17 @@ export function makeValueSumPie<T = any>(
   const getSumPieData = (gk: keyof T, vk: keyof T, ds: T[] = dataset) => {
     const sumMap: Record<string, number> = {};
     ds.forEach((item) => {
-      const group = String(item[gk]);
+      const rawGroup = String(item[gk]);
+      const cleanGroup = cleanCategoryName(rawGroup, true);
+      if (!cleanGroup) return;
+
       const val = Number(item[vk]);
-      if (!group || isNaN(val)) return;
-      sumMap[group] = (sumMap[group] || 0) + val;
+      if (isNaN(val)) return;
+
+      sumMap[cleanGroup] = (sumMap[cleanGroup] || 0) + val;
     });
     return Object.entries(sumMap)
-      .map(([name, value]) => ({ name: snakeToHuman(name), value, originalName: name }))
+      .map(([name, value]) => ({ name, value, originalName: name }))
       .filter((d) => d.value > 0);
   };
 

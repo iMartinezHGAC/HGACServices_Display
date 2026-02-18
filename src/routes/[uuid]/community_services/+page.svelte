@@ -39,7 +39,7 @@
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
-	//$inspect('table data: ', tablesData);
+	$inspect('table data: ', tablesData);
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 	//$inspect('data', data);
