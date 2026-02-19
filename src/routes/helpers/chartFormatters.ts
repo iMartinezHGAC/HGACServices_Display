@@ -1140,33 +1140,58 @@ export function makeBar<T = any>(
     };
   }
 
+  // One-pass filter + explicit string coercion (fixes the #1 silent-fail case for category bars)
+  const validData = dataset
+    .filter((item: T) => {
+      const v = item[key2];
+      return typeof v === "number" && v >= 0;
+    })
+    .map((item: T) => ({
+      x: String(truncateDate(item[key1]) ?? "—"),
+      y: item[key2] as number,
+    }));
+
   return {
     parent_table,
     chart: {
       charts: {
         title: { text: snakeToHuman(String(key2)) },
-        tooltip: {},
-        xAxis: { data: dataset.map((item: T) => truncateDate(item[key1])) },
-        yAxis: {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+        },
+        grid: {
+          left: "4%",
+          right: "4%",
+          bottom: "8%",
+          top: "15%",
+          containLabel: true,
+        },
+        xAxis: {
+          type: "category",
+          data: validData.map((d) => d.x),
           axisLabel: {
-            formatter: (value: number) =>
-              value > 1000000
-                ? (value / 1000000) + "M"
-                : value > 1000
-                  ? (value / 1000) + "K"
-                  : value,
+            interval: 0,
+            rotate: validData.length > 6 ? 45 : 0,
+          },
+        },
+        yAxis: {
+          type: "value",
+          axisLabel: {
+            formatter: (value: number): string => {
+              if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+              if (value >= 1_000) return (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+              return value.toLocaleString();
+            },
           },
         },
         series: [
           {
             name: snakeToHuman(String(key2)),
             type: "bar",
-            data: dataset
-              .filter((item: T) => {
-                const v = item[key2];
-                return typeof v === "number" && v >= 0;
-              })
-              .map((item: T) => item[key2]),
+            data: validData.map((d) => d.y),
+            barMaxWidth: 80,
+            emphasis: { focus: "series" },
           },
         ],
       },
@@ -1221,40 +1246,19 @@ export function makeGroupedBar<T = any>(
 }
 
 /* === All Small Utility Functions (unchanged from original, minor cleanups only) === */
-
-export function combineRelatedRecords(
-  tablesData: Record<string, any>,
-  parentCollection: string,
-  relatedFields: string[],
+/**
+ * Core reusable helper – perfect for both `relatedFields` expand mode AND direct `table.data` situations.
+ * Handles column ordering (custom or auto-discovered), excludes internal PocketBase keys,
+ * and automatically promotes the "source" column when `hasMultipleSources` is true.
+ * 
+ * Use this directly for any flat array of PocketBase records.
+ */
+export function buildTableData(
+  records: any[],
+  hasMultipleSources: boolean = false,
   columnOrder: string[] = []
 ): { data: any[] | null; columns: string[] } | null {
-  const response = tablesData[parentCollection];
-  if (!response?.items?.[0]?.expand) {
-    return null;
-  }
-
-  const expand = response.items[0].expand;
-  const combinedRecords: any[] = [];
-  const hasMultipleSources = relatedFields.length > 1;
-
-  for (const field of relatedFields) {
-    let rel = expand[field];
-    if (!rel) continue;
-
-    const relArray = Array.isArray(rel) ? rel : [rel];
-
-    for (const record of relArray) {
-      const newRecord = { ...record };
-
-      if (hasMultipleSources) {
-        newRecord.source = snakeToHuman(field);
-      }
-
-      combinedRecords.push(newRecord);
-    }
-  }
-
-  if (combinedRecords.length === 0) {
+  if (!records?.length) {
     return null;
   }
 
@@ -1275,6 +1279,7 @@ export function combineRelatedRecords(
   ];
 
   let columns: string[];
+
   if (columnOrder.length > 0) {
     columns = [...columnOrder];
     if (hasMultipleSources && !columns.includes("source")) {
@@ -1284,7 +1289,7 @@ export function combineRelatedRecords(
     const seen = new Set<string>();
     const keys: string[] = [];
 
-    combinedRecords.forEach((r) => {
+    records.forEach((r) => {
       Object.keys(r).forEach((k) => {
         if (!excludedKeys.includes(k) && !seen.has(k)) {
           seen.add(k);
@@ -1305,9 +1310,67 @@ export function combineRelatedRecords(
   }
 
   return {
-    data: combinedRecords,
+    data: records.map((r) => ({ ...r })), // shallow clone for safety (won't mutate original PB items)
     columns,
   };
+}
+
+/**
+ * Refactored original function – fully backward compatible.
+ * Now delegates column logic to `buildTableData` so `columnOrder` works in BOTH modes.
+ * 
+ * - Pass `string[]` for related/expand fields (unchanged)
+ * - Pass `null` for direct `table.data` (new)
+ */
+export function combineRelatedRecords(
+  tablesData: Record<string, any>,
+  parentCollection: string,
+  relatedFields: string[] | null,
+  columnOrder: string[] = []
+): { data: any[] | null; columns: string[] } | null {
+  const response = tablesData[parentCollection];
+  if (!response?.items?.length) {
+    return null;
+  }
+
+  let combinedRecords: any[] = [];
+  let hasMultipleSources = false;
+
+  if (relatedFields && relatedFields.length > 0) {
+    // === Related/expanded fields (your original table.subtable1.data case) ===
+    if (!response.items[0]?.expand) {
+      return null;
+    }
+
+    const expand = response.items[0].expand;
+    hasMultipleSources = relatedFields.length > 1;
+
+    for (const field of relatedFields) {
+      let rel = expand[field];
+      if (!rel) continue;
+
+      const relArray = Array.isArray(rel) ? rel : [rel];
+
+      for (const record of relArray) {
+        const newRecord = { ...record };
+        if (hasMultipleSources) {
+          newRecord.source = snakeToHuman(field);
+        }
+        combinedRecords.push(newRecord);
+      }
+    }
+  } else {
+    // === Direct table.data (new supported case) ===
+    hasMultipleSources = false;
+    combinedRecords = response.items.map((item: any) => ({ ...item }));
+  }
+
+  if (combinedRecords.length === 0) {
+    return null;
+  }
+
+  // Delegate column logic (this is why columnOrder now works everywhere)
+  return buildTableData(combinedRecords, hasMultipleSources, columnOrder);
 }
 
 export const truncateDate = <T = any>(input: T): T | string =>

@@ -16,10 +16,10 @@
     '#C6093B',
     '#002F47',
     '#025773',
-    '#56B4E9', // light sky blue – adds a distinct cool tone
-    '#F0E442', // bright yellow – introduces a high-visibility warm hue
-    '#0072B2', // medium blue – contrasts well with your darker blues
-    '#CC79A7', // reddish purple – adds a magenta/pink tone for variety
+    '#56B4E9', // light sky blue  
+    '#F0E442', // bright yellow 
+    '#0072B2', // medium blue
+    '#CC79A7', // reddish purple
   ] as const
 
   // Helper to merge custom colors into the provided option (top-level color palette)
@@ -38,6 +38,13 @@
 
   $effect(() => {
     if (chartInstance && chart) {
+console.log("RenderEchart received option →", {
+  title: chart?.title?.text,
+  xLength: chart?.xAxis?.data?.length,
+  yLength: chart?.series?.[0]?.data?.length,
+  sampleX: chart?.xAxis?.data?.slice(0, 3),
+  sampleY: chart?.series?.[0]?.data?.slice(0, 3),
+});
       chartInstance.setOption(getOptionWithColors(chart), true)
       currentChartOption = chart
       isDrilledDown = false

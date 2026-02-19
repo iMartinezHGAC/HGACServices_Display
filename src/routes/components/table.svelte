@@ -16,7 +16,7 @@
 
   const { data, columns = [] }: Props = $props();
 
-  $inspect('TABLE props', data, columns);
+  //$inspect('TABLE props', data, columns);
 
   let records: PB_Record_Type[] | EventType[] | null = data
     ? Array.isArray(data) ? data : [data] 
@@ -47,7 +47,7 @@
         })()
     : null
 
-  // Detect if the *header* (displayed text) represents money
+  // Detect if the *header* represents money
   function isMonetaryField(key: string): boolean {
     const keywords = [
       'cost', 'budget', 'dollar', 'dollars', 'price', 'fee', 'payment',
@@ -55,17 +55,37 @@
       'amount', 'total', 'charge', 'balance', 'paid', 'due', 'spend', 'value'
     ];
     const lowerKey = key.toLowerCase();
-    const lowerHeader = snakeToHuman(key).toLowerCase();   // this is what the user sees
+    const lowerHeader = snakeToHuman(key).toLowerCase();
     return keywords.some(word => lowerKey.includes(word) || lowerHeader.includes(word));
   }
 
-  // Format numbers with commas + $ when header sounds like money
+  // Detect year columns (e.g. year, fiscal_year, birth_year) — never add commas
+  function isYearField(key: string): boolean {
+    const keywords = ['year', 'yr', 'years'];
+    const lowerKey = key.toLowerCase();
+    const lowerHeader = snakeToHuman(key).toLowerCase();
+    return keywords.some(word => lowerKey.includes(word) || lowerHeader.includes(word));
+  }
+
+  // Clean header: Title Case + no excess whitespace
+  function formatHeader(key: string): string {
+    let header = snakeToHuman(key);
+    header = header.trim().replace(/\s+/g, ' ');
+    return header.replace(/\w\S*/g, txt => 
+      txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+    );
+  }
+
+  // Format numbers: commas + $ for money, NO commas for years, plain otherwise
   function formatDisplayValue(key: string, val: any): string {
     if (val instanceof Date) {
       return val.toISOString().split('T')[0];
     }
     if (typeof val === 'number') {
-      const numStr = val.toLocaleString('en-US');
+      if (isYearField(key)) {
+        return val.toString();                    // 2024 stays 2024
+      }
+      const numStr = val.toLocaleString('en-US'); // 1234567 → 1,234,567
       return isMonetaryField(key) ? `$${numStr}` : numStr;
     }
     if (typeof val === 'string') return val;
@@ -81,7 +101,7 @@
         <tr>
           {#each allKeys as key}
             <th class="font-bold px-4 py-2 border border-gray-300 bg-gray-100 text-left sticky top-0 z-10">
-              {snakeToHuman(key)}
+              {formatHeader(key)}
             </th>
           {/each}
         </tr>

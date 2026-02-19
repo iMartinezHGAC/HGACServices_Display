@@ -40,7 +40,7 @@
 
 	$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
-	 console.log('test table',  selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips'));
+	 console.log('test table',  selectSplitSubtable(tablesData, '03_wqmp', "ossf"));
 	 console.log('test water',  splitTableData(tablesData, water_innovation));
 	//console.log('split table data', 
 //accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
@@ -109,22 +109,22 @@
 				'monitoring_event_cost_hgac',
 				'monitoring_event_cost_inkind',
 			],
-			'Motorist Assistance Program Services',
+			'Monitoring Costs',
       accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toString() ?? ''
 		),
     {
       parent_table: "03_wqmp",
       indicator: {
-        indicatorName: "Monitoring Events",
-        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf") ?? 0,
+        indicatorName: "Permitted OSSF Tracked",
+        indicatorVal: splitExpandedMapTable(tablesData, '03_wqmp', "ossf", "permitted_ossf"),
       },
       chartType: "indicator"
     },
     {
       parent_table: "03_wqmp",
       indicator: {
-        indicatorName: "Permitted OSSF Tracked",
-        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "ossf"),
+        indicatorName: "Estimated Unpermitted OSSF Tracked",
+        indicatorVal: splitExpandedMapTable(tablesData, '03_wqmp', "ossf", "unpermitted_ossf"),
       },
       chartType: "indicator"
     },
@@ -132,18 +132,19 @@
       parent_table: "03_wqmp",
       indicator: {
         indicatorName: "Completed Septic Projects",
-        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+        indicatorVal: splitExpandedMapTable(tablesData, '03_wqmp', "septic", "sep_complete_count"),
       },
       chartType: "indicator"
     },
     {
       parent_table: "03_wqmp",
       indicator: {
-        indicatorName: "Completed Septic Project Costs",
-        indicatorVal: safeSelectObjectField(splitTableData(tablesData, '03_wqmp'), "septic"),
+        indicatorName: "Septic Projects CostSeptic Projects",
+        indicatorVal: splitExpandedMapTable(tablesData, '03_wqmp', "septic", "sep_complete_cost"),
       },
       chartType: "indicator"
     },
+
     {
       parent_table: "05_trash_bash",
       indicator: {
@@ -175,7 +176,7 @@
 				'vol_under_18',
 				'vol_scouts',
 			],
-			'Motorist Assistance Program Services',
+			'Volunteers',
       accumulateMappedField(tablesData, '05_trash_bash', 'tot_volunteer_count').toString() ?? ""
 		),
     {

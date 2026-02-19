@@ -18,7 +18,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeHierarchicalCategoryDonut, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, buildTableData, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeHierarchicalCategoryDonut, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -40,7 +40,7 @@
 
 	$inspect('table data: ', tablesData);
 
-	console.log('test splt', selectSplitSubtable(tablesData, '36_transportation_improvement_plan', 'let'));
+	console.log('test splt', splitTableData(tablesData, '37_clean_vehicles'));
 
 const rtpProcessed = combineRelatedRecords(
   tablesData,
@@ -49,14 +49,19 @@ const rtpProcessed = combineRelatedRecords(
   ['fiscal_year', 'project_name', 'project_description','funding', 'project_type','project_category', 'project_subcategory', 'project_subcategory2',   ] // optional – omit for auto columns
 );
 
-  console.log('rtp processed', rtpProcessed)
+  //console.log('rtp processed', rtpProcessed)
 
-const tipProcessed = combineRelatedRecords(
-  tablesData,
-  '36_transportation_improvement_plan',
-  ['tip_projects'],                 // only one source
-  ['project_name', 'project_description', 'funding'] // optional
-);
+
+  const tipProcessed = combineRelatedRecords(
+    tablesData,
+    '36_transportation_improvement_plan',
+    ['tip_projects'],                 // only one source
+    ['project_name', 'project_description', 'funding'] // optional
+  );
+  const tpsProcessed  = buildTableData(tablesData['38_transportation_planning_studies'], false,['study_name', 'study_description', 'study_type', 'schedule', 'estimated_cost', 'study_url']);
+
+  //console.log('tps', tpsProcessed)
+
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
 	const exclusions = [
@@ -112,7 +117,7 @@ makeValueCountPie(
   splitSubtables(tablesData, '35_rtp').rtp_projects,
   'project_type',           // primary
   'project_subcategory',    // secondary → drilldown
-  'Regional Transportation Plan Projects: # of Projects grouped by Type'
+  'Regional Transportation Projects: # of Projects Grouped by Type'
 ),
 
 makeValueCountPie(
@@ -120,7 +125,7 @@ makeValueCountPie(
   splitSubtables(tablesData, '35_rtp').yr10_projects,
   'project_type',
   'project_subcategory',
-  '10 Year RTP Projects: # of Projects grouped by Type'
+  '10 Year RTP Projects: # of Projects Grouped by Type'
 ),
 
 // Same pattern for TIP and LET
@@ -140,12 +145,7 @@ makeValueCountPie(
   'LET Projects: # of Projects grouped by Type'
 ),
 
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		),
+
     {
       parent_table: "35_rtp",
       table: rtpProcessed?.data ?? null,
@@ -157,6 +157,39 @@ makeValueCountPie(
       table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type,
       fullWidth: true
     },
+		makeBar(
+			'37_clean_vehicles',
+			splitTableData(tablesData, '37_clean_vehicles'),
+			'from_date',
+			'emissions_reduction'
+		),	
+    makeBar(
+			'37_clean_vehicles',
+			splitTableData(tablesData, '37_clean_vehicles'),
+			'from_date',
+			'vehicles_monitored'
+		),
+makeValueCountPie(
+  '38_transportation_planning_studies',
+  splitTableData(tablesData, '38_transportation_planning_studies'),
+  'study_type',
+  'study_name',
+  'Planning Studies Type: # of Studies Grouped by Type'
+),
+makeValueCountPie(
+  '38_transportation_planning_studies',
+  splitTableData(tablesData, '38_transportation_planning_studies'),
+  'schedule',
+  'study_name',
+  'Planning Studies Schedule: # of Studies Grouped by Schedule'
+),
+    {
+      parent_table: "38_transportation_planning_studies",
+      table: tpsProcessed?.data ?? null,
+      columns: tpsProcessed?.columns,
+      fullWidth: true
+    },
+
 	);
 
 data.tableNames.forEach((tableName: string) => {
@@ -169,15 +202,7 @@ data.tableNames.forEach((tableName: string) => {
     });
   }
 });
-	charts.push(
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'vehicles_monitored'
-		)
-	);
-	//});
+
 
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {

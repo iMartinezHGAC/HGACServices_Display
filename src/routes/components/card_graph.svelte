@@ -54,7 +54,7 @@ let displayedCharts = $derived(
       : charts.slice(0, 2)
   );
 
-  $inspect('displayed charts', displayedCharts)
+  //$inspect('displayed charts', displayedCharts)
 </script>
 
 <div>
@@ -82,8 +82,7 @@ let displayedCharts = $derived(
 
         <Table data={chart.table} columns={chart.columns} />
 
-      {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-        {console.log(chart)}
+      {:else if chart.chart}
 
         <RenderEchart
           chart={chart.chart.charts}

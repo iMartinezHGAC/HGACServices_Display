@@ -16,8 +16,8 @@
 
 	const { project, charts, additionalWork, subtitle }: cardProps = $props();
 
-  $inspect('project', project)
-  $inspect('charts', charts)
+  //$inspect('project', project)
+  //$inspect('charts', charts)
 
 	let linkUrls = $derived.by(() => {
 		if (project.expand && project.expand.links) {
@@ -39,7 +39,7 @@
 	const graphState = graphsState();
 
 	function handleExportClick() {
-		console.log(graphState.graph);
+		//console.log(graphState.graph);
 		exportChartToPDF(graphState.graph, project.program_name + ' - Harris County');
 	}
 

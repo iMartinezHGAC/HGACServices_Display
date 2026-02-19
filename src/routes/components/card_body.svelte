@@ -35,7 +35,7 @@
 
 	let flyValue = $state(direction ? -400 : 400);
 
-$inspect('card names', cardNames)
+//$inspect('card names', cardNames)
 
 
   cardData.forEach(card => {
