@@ -40,7 +40,6 @@ const subCollectionsByTable = $derived(
 		});
 		return total;
 	}
-
 	const totalFunding = $derived(accumulateFunding(subCollectionsByTable));
 
 	// Safe combined data for project count pie – missing subtables treated as empty
@@ -54,7 +53,6 @@ const subCollectionsByTable = $derived(
 			LET: tipSubs['36_transportation_improvement_plan_let'] ??   [] 
 		}
 	]);
-
 	// Safe LET data – splitTableData now returns [] if missing
 	const letData = $derived(splitTableData(tipSubs, '36_transportation_improvement_plan_let'));
 
@@ -62,7 +60,6 @@ const subCollectionsByTable = $derived(
 	const chartA = $derived(
 		makeProjectCountDrilldownPie('35_rtp', combinedProjectData, 'Transportation Projects')
 	);
-
 	const chartB = $derived(
 		makeDrilldownMultPie(
 			'35_rtp',
@@ -88,6 +85,15 @@ const subCollectionsByTable = $derived(
 		chartType: 'indicator'
 	}); 
 
+  const dataPotential: Record<string, number> = data.potential_tabs.reduce((acc, item) => {
+    acc[item.id] = item.tab_project_count;
+    return acc;
+  }, {} as Record<string, number>);
+
+	$inspect('data potential raw', data.potential_tabs);
+	$inspect('data potential', dataPotential);
+
+
 const tabCodeMap = {
     "41": "workforce",
     "64": "environmental",
@@ -100,91 +106,100 @@ const tabCodeMap = {
   } as const;
 
   type TabCode = keyof typeof tabCodeMap;
-  type CodedTabCounts = Record<TabCode, number>;
 
-  // 🔥 ROBUST MAPPER – handles PocketBase array (most common) OR direct object
-  function mapToCodedTabs(input: any): CodedTabCounts {
-    // PocketBase `.getList()`, `.getFullList()`, or view often returns Array with 1 item
-    const record = Array.isArray(input) ? (input[0] ?? {}) : (input ?? {});
+  type FullTabData = Record<TabCode, { count: number; programs: string[] }>;
+
+  // 🔥 ONE mapper for everything (PocketBase array or object)
+  function mapToFullActualData(raw: any): FullTabData {
+    const record = Array.isArray(raw) ? (raw[0] ?? {}) : (raw ?? {});
 
     return Object.fromEntries(
-      Object.entries(tabCodeMap).map(([code, category]) => [
-        code as TabCode,
-        Number(record[category as keyof typeof record] ?? 0)
-      ])
-    ) as CodedTabCounts;
+      Object.entries(tabCodeMap).map(([code, category]) => {
+        const programsField = `${category}_programs` as keyof typeof record;
+        const rawPrograms = record[programsField] ?? [];
+
+        // Handles your exact data format: array of comma-strings
+        const programs = Array.isArray(rawPrograms)
+          ? rawPrograms.flatMap((item: any) => {
+              if (typeof item === 'string') {
+                return item.split(',').map((s) => s.trim()).filter(Boolean);
+              }
+              return [];
+            })
+          : [];
+
+        return [
+          code as TabCode,
+          {
+            count: Number(record[category as keyof typeof record] ?? 0),
+            programs,
+          },
+        ];
+      })
+    ) as FullTabData;
   }
 
-  // ✅ ONE LINE FIX – no change needed elsewhere
-  let dataActual = $derived(mapToCodedTabs(data.dash_count));
+  // Derived data (Svelte 5 runes)
+  let fullActualData = $derived(mapToFullActualData(data.dash_count));
+
+  // Your chart call (no other changes needed)
+  const actualPotentialChart = $derived(
+    makeActualPotentialStackedBar(
+      fullActualData,
+      dataPotential,
+      "Actual vs Potential Programs by Category"
+    )
+  );
+
+  
 
 
 
-  //$inspect('pbData', data)
-  //$inspect('tip subtables', tipSubs)
-  //$inspect('rtp subtables', rtpSubs)
-  //$inspect('combined', combinedProjectData)
-  //$inspect('let data', letData)
-	$inspect('data actual raw', data.dash_count);
-	$inspect('data actual', dataActual);
-
-
-  const dataPotential: Record<string, number> = data.potential_tabs.reduce((acc, item) => {
-    acc[item.id] = item.tab_project_count;
-    return acc;
-  }, {} as Record<string, number>);
-
-	$inspect('data potential raw', data.potential_tabs);
-	$inspect('data potential', dataPotential);
-
-
+  //////*******************************************/////////////
+// In your chart utils (TypeScript)
 export function makeActualPotentialStackedBar(
-  dataActual: Record<string, number> | null | undefined,
+  fullActualData: FullTabData | null | undefined,
   dataPotential: Record<string, number> | null | undefined,
   title: string
 ): ChartType {
-  // Handle no data case
-  if (
-    !dataActual ||
-    !dataPotential ||
-    (Object.keys(dataActual).length === 0 && Object.keys(dataPotential).length === 0)
-  ) {
+  if (!fullActualData || !dataPotential) {
     return {
       chart: { charts: getNoDataOption(title) },
       chartType: "stackedbarchart",
     };
   }
 
-	const keyToName: Record<string, string> = {
-		'07': 'Aging Disability',
-		'41': 'Workforce',
-		'55': 'Economic Development',
-		'64': 'Environmental',
-		'71': 'Enterprise Solutions',
-		'74': 'Public Safety',
-		'76': 'Transportation',
-		'92': 'Community Services'
-	};
-  // Union of keys, sorted numerically by code
-  const allKeys = Array.from(
-    new Set([...Object.keys(dataActual ?? {}), ...Object.keys(dataPotential ?? {})])
-  );
-  const sortedKeys = allKeys.sort((a, b) => Number(a) - Number(b));
+  const keyToName: Record<string, string> = {
+    '07': 'Aging Disability',
+    '41': 'Workforce',
+    '55': 'Economic Development',
+    '64': 'Environmental',
+    '71': 'Enterprise Solutions',
+    '74': 'Public Safety',
+    '76': 'Transportation',
+    '92': 'Community Services'
+  };
+
+  const sortedKeys = Object.keys(tabCodeMap).sort((a, b) => Number(a) - Number(b));
 
   const categories = sortedKeys.map((code) => keyToName[code] ?? code);
 
-  const actualValues = sortedKeys.map((code) => dataActual?.[code] ?? 0);
-  const potentialValues = sortedKeys.map((code) => dataPotential?.[code] ?? 0);
+  // Attach programs directly to each bar data point
+  const actualData = sortedKeys.map((code) => ({
+    value: fullActualData[code as TabCode].count,
+    programs: fullActualData[code as TabCode].programs,
+  }));
+
+  const actualValues = actualData.map((d) => d.value);
+  const potentialValues = sortedKeys.map((code) => dataPotential[code] ?? 0);
   const gapValues = potentialValues.map((p, i) => Math.max(0, p - actualValues[i]));
 
-  // Bake totals into data objects to safely access in formatter (no reactivity issues)
-  const actualData = actualValues.map((value) => ({ value }));
   const gapData = gapValues.map((gap, i) => ({
     value: gap,
     total: potentialValues[i],
   }));
 
-const option: echarts.EChartsOption = {
+  const option: echarts.EChartsOption = {
     backgroundColor: "#fff",
     title: {
       text: title,
@@ -194,13 +209,27 @@ const option: echarts.EChartsOption = {
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-      formatter: (params: any) => {
-        const actualParam = params.find((p: any) => p.seriesName === "Actual");
-        const gapParam = params.find((p: any) => p.seriesName === "Available Programs");
-        const actual = actualParam?.value ?? 0;
-        const gap = gapParam?.value ?? 0;
-        const total = actual + gap;
-        return `${params[0].name}<br/>Actual: ${actual}<br/>Remaining: ${gap}<br/><strong>Potential: ${total}</strong>`;
+      formatter: (params: any[]) => {
+        const idx = params[0]?.dataIndex ?? 0;
+        const categoryName = categories[idx];
+        const actualItem = actualData[idx];
+        const actual = actualItem.value;
+        const gap = gapValues[idx];
+        const total = potentialValues[idx];
+
+        let html = `<b style="font-size:14px;">${categoryName}</b><br/>`;
+        html += `Actual: <strong>${actual}</strong><br/>`;
+
+        if (actualItem.programs.length > 0) {
+          html += `<br/><b>Programs (${actualItem.programs.length}):</b><br/>`;
+          html += actualItem.programs.map((p) => `• ${p}`).join('<br/>');
+          html += '<br/><br/>';
+        }
+
+        html += `Remaining: ${gap}<br/>`;
+        html += `<strong style="color:#5470c6">Potential: ${total}</strong>`;
+
+        return html;
       },
     },
     legend: {
@@ -210,7 +239,7 @@ const option: echarts.EChartsOption = {
     grid: {
       left: 70,
       right: 50,
-      bottom: 20,
+      bottom: 10,
       top: 100,
       containLabel: true,
     },
@@ -241,7 +270,7 @@ const option: echarts.EChartsOption = {
           position: "inside",
           fontWeight: "bold",
           color: "#fff",
-          formatter: (params: any) => (params.data.value > 0 ? params.data.value : ""),
+          formatter: (p: any) => (p.data.value > 0 ? p.data.value : ""),
         },
       },
       {
@@ -250,30 +279,23 @@ const option: echarts.EChartsOption = {
         stack: "total",
         barWidth: "60px",
         data: gapData,
-        itemStyle: {
-          color: "#cccccc",  // light grey
-          opacity: 0.5,      // 80% opacity for a faded/projected look
-        },
+        itemStyle: { color: "#cccccc", opacity: 0.5 },
         emphasis: { focus: "series" },
         label: {
           show: true,
           position: "top",
           fontWeight: "bold",
-          formatter: (params: any) =>
-            params.data.total > 0 ? params.data.total : "",
+          formatter: (p: any) => (p.data.total > 0 ? p.data.total : ""),
         },
       },
     ],
   };
 
   return {
-    parent_table: "irrelevant",
     chart: { charts: option },
     chartType: "stackedbarchart",
   };
 }
-  let plapChart = makeActualPotentialStackedBar(dataActual, dataPotential, "Program Utilization")
-
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
@@ -294,7 +316,7 @@ const option: echarts.EChartsOption = {
 		<div class="flex gap-12 justify-center pt-8 w-full">
 
 			<div class="flex h-[36rem] w-[44rem] items-center justify-center rounded bg-slate-100">
-				<RenderEchart chart={plapChart.chart?.charts!} />
+				<RenderEchart chart={actualPotentialChart.chart?.charts!} />
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->

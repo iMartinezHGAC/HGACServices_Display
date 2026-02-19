@@ -1291,6 +1291,148 @@ export function buildTableData(
   };
 }
 
+
+// In your chart utils (TypeScript)
+export function makeActualPotentialStackedBar(
+  fullActualData: FullTabData | null | undefined,
+  dataPotential: Record<string, number> | null | undefined,
+  title: string
+): ChartType {
+  if (!fullActualData || !dataPotential) {
+    return {
+      chart: { charts: getNoDataOption(title) },
+      chartType: "stackedbarchart",
+    };
+  }
+
+  const keyToName: Record<string, string> = {
+    '07': 'Aging Disability',
+    '41': 'Workforce',
+    '55': 'Economic Development',
+    '64': 'Environmental',
+    '71': 'Enterprise Solutions',
+    '74': 'Public Safety',
+    '76': 'Transportation',
+    '92': 'Community Services'
+  };
+
+  const sortedKeys = Object.keys(tabCodeMap).sort((a, b) => Number(a) - Number(b));
+
+  const categories = sortedKeys.map((code) => keyToName[code] ?? code);
+
+  // Attach programs directly to each bar data point
+  const actualData = sortedKeys.map((code) => ({
+    value: fullActualData[code as TabCode].count,
+    programs: fullActualData[code as TabCode].programs,
+  }));
+
+  const actualValues = actualData.map((d) => d.value);
+  const potentialValues = sortedKeys.map((code) => dataPotential[code] ?? 0);
+  const gapValues = potentialValues.map((p, i) => Math.max(0, p - actualValues[i]));
+
+  const gapData = gapValues.map((gap, i) => ({
+    value: gap,
+    total: potentialValues[i],
+  }));
+
+  const option: echarts.EChartsOption = {
+    backgroundColor: "#fff",
+    title: {
+      text: title,
+      left: "center",
+      textStyle: { fontWeight: "normal", fontSize: 18, fontFamily: 'Metropolis' },
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: (params: any[]) => {
+        const idx = params[0]?.dataIndex ?? 0;
+        const categoryName = categories[idx];
+        const actualItem = actualData[idx];
+        const actual = actualItem.value;
+        const gap = gapValues[idx];
+        const total = potentialValues[idx];
+
+        let html = `<b style="font-size:14px;">${categoryName}</b><br/>`;
+        html += `Actual: <strong>${actual}</strong><br/>`;
+
+        if (actualItem.programs.length > 0) {
+          html += `<br/><b>Programs (${actualItem.programs.length}):</b><br/>`;
+          html += actualItem.programs.map((p) => `• ${p}`).join('<br/>');
+          html += '<br/><br/>';
+        }
+
+        html += `Remaining: ${gap}<br/>`;
+        html += `<strong style="color:#5470c6">Potential: ${total}</strong>`;
+
+        return html;
+      },
+    },
+    legend: {
+      data: ["Actual", "Available Programs"],
+      top: 30,
+    },
+    grid: {
+      left: 70,
+      right: 50,
+      bottom: 80,
+      top: 100,
+      containLabel: true,
+    },
+    xAxis: {
+      type: "category",
+      data: categories,
+      axisLabel: {
+        rotate: 45,
+        interval: 0,
+        fontSize: 12,
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { fontSize: 12 },
+    },
+    series: [
+      {
+        name: "Actual",
+        type: "bar",
+        stack: "total",
+        barWidth: "60px",
+        data: actualData,
+        itemStyle: { color: "#5470c6" },
+        emphasis: { focus: "series" },
+        label: {
+          show: true,
+          position: "inside",
+          fontWeight: "bold",
+          color: "#fff",
+          formatter: (p: any) => (p.data.value > 0 ? p.data.value : ""),
+        },
+      },
+      {
+        name: "Available Programs",
+        type: "bar",
+        stack: "total",
+        barWidth: "60px",
+        data: gapData,
+        itemStyle: { color: "#cccccc", opacity: 0.5 },
+        emphasis: { focus: "series" },
+        label: {
+          show: true,
+          position: "top",
+          fontWeight: "bold",
+          formatter: (p: any) => (p.data.total > 0 ? p.data.total : ""),
+        },
+      },
+    ],
+  };
+
+  return {
+    chart: { charts: option },
+    chartType: "stackedbarchart",
+  };
+}
+
 /**
  * Refactored original function – fully backward compatible.
  * Now delegates column logic to `buildTableData` so `columnOrder` works in BOTH modes.
