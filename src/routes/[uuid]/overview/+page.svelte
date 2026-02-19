@@ -88,41 +88,44 @@ const subCollectionsByTable = $derived(
 		chartType: 'indicator'
 	}); 
 
-  const tabCodeMap = {
-  "41": "workforce",
-  "64": "environmental",
-  "71": "enterprise_solutions",
-  "55": "economic_development",
-  "07": "aging_disability",
-  "92": "community_services",
-  "74": "public_safety",
-  "76": "transportation"
-} as const;
+const tabCodeMap = {
+    "41": "workforce",
+    "64": "environmental",
+    "71": "enterprise_solutions",
+    "55": "economic_development",
+    "07": "aging_disability",
+    "92": "community_services",
+    "74": "public_safety",
+    "76": "transportation"
+  } as const;
 
-type CodedTabCounts = {
-  [K in keyof typeof tabCodeMap as typeof tabCodeMap[K]]: number;
-};
+  type TabCode = keyof typeof tabCodeMap;
+  type CodedTabCounts = Record<TabCode, number>;
 
-function mapToCodedTabs(data: TabCountType): CodedTabCounts {
-  return {
-    "41": data.has_workforce,
-    "64": data.has_environmental,
-    "71": data.has_enterprise_solutions,
-    "55": data.has_economic_development,
-    "07": data.has_aging_disability,
-    "92": data.has_community_services,
-    "74": data.has_public_safety,
-    "76": data.has_transportation,
-  };
-}
+  // 🔥 ROBUST MAPPER – handles PocketBase array (most common) OR direct object
+  function mapToCodedTabs(input: any): CodedTabCounts {
+    // PocketBase `.getList()`, `.getFullList()`, or view often returns Array with 1 item
+    const record = Array.isArray(input) ? (input[0] ?? {}) : (input ?? {});
 
-  let dataActual = $derived(mapToCodedTabs(data.dash_count[0]))
+    return Object.fromEntries(
+      Object.entries(tabCodeMap).map(([code, category]) => [
+        code as TabCode,
+        Number(record[category as keyof typeof record] ?? 0)
+      ])
+    ) as CodedTabCounts;
+  }
+
+  // ✅ ONE LINE FIX – no change needed elsewhere
+  let dataActual = $derived(mapToCodedTabs(data.dash_count));
+
+
 
   //$inspect('pbData', data)
   //$inspect('tip subtables', tipSubs)
   //$inspect('rtp subtables', rtpSubs)
   //$inspect('combined', combinedProjectData)
   //$inspect('let data', letData)
+	$inspect('data actual raw', data.dash_count);
 	$inspect('data actual', dataActual);
 
 
@@ -131,6 +134,7 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
     return acc;
   }, {} as Record<string, number>);
 
+	$inspect('data potential raw', data.potential_tabs);
 	$inspect('data potential', dataPotential);
 
 

@@ -269,6 +269,28 @@ type TabCountType = {
   has_transportation: number;
 };
 
+interface TabCountRecord {
+  id: string;
+  jurisdiction: string;
+  jurisdiction_name: string;
+  workforce: number;
+  workforce_programs: string[];
+  environmental: number;
+  environmental_programs: string[];
+  enterprise_solutions: number;
+  enterprise_solutions_programs: string[];
+  economic_development: number;
+  economic_development_programs: string[];
+  aging_disability: number;
+  aging_disability_programs: string[];
+  community_services: number;
+  community_services_programs: string[];
+  public_safety: number;
+  public_safety_programs: string[];
+  transportation: number;
+  transportation_programs: string[];
+}
+
 type PotentialTabType = {
   collectionId: string;
   collectionName: string;

@@ -2,7 +2,7 @@
 import { PB_URL } from "$env/static/private";
 import type { PageServerLoad } from "./$types";
 import { FetchTable, GenerateFilter, getSubtableSchema } from "../../helpers/apiHelpers";
-import type { PotentialTabType, TabCountType } from "../../../ambient";
+import type { PotentialTabType, TabCountRecord, TabCountType } from "../../../ambient";
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
@@ -17,17 +17,16 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     potentialTabTotal = [];
   }
 
-  let tabCounts: TabCountType[]
+  let tabCounts: TabCountRecord[]
   try {
-    tabCounts = await locals.pb.collection("tab_visibility").getFullList<TabCountType>({
-      filter: `jurisdiction.id = '${juris_id}'`
+    tabCounts = await locals.pb.collection("tab_visibility_union_stringarrays").getFullList({
+      filter: `jurisdiction = '${juris_id}'`
     });
+    console.log('tabCount Data', tabCounts)
   } catch (err) {
     console.error("Failed to fetch programs:", err);
     tabCounts = [];
   }
-
-
 
   for (const table of collections) {
     console.log('Processing table', table);
