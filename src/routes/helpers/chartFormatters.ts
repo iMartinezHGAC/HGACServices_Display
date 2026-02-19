@@ -7,6 +7,7 @@ import type {
   ChartType,
   IndicatorType,
   EventType,
+  AdworkType,
 } from "../../ambient";
 
 import type { EChartsOption, DefaultLabelFormatterCallbackParams } from "echarts";
@@ -1140,58 +1141,33 @@ export function makeBar<T = any>(
     };
   }
 
-  // One-pass filter + explicit string coercion (fixes the #1 silent-fail case for category bars)
-  const validData = dataset
-    .filter((item: T) => {
-      const v = item[key2];
-      return typeof v === "number" && v >= 0;
-    })
-    .map((item: T) => ({
-      x: String(truncateDate(item[key1]) ?? "—"),
-      y: item[key2] as number,
-    }));
-
   return {
     parent_table,
     chart: {
       charts: {
         title: { text: snakeToHuman(String(key2)) },
-        tooltip: {
-          trigger: "axis",
-          axisPointer: { type: "shadow" },
-        },
-        grid: {
-          left: "4%",
-          right: "4%",
-          bottom: "8%",
-          top: "15%",
-          containLabel: true,
-        },
-        xAxis: {
-          type: "category",
-          data: validData.map((d) => d.x),
-          axisLabel: {
-            interval: 0,
-            rotate: validData.length > 6 ? 45 : 0,
-          },
-        },
+        tooltip: {},
+        xAxis: { data: dataset.map((item: T) => truncateDate(item[key1])) },
         yAxis: {
-          type: "value",
           axisLabel: {
-            formatter: (value: number): string => {
-              if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-              if (value >= 1_000) return (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-              return value.toLocaleString();
-            },
+            formatter: (value: number) =>
+              value > 1000000
+                ? (value / 1000000) + "M"
+                : value > 1000
+                  ? (value / 1000) + "K"
+                  : value,
           },
         },
         series: [
           {
             name: snakeToHuman(String(key2)),
             type: "bar",
-            data: validData.map((d) => d.y),
-            barMaxWidth: 80,
-            emphasis: { focus: "series" },
+            data: dataset
+              .filter((item: T) => {
+                const v = item[key2];
+                return typeof v === "number" && v >= 0;
+              })
+              .map((item: T) => item[key2]),
           },
         ],
       },
@@ -1517,3 +1493,24 @@ export const isAllComponentsEmptyOrZero = (chartType: ChartType): boolean =>
 
 export const areAllChartsEmptyOrZero = (chartTypes: ChartType[]): boolean =>
   chartTypes.every(isAllComponentsEmptyOrZero);
+
+// chartFormatters.ts
+export const hasAdworkForProgram = (
+  adwork: AdworkType[] | undefined,
+  parent_table: string | undefined
+): boolean => {
+  if (!adwork?.length || !parent_table) return false;
+  return adwork.some(
+    (item) => item.expand?.program?.parent_table === parent_table
+  );
+};
+
+export const shouldRenderCard = (
+  charts: ChartType[],
+  additionalWork: AdworkType[] | undefined,
+  program: ProgramType
+): boolean => {
+  const hasRealCharts = !areAllChartsEmptyOrZero(charts);
+  const hasAdwork = hasAdworkForProgram(additionalWork, program.parent_table);
+  return hasRealCharts || hasAdwork;
+};

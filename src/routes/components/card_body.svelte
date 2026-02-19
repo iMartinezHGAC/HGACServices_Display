@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { toCamelCase } from '../helpers/caseConversion';
-	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import type { ProgramType, CustomEchartType, AdworkType, ChartType } from '../../ambient';
+	import type { ProgramType, AdworkType, ChartType } from '../../ambient';
 	import Card from './card.svelte';
-	import { areAllChartsEmptyOrZero } from '../helpers/chartFormatters';
+	import { shouldRenderCard } from '../helpers/chartFormatters';
 
 	interface CardDataType {
 		program: ProgramType;
@@ -20,31 +19,39 @@
 
 	let { cardNames, cardData, direction, adwork }: cardProps = $props();
 
-	const targetIndex = cardData.findIndex(
-		(item) => item.program?.parent_table === '34_gc_tow_and_go'
+	// Special case: move "34_gc_tow_and_go" to top (unchanged)
+	const processed = $derived.by(() => {
+		let data = [...cardData];
+		let names = [...cardNames];
+
+		const targetIndex = data.findIndex(
+			(item) => item.program?.parent_table === '34_gc_tow_and_go'
+		);
+
+		if (targetIndex !== -1) {
+			const [targetData] = data.splice(targetIndex, 1);
+			const [targetName] = names.splice(targetIndex, 1);
+			data.unshift(targetData);
+			names.unshift(targetName);
+		}
+		return { data, names };
+	});
+
+	// NEW: only keep cards that have charts OR adwork
+	let visibleCardData = $derived(
+		processed.data.filter((card) =>
+			shouldRenderCard(card.echarts, adwork, card.program)
+		)
 	);
 
-	if (targetIndex !== -1) {
-		const [targetData] = cardData.splice(targetIndex, 1);
-		cardData.unshift(targetData);
-
-		// Do the same for cardNames, assuming it's parallel to cardData
-		const [targetName] = cardNames.splice(targetIndex, 1);
-		cardNames.unshift(targetName);
-	}
+	let visibleCardNames = $derived(
+		processed.names.filter((_, i) => {
+			const card = processed.data[i];
+			return shouldRenderCard(card.echarts, adwork, card.program);
+		})
+	);
 
 	let flyValue = $state(direction ? -400 : 400);
-
-//$inspect('card names', cardNames)
-
-
-  cardData.forEach(card => {
-    if(areAllChartsEmptyOrZero(card.echarts)) {
-      cardNames = cardNames.filter(cardName => cardName !== card.program.program_name)
-    }
-  })
-
-	$inspect('card data', cardData);
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
@@ -61,7 +68,7 @@
 	<div
 		class="fixed top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl"
 	>
-		{#each cardNames as cardName}
+		{#each visibleCardNames as cardName}
 			{@render formattedEntryText(cardName)}
 		{/each}
 	</div>
@@ -70,7 +77,7 @@
 		transition:fly={{ x: flyValue, duration: 300 }}
 	>
 		<div class="flex flex-col w-full">
-			{#each cardData as card, i}
+			{#each visibleCardData as card}
 				<div class="flex w-full" id={card.program.program_name.split(' ').join('')}>
 					<Card project={card.program} charts={card.echarts} additionalWork={adwork} />
 				</div>
