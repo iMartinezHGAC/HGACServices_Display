@@ -65,6 +65,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     let joinedSubtables = ""
     if (subtable && subtable.length > 0) joinedSubtables = subtable.join(',')
     console.log('subtables if any', subtable)
+    console.log(`filter for ${tableNames[i]}: ${GenerateFilter(subtable, juris_id)}`)
     tablesData[tableNames[i]] = await FetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
       filter: GenerateFilter(subtable, juris_id),

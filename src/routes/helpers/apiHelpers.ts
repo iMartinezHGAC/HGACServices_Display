@@ -53,7 +53,7 @@ export function GenerateFilter(
   if (subs.length > 0) {
     // Relation fields (multiple or single) – any linked record must be inside the 5-quarter window
     const subConditions = subs.map(name =>
-      `(${name}.from_date?>= "${start}" && ${name}.to_date?<= "${now}")`
+      `(${name}.from_date?<= "${now}" || ${name}.to_date?>= "${start}")`
     );
 
     dateCondition =
@@ -62,7 +62,7 @@ export function GenerateFilter(
         : subConditions[0];
   } else {
     // Direct fields on the main collection (your 38_table_of_data case)
-    dateCondition = `(from_date >= "${start}" && to_date <= "${now}")`;
+    dateCondition = `(from_date?<= "${now}" || to_date?>= "${start}")`
   }
 
   // Final PocketBase filter – 100% safe syntax

@@ -1126,54 +1126,109 @@ export function makePie<T = any>(
     chartType: "piechart",
   };
 }
+/** Short readable date for x-axis (e.g. "Jan 25") */
+function formatShortDate(value: any): string {
+  if (!value) return 'N/A';
 
-export function makeBar<T = any>(
+  try {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return String(value).slice(0, 10);
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      year: '2-digit'
+    });
+  } catch {
+    return String(value).slice(0, 10);
+  }
+}
+
+export function makeBar<T extends Record<string, any>>(
   parent_table: string,
   dataset: T[] | null | undefined,
-  key1: keyof T,
-  key2: keyof T
+  xKey: keyof T, // 'from_date'
+  yKey: keyof T, // 'emissions_reduction' or 'vehicles_monitored'
+  customTitle?: string
 ): ChartType {
-  if (!dataset || dataset.length === 0) {
+  if (!dataset?.length) {
     return {
       parent_table,
-      chart: { charts: getNoDataOption(snakeToHuman(String(key2))) },
-      chartType: "barchart",
+      chart: { charts: getNoDataOption(customTitle ?? snakeToHuman(String(yKey))) },
+      chartType: 'barchart'
     };
   }
 
+  const xAxisData = dataset.map((item) => formatShortDate(item[xKey]));
+
+  const seriesData = dataset.map((item) => {
+    const v = item[yKey];
+    return typeof v === 'number' && !isNaN(v) ? v : 0;
+  });
+
+  const option: echarts.EChartsOption = {
+    backgroundColor: '#ffffff',
+    title: {
+      text: customTitle ?? snakeToHuman(String(yKey)),
+      left: 'center',
+      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' }
+    },
+    grid: {
+      left: '4%',
+      right: '4%',
+      bottom: '10%', // extra space for rotated labels
+      top: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      axisLabel: {
+        rotate: 45,
+        interval: 0,
+        fontSize: 11.5,
+        margin: 15,
+        color: '#4b5563'
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: (value: number) =>
+          value >= 1_000_000
+            ? (value / 1_000_000).toFixed(1) + 'M'
+            : value >= 1_000
+              ? (value / 1_000).toFixed(1) + 'K'
+              : value
+      }
+    },
+    series: [
+      {
+        name: snakeToHuman(String(yKey)),
+        type: 'bar',
+        data: seriesData,
+        barMaxWidth: 60,
+        itemStyle: {
+          color: '#3b82f6', // Tailwind blue-500
+          borderRadius: [8, 8, 0, 0]
+        },
+        emphasis: {
+          itemStyle: { color: '#2563eb' }
+        }
+      }
+    ]
+  };
+
   return {
     parent_table,
-    chart: {
-      charts: {
-        title: { text: snakeToHuman(String(key2)) },
-        tooltip: {},
-        xAxis: { data: dataset.map((item: T) => truncateDate(item[key1])) },
-        yAxis: {
-          axisLabel: {
-            formatter: (value: number) =>
-              value > 1000000
-                ? (value / 1000000) + "M"
-                : value > 1000
-                  ? (value / 1000) + "K"
-                  : value,
-          },
-        },
-        series: [
-          {
-            name: snakeToHuman(String(key2)),
-            type: "bar",
-            data: dataset
-              .filter((item: T) => {
-                const v = item[key2];
-                return typeof v === "number" && v >= 0;
-              })
-              .map((item: T) => item[key2]),
-          },
-        ],
-      },
-    },
+    chart: { charts: option },
+    chartType: 'barchart'
   };
 }
+
 
 export function makeGroupedBar<T = any>(
   parent_table: string,
@@ -1476,14 +1531,38 @@ export function collectAllSubrecords(tablesData: TableDataResult, tableName: str
 /* === Emptiness Checks (simplified) === */
 export const isChartEmptyOrAllZero = (chartType: ChartType): boolean => {
   const option = (chartType.chart?.charts ?? {}) as EChartsOption;
-  const series = Array.isArray(option.series)
+
+  const seriesArray = Array.isArray(option.series)
     ? option.series
     : option.series
       ? [option.series]
       : [];
-  return series.every(
-    (s) => !s?.data || (Array.isArray(s.data) && s.data.every((d: any) => (d?.value ?? 0) === 0 || d?.value == null))
-  );
+
+  if (seriesArray.length === 0) return true;
+
+  return seriesArray.every((s: any) => {
+    const data = s?.data;
+    if (!data) return true;
+
+    const dataItems = Array.isArray(data) ? data : [data];
+
+    return dataItems.every((d: any) => {
+      // ✅ Handles BOTH formats used in your app:
+      // 1. Plain numbers → makeBar / simple bars
+      // 2. { value: number } → makeActualPotentialStackedBar
+      let value: number | null | undefined;
+
+      if (typeof d === 'number' || typeof d === 'string') {
+        value = Number(d);
+      } else if (d && typeof d === 'object' && d !== null) {
+        value = d.value ?? d.val ?? null;
+      } else {
+        value = null;
+      }
+
+      return value == null || isNaN(value) || value === 0;
+    });
+  });
 };
 
 export const isIndicatorEmptyOrZero = (indicator: IndicatorType | undefined): boolean => {
@@ -1507,7 +1586,6 @@ export const isAllComponentsEmptyOrZero = (chartType: ChartType): boolean =>
 export const areAllChartsEmptyOrZero = (chartTypes: ChartType[]): boolean =>
   chartTypes.every(isAllComponentsEmptyOrZero);
 
-// chartFormatters.ts
 export const hasAdworkForProgram = (
   adwork: AdworkType[] | undefined,
   parent_table: string | undefined
@@ -1524,7 +1602,9 @@ export const shouldRenderCard = (
   program: ProgramType
 ): boolean => {
   const hasRealCharts = !areAllChartsEmptyOrZero(charts);
-  const hasAdwork = hasAdworkForProgram(additionalWork, program.parent_table);
+  const hasAdwork = hasAdworkForProgram(additionalWork, program.parent_table)
+  console.log(`shouldRenderCard results for ${program.parent_table}. hasCharts: ${hasRealCharts}, hasAdwork: ${hasAdwork}`)
+  if (!hasRealCharts) console.log(`Charts for ${program.parent_table}: ${charts}`)
   return hasRealCharts || hasAdwork;
 };
 
@@ -1635,6 +1715,7 @@ export function buildTableData(
 
   return { data, columns };
 }
+
 
 /**
  * Main public function – drop-in replacement (no changes to existing calls).

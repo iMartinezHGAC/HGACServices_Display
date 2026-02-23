@@ -40,7 +40,6 @@
 
 	$inspect('table data: ', tablesData);
 
-	console.log('test splt', splitTableData(tablesData, '37_clean_vehicles'));
 
 const rtpProcessed = combineRelatedRecords(
   tablesData,
@@ -49,7 +48,7 @@ const rtpProcessed = combineRelatedRecords(
   ['fiscal_year', 'project_name', 'project_description','funding', 'project_type','project_category', 'project_subcategory', 'project_subcategory2',   ] // optional – omit for auto columns
 );
 
-  $inspect('rtp processed', rtpProcessed)
+  //$inspect('rtp processed', rtpProcessed)
 
 
   const tipProcessed = combineRelatedRecords(
@@ -60,8 +59,11 @@ const rtpProcessed = combineRelatedRecords(
   );
 
   const tpsProcessed  = buildTableData(tablesData['38_transportation_planning_studies'], false,['study_name', 'study_description', 'study_type', 'schedule', 'estimated_cost', 'study_url']);
-
-  $inspect('tip processed', tipProcessed)
+const cleanVehicles = $derived(
+    splitTableData(tablesData, '37_clean_vehicles')
+  );
+	console.log('test splt', splitTableData(tablesData, '37_clean_vehicles'));
+  //$inspect('tip processed', tipProcessed)
 
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
@@ -98,7 +100,7 @@ const rtpProcessed = combineRelatedRecords(
 		),
 		makeDrilldownPie(
 			'34_gc_tow_and_go',
-			splitSubtables(tablesData, '34_gc_tow_and_go').map,
+			selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'map'),
 			[
 				'abandoned_vehicles',
 				'debris',
@@ -115,7 +117,7 @@ const rtpProcessed = combineRelatedRecords(
 
 makeValueCountPie(
   '35_rtp',
-  splitSubtables(tablesData, '35_rtp').rtp_projects,
+  selectSplitSubtable(tablesData, '35_rtp', 'rtp_projects'),
   'project_type',           // primary
   'project_subcategory',    // secondary → drilldown
   'Regional Transportation Projects: # of Projects Grouped by Type'
@@ -123,7 +125,7 @@ makeValueCountPie(
 
 makeValueCountPie(
   '35_rtp',
-  splitSubtables(tablesData, '35_rtp').yr10_projects,
+  selectSplitSubtable(tablesData, '35_rtp', 'yr10_projects'),
   'project_type',
   'project_subcategory',
   '10 Year RTP Projects: # of Projects Grouped by Type'
@@ -160,18 +162,19 @@ makeValueCountPie(
       fullWidth: true,
       title: "Projects"
     },
-		makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'emissions_reduction'
-		),	
+makeBar(
+      '37_clean_vehicles',
+      cleanVehicles,
+      'from_date',
+      'emissions_reduction'
+    ),
     makeBar(
-			'37_clean_vehicles',
-			splitTableData(tablesData, '37_clean_vehicles'),
-			'from_date',
-			'vehicles_monitored'
-		),
+      '37_clean_vehicles',
+      cleanVehicles,
+      'from_date',
+      'vehicles_monitored',
+      'Vehicles Monitored' // optional custom title
+    ),
 makeValueCountPie(
   '38_transportation_planning_studies',
   splitTableData(tablesData, '38_transportation_planning_studies'),

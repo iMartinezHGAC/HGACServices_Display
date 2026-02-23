@@ -17,8 +17,8 @@
 
   const { data, columns = [], title: providedTitle }: Props = $props();
 
-  $inspect('TABLE props', data);
-  $inspect('Title', providedTitle)
+ // $inspect('TABLE props', data);
+  //$inspect('Title', providedTitle)
 
   let records: PB_Record_Type[] | EventType[] | null = data
     ? Array.isArray(data) ? data : [data] 

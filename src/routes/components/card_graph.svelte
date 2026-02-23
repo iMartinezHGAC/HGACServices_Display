@@ -84,10 +84,11 @@
 					/>
 
 				{:else if chart.table}
-					{console.log("Table in Card_Graph", chart)}
+				<!--	{console.log("Table in Card_Graph", chart)}-->
 					<Table data={chart.table} columns={chart.columns} title={chart.title} />
 
 				{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+
 					{console.log(chart)}
 					<RenderEchart
 						chart={chart.chart.charts}

@@ -38,15 +38,15 @@
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
 	//console.log("Name: ", programNames)
-	$inspect('table data: ', tablesData);
+	//$inspect('table data: ', tablesData);
 
-  $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
+ // $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
 
   const rcjgProcessed  = buildTableData(tablesData['16_regional_criminal_justice_grants'], false,['grant_purpose', 'grant_type', 'grant_dollars', 'entity']);
   //splitSubtables(tablesData, '14_livable_centers'));
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
-	$inspect('data', data);
+	//$inspect('data', data);
 	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
@@ -115,7 +115,7 @@ data.tableNames.forEach((tableName: string) => {
 });
 
 
-	$inspect('charts data', charts);
+	//$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {
 			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
@@ -124,7 +124,7 @@ data.tableNames.forEach((tableName: string) => {
 		})
 	);
 
-	$inspect('card data', cardData);
+	//$inspect('card data', cardData);
 
 </script>
 
