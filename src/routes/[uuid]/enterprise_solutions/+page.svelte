@@ -67,6 +67,13 @@
     '33_hgac_coop_purchasing',  // Parent table name (from your data example)
 			splitTableData(tablesData, '33_hgac_coop_purchasing'),
     'category',                      // The key to count unique values for
+    'dollars',
+    'Orders Dollars: Count of Dollars Grouped by Category'          // Optional custom title
+  ),
+    makeValueSumPie(
+    '33_hgac_coop_purchasing',  // Parent table name (from your data example)
+			splitTableData(tablesData, '33_hgac_coop_purchasing'),
+    'category',                      // The key to count unique values for
     'fee_dollars',
     'Fee Dollars by Category'          // Optional custom title
   ),

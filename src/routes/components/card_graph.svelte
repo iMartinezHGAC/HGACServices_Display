@@ -24,15 +24,22 @@
 
 	let expanded = $state(false);
 
+	// ────── PER-PROJECT FILTER (fixes the duplicated "Show All (32 more)" bug) ──────
+	let projectAdditionalWorks = $derived.by((): AdworkType[] => {
+		if (!additionalWork) return [];
+		return additionalWork.filter((adwork: AdworkType) => 
+			adwork.expand?.program?.parent_table === project.parent_table
+		);
+	});
 
-	let itemsToShow = $derived.by(()=> {
-    if(expanded && additionalWork) return additionalWork.filter((adwork: AdworkType) => adwork.expand?.program.parent_table === project.parent_table) 
-    else if (!expanded && additionalWork) return additionalWork
-      .filter((adwork: AdworkType) => adwork.expand?.program.parent_table === project.parent_table)
-      .slice(0, 3)
-    else return []
-  }
-  );
+	let itemsToShow = $derived.by((): AdworkType[] => {
+		if (expanded) return projectAdditionalWorks;
+		return projectAdditionalWorks.slice(0, 3);
+	});
+
+	let hasAdditionalWork = $derived(projectAdditionalWorks.length > 0);
+	let showExpandButton = $derived(projectAdditionalWorks.length > 3);
+	// ───────────────────────────────────────────────────────────────────────────────
 
 	function toggleExpanded() {
 		expanded = !expanded;
@@ -44,17 +51,15 @@
 		if (workVector) graphState.add(workVector);
 	}
 
-function getNonEmptyChartCount(charts: ChartType[]): number {
-  return charts.filter(chart => !isAllComponentsEmptyOrZero(chart)).length;
-}
+	function getNonEmptyChartCount(charts: ChartType[]): number {
+		return charts.filter(chart => !isAllComponentsEmptyOrZero(chart)).length;
+	}
 
-let displayedCharts = $derived(
-    getNonEmptyChartCount(charts) <= 2 || accordionFlag
-      ? charts
-      : charts.slice(0, 2)
-  );
-
-  //$inspect('displayed charts', displayedCharts)
+	let displayedCharts = $derived(
+		getNonEmptyChartCount(charts) <= 2 || accordionFlag
+			? charts
+			: charts.slice(0, 2)
+	);
 </script>
 
 <div>
@@ -64,45 +69,41 @@ let displayedCharts = $derived(
 		</div>
 	{/if}
 
-<div class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
-  {#each displayedCharts as chart}
-    {@const isFullWidth = chart.fullWidth === true}
-    <div class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto">
-      {#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-        <Indicator
-          above={true}
-          below={false}
-          aboveText={chart.indicator.indicatorName}
-          belowText={''}
-          numericValue={Number(chart.indicator.indicatorVal)}
-          symbol_pre={chart.indicator.indicatorSymPre}
-        />
+	<div class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
+		{#each displayedCharts as chart}
+			{@const isFullWidth = chart.fullWidth === true}
+			<div class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto">
+				{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
+					<Indicator
+						above={true}
+						below={false}
+						aboveText={chart.indicator.indicatorName}
+						belowText={''}
+						numericValue={Number(chart.indicator.indicatorVal)}
+						symbol_pre={chart.indicator.indicatorSymPre}
+					/>
 
-      {:else if chart.table}
+				{:else if chart.table}
+					{console.log("Table in Card_Graph", chart)}
+					<Table data={chart.table} columns={chart.columns} title={chart.title} />
 
-        <Table data={chart.table} columns={chart.columns} />
+				{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+					{console.log(chart)}
+					<RenderEchart
+						chart={chart.chart.charts}
+						onDrilldown={chart.chart.onDrilldown}
+					/>
 
-      {:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-        {console.log(chart)}
+				{:else}
+					<!-- Empty state (uncomment if needed) -->
+				{/if}
+			</div>
+		{/each}
+	</div>
 
-        <RenderEchart
-          chart={chart.chart.charts}
-          onDrilldown={chart.chart.onDrilldown}
-        />
-
-      {:else}
-          <!--
-        <div class="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
-          No data. Consider using HART to manage you data
-        </div>
-          -->
-      {/if}
-    </div>
-  {/each}
-</div>
 	{#if getNonEmptyChartCount(charts) > 2}
 		<button
-			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white"
+			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white hover:bg-slate-800 transition-colors"
 			onclick={() => {
 				accordionFlag = !accordionFlag;
 			}}
@@ -112,31 +113,24 @@ let displayedCharts = $derived(
 	{:else}
 		<span></span>
 	{/if}
-	{#if itemsToShow.length > 0}
+
+	{#if hasAdditionalWork}
 		<div class="flexy flex-col" {@attach toGraphWork}>
-        <h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
-				{#each itemsToShow as adWork}
-          {#if adWork.expand?.program.parent_table === project.parent_table}
-        {console.log(adWork.expand?.program.parent_table, 'project', project.parent_table)}
-            <AdditionalWork
-              adwork={adWork}
-            />
-        {/if}
-				{/each}
-				{#if additionalWork && additionalWork.length > 3}
-					<div class="expand-toggle">
-						<button onclick={toggleExpanded} class={'bg-lime-400 p-2 rounded opacity-80 cursor-pointer'}>
-							{expanded ? 'Show Fewer' : `Show All (${additionalWork.length - 3} more)`}
-						</button>
-					</div>
-			{:else}
-        <!--
-				<AdditionalWork
-					bodyText={'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'}
-					projectName={'Ieacta Est'}
-					funding={0}
-				/>
-        -->
+			<h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
+
+			{#each itemsToShow as adWork}
+				<AdditionalWork adwork={adWork} />
+			{/each}
+
+			{#if showExpandButton}
+				<div class="expand-toggle mt-6 flex justify-center">
+					<button
+						onclick={toggleExpanded}
+						class="bg-[#7AB66F] hover:bg-[#7AB66F] active:bg-[#7AB66F] px-8 py-3 rounded-lg font-medium text-slate-900 transition-all active:scale-[0.97]"
+					>
+						{expanded ? 'Show Fewer' : `Show All (${projectAdditionalWorks.length - 3} more)`}
+					</button>
+				</div>
 			{/if}
 		</div>
 	{/if}

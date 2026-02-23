@@ -17,7 +17,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, buildTableData, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -42,8 +42,8 @@
 
   $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
 
+  const rcjgProcessed  = buildTableData(tablesData['16_regional_criminal_justice_grants'], false,['grant_purpose', 'grant_type', 'grant_dollars', 'entity']);
   //splitSubtables(tablesData, '14_livable_centers'));
-
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 
 	$inspect('data', data);
@@ -72,10 +72,7 @@
     'contact_hours_provided',                      // The key to count unique values for
     'Contact Hours by Class Name'          // Optional custom title
   ),
-    {
-      parent_table: "16_regional_criminal_justice_grants",
-      table: splitTableData(tablesData, '16_regional_criminal_justice_grants'), 
-    },
+
     makeValueSumPie(
     '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
     splitTableData(tablesData, '16_regional_criminal_justice_grants'),
@@ -83,6 +80,13 @@
     'grant_dollars',
     'Grants Prioritized'          // Optional custom title
   ),
+    {
+      parent_table: "16_regional_criminal_justice_grants",
+      table: rcjgProcessed?.data, 
+      columns: rcjgProcessed?.columns,
+      fullWidth: true,
+      title: "Grants"
+    },
     makeValueSumPie(
     '19_regional_juvenile_mental_health',  // Parent table name (from your data example)
 			splitTableData(tablesData, '19_regional_juvenile_mental_health'),

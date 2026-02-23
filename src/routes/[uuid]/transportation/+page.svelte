@@ -49,18 +49,19 @@ const rtpProcessed = combineRelatedRecords(
   ['fiscal_year', 'project_name', 'project_description','funding', 'project_type','project_category', 'project_subcategory', 'project_subcategory2',   ] // optional – omit for auto columns
 );
 
-  //console.log('rtp processed', rtpProcessed)
+  $inspect('rtp processed', rtpProcessed)
 
 
   const tipProcessed = combineRelatedRecords(
     tablesData,
     '36_transportation_improvement_plan',
-    ['tip_projects'],                 // only one source
-    ['project_name', 'project_description', 'funding'] // optional
+    ['tip', 'let'],                 // only one source
+    ["fiscal_year", "project_name", "project_description", "funding", "project_type", "project_category", "project_subcategory2"] // optional
   );
+
   const tpsProcessed  = buildTableData(tablesData['38_transportation_planning_studies'], false,['study_name', 'study_description', 'study_type', 'schedule', 'estimated_cost', 'study_url']);
 
-  //console.log('tps', tpsProcessed)
+  $inspect('tip processed', tipProcessed)
 
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
@@ -154,8 +155,10 @@ makeValueCountPie(
     },
     {
       parent_table: "36_transportation_improvement_plan",
-      table: splitSubtables(tablesData, '36_transportation_improvement_plan').tip as PB_Record_Type,
-      fullWidth: true
+      table: tipProcessed?.data ?? null,
+      columns: tipProcessed?.columns,
+      fullWidth: true,
+      title: "Projects"
     },
 		makeBar(
 			'37_clean_vehicles',

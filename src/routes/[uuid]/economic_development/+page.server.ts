@@ -1,12 +1,12 @@
 import { PB_URL } from '$env/static/private';
-import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
+import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult } from '../../../ambient';
 import { buildAdworkFilter, FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
+
 
 async function getSchema(tableName: string): Promise<SchemaType[]> {
   try {
     const response = await fetch(`${PB_URL}/api/collections/${tableName}/schema`);
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -20,7 +20,6 @@ async function getSchema(tableName: string): Promise<SchemaType[]> {
 
 async function useGetSchema(tableName: string = "05_trash_bash"): Promise<SchemaMultiType> {
   const schema = await getSchema(tableName);
-
   return {
     tableName,
     schema
@@ -46,17 +45,20 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   })
 
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
+  console.log("table names", tableNames)
 
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
 
   for (let i = 0; i < tableNames.length; i++) {
-    let subtable = await getSubtableSchema(tableNames[i]) ?? [""]
+    let subtable = await getSubtableSchema(tableNames[i])
+    let joinedSubtables = ""
+    if (subtable && subtable.length > 0) joinedSubtables = subtable.join(',')
     console.log('subtables if any', subtable)
     tablesData[tableNames[i]] = await FetchTable(locals.pb, tableNames[i], {
       perPage: 1000,
       filter: GenerateFilter(subtable, juris_id),
-      expand: subtable.join(', ') // ""
+      expand: joinedSubtables // ""
     });
     schema.push(await useGetSchema(tableNames[i]))
   }
@@ -74,12 +76,12 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   let eventsData: EventType[] = []
   const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
-  const eventFilter = filterParts.join(' || ');
+  const filter = filterParts.join(' || ');
   try {
     eventsData = await locals.pb.collection('events_json').getFullList({
-      filter: eventFilter
+      filter: filter
     })
-    console.log('Event Data if any', eventsData)
+    //console.log('Event Data if any', eventsData)
   } catch (err) {
     console.error('Error trying to get events data', err)
   }

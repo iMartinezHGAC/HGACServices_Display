@@ -12,11 +12,13 @@
   interface Props {
     data: PB_Record_Type | PB_Record_Type[] | EventType[] | null;  
     columns?: string[];  
+    title?: string;           // optional custom title — **always overrides** when passed
   }
 
-  const { data, columns = [] }: Props = $props();
+  const { data, columns = [], title: providedTitle }: Props = $props();
 
-  //$inspect('TABLE props', data, columns);
+  $inspect('TABLE props', data);
+  $inspect('Title', providedTitle)
 
   let records: PB_Record_Type[] | EventType[] | null = data
     ? Array.isArray(data) ? data : [data] 
@@ -47,7 +49,7 @@
         })()
     : null
 
-  // Detect if the *header* represents money
+  // Detect money columns
   function isMonetaryField(key: string): boolean {
     const keywords = [
       'cost', 'budget', 'dollar', 'dollars', 'price', 'fee', 'payment',
@@ -59,7 +61,7 @@
     return keywords.some(word => lowerKey.includes(word) || lowerHeader.includes(word));
   }
 
-  // Detect year columns (e.g. year, fiscal_year, birth_year) — never add commas
+  // Detect year columns (no commas)
   function isYearField(key: string): boolean {
     const keywords = ['year', 'yr', 'years'];
     const lowerKey = key.toLowerCase();
@@ -76,64 +78,86 @@
     );
   }
 
-  // Format numbers: commas + $ for money, NO commas for years, plain otherwise
+  // Format numbers: commas + $ for money, NO commas for years
   function formatDisplayValue(key: string, val: any): string {
     if (val instanceof Date) {
       return val.toISOString().split('T')[0];
     }
     if (typeof val === 'number') {
       if (isYearField(key)) {
-        return val.toString();                    // 2024 stays 2024
+        return val.toString();
       }
-      const numStr = val.toLocaleString('en-US'); // 1234567 → 1,234,567
+      const numStr = val.toLocaleString('en-US');
       return isMonetaryField(key) ? `$${numStr}` : numStr;
     }
     if (typeof val === 'string') return val;
     if (Array.isArray(val)) return `${val.length} item(s)`;
     return val != null ? String(val) : '-';
   }
+
+  // Title logic (fixed for Svelte 5 props):
+  // - If `title` prop is passed (even empty string), use it exactly
+  // - If `title` prop is completely omitted, show "Events" ONLY for EventType[]
+  // - data / collectionName / columns are never used for the title
+  let displayTitle = $derived(
+    providedTitle !== undefined 
+      ? providedTitle 
+      : (records && records.length > 0 && 'event_name' in records[0] 
+          ? 'Events' 
+          : null)
+  );
 </script>
 
-<div class="w-full overflow-x-auto max-h-96">
-  <table class="table-auto border-collapse border border-gray-400 mx-auto">
-    {#if records && allKeys}
-      <thead>
-        <tr>
-          {#each allKeys as key}
-            <th class="font-bold px-4 py-2 border border-gray-300 bg-gray-100 text-left sticky top-0 z-10">
-              {formatHeader(key)}
-            </th>
-          {/each}
-        </tr>
-      </thead>
-      <tbody>
-        {#each records as record}
+<div class="w-full">
+  <!-- Centered title with Metropolis font -->
+  {#if displayTitle}
+    <h2 class="text-2xl font-semibold mb-4 text-gray-900 tracking-tight text-center font-[Metropolis]">
+      {displayTitle}
+    </h2>
+  {/if}
+
+  <!-- Scrollable table -->
+  <div class="w-full overflow-x-auto max-h-96">
+    <table class="table-auto border-collapse border border-gray-400 mx-auto w-full">
+      {#if records && allKeys}
+        <thead>
           <tr>
             {#each allKeys as key}
-              {@const val = key in record ? record[key] : null}
-              {@const isNumeric = typeof val === 'number'}
-              <td class="px-4 py-2 border border-gray-300 {isNumeric ? 'text-right font-medium' : ''}">
-                {#if key in record}
-                  {formatDisplayValue(key, val)}
-                {:else}
-                  -
-                {/if}
-              </td>
+              <th class="font-bold px-4 py-2 border border-gray-300 bg-gray-100 text-left sticky top-0 z-10">
+                {formatHeader(key)}
+              </th>
             {/each}
           </tr>
-        {/each}
-      </tbody>
-    {:else}
-      <thead>
-        <tr>
-          <th class="font-bold px-4 py-2 border border-gray-300 bg-gray-100 text-left sticky top-0 z-10">No data</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Consider using HART to manage your data</td>
-        </tr>
-      </tbody>
-    {/if}
-  </table>
+        </thead>
+        <tbody>
+          {#each records as record}
+            <tr>
+              {#each allKeys as key}
+                {@const val = key in record ? record[key] : null}
+                {@const isNumeric = typeof val === 'number'}
+                <td class="px-4 py-2 border border-gray-300 {isNumeric ? 'text-right font-medium' : ''}">
+                  {#if key in record}
+                    {formatDisplayValue(key, val)}
+                  {:else}
+                    -
+                  {/if}
+                </td>
+              {/each}
+            </tr>
+          {/each}
+        </tbody>
+      {:else}
+        <thead>
+          <tr>
+            <th class="font-bold px-4 py-2 border border-gray-300 bg-gray-100 text-left sticky top-0 z-10">No data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Consider using HART to manage your data</td>
+          </tr>
+        </tbody>
+      {/if}
+    </table>
+  </div>
 </div>

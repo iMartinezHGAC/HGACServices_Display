@@ -166,7 +166,8 @@ interface ChartType {
   table?: PB_Record_Type | PB_Record_Type[] | EventType[] | null,
   columns?: string[],
   chartType?: string,
-  fullWidth?: boolean
+  fullWidth?: boolean,
+  title?: string
 }
 
 interface CardDataType {

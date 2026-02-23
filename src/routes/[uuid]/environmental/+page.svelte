@@ -181,16 +181,19 @@
 		),
     {
       parent_table: "10_parks_and_natural_areas",
-      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas','awards')
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas','awards'),
+      title: "Awards"
     },
     {
       parent_table: "10_parks_and_natural_areas",
-      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips')
+      table: selectSplitSubtable(tablesData, '10_parks_and_natural_areas', 'trips'),
+      title: "Trips"
     },
     {
       parent_table: water_innovation,
       table: splitTableData(tablesData, water_innovation), 
-      fullWidth: true
+      fullWidth: true,
+      title: "Awards"
     },
 	)
 
