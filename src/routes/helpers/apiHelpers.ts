@@ -104,6 +104,23 @@ export async function getSubtableSchema(tableName: string, PB_URL: string) {
   return await res.json()
 }
 
+export function buildEventFilter(tableNames: string[], juris_id: string) {
+  const filterParts = tableNames.map((name: string) =>
+    `program = "${name.replace(/"/g, '\\"')}"`
+  ); // Escape double quotes if present
+
+  const programFilter = filterParts.join(' || ');
+
+  // Add AND with jurisdiction using PocketBase's `?=` operator
+  // (?= = "any/at-least-one equals" – perfect for multi-select/relation fields)
+  const escapedJurisId = String(juris_id ?? '').replace(/"/g, '\\"');
+
+  return programFilter
+    ? `(${programFilter}) && jurisdiction.id ?= "${escapedJurisId}"`
+    : `jurisdiction.id ?= "${escapedJurisId}"`; // fallback if no programs
+
+}
+
 export function buildAdworkFilter(tableNames: string[], juris_id: string) {
   const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`);
   const filterAdwork = filterPartsAdwork.join(' || ');

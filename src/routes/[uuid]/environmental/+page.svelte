@@ -79,6 +79,7 @@
       indicator: {
         indicatorName: "Grant Funding",
         indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grant_dollars'),
+        indicatorSymPre: '$'
       },
       chartType: "indicator"
     },  
