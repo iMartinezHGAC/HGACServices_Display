@@ -81,7 +81,7 @@
 				id="printerIcon"
 				class="group mr-8 flex cursor-pointer items-start justify-start bg-slate-700 bg-none pt-8 font-[Staatliches] font-medium active:bg-slate-800"
 			>
-				<Printer id="printerIcon" />
+				<!--<Printer id="printerIcon" />-->
 			</button>
 		</div>
 		<CardGraph {project} {charts} {additionalWork} />

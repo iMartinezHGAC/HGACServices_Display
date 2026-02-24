@@ -370,6 +370,7 @@ export function makeHierarchicalCategoryDonut<T = any>(
     chartType: "drilldown_donut",
   };
 }
+
 export function makeProjectCountDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[] | null | undefined,
@@ -412,17 +413,16 @@ export function makeProjectCountDrilldownPie<T = any>(
     });
   });
 
-  // ── Apply getCalloutDisplayInfo to program/callout keys ──
   const parentData = Object.keys(projectsMap)
     .map((key) => {
       const info = getCalloutDisplayInfo(key);
       return {
-        name: info.display,           // pie slice + tooltip label → "TIP"
+        name: info.display,
         value: countMap[key],
         totalFunding: totalFundingMap[key],
         projects: projectsMap[key],
-        originalKey: key,             // raw key for drilldown lookup
-        fullName: info.full,          // legend + drilldown title
+        originalKey: key,
+        fullName: info.full,
       };
     })
     .sort((a: any, b: any) => b.value - a.value);
@@ -494,11 +494,16 @@ export function makeProjectCountDrilldownPie<T = any>(
   const outerLabel = (params: any) =>
     `${params.name}\n${params.value} projects\n(${params.percent?.toFixed(1)}%)`;
 
-  // Legend always shows full names for TIP/RTP/TSM
+  // Legend now renders in 2-column rows (horizontal wrapping)
   const legendConfig = {
     orient: "horizontal",
-    left: "left",
-    bottom: 10,
+    left: "center",
+    bottom: -2,
+    width: "84%", // ← forces wrap into 2 columns
+    itemWidth: 20,
+    itemHeight: 12,
+    itemGap: 20,
+    textStyle: { fontSize: 13 },
     formatter: (name: string) => getCalloutDisplayInfo(name).full,
   };
 
@@ -527,9 +532,9 @@ export function makeProjectCountDrilldownPie<T = any>(
       title: {
         text: `${fullName} — Number of Projects by Project Type`,
         left: "center",
-        top: 20,
+        top: 10,
       },
-      legend: legendConfig, // full-name formatter travels to drilldown
+      legend: legendConfig,
       series: getStandardPieSeries(childData, "70%", outerLabel, "{c}"),
     });
   };
