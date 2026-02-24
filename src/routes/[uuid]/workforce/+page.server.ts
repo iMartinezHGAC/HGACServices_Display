@@ -1,7 +1,7 @@
 
 import { PB_URL } from '$env/static/private';
 import type { AdworkType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
-import { buildAdworkFilter, FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
+import { buildAdworkFilter, buildEventFilter, FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
 
 async function getSchema(tableName: string): Promise<SchemaType[]> {
@@ -84,11 +84,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   let eventsData: EventType[] = []
-  const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
-  const filter = filterParts.join(' || ');
   try {
     eventsData = await locals.pb.collection('events_json').getFullList({
-      filter: filter
+      filter: buildEventFilter(tableNames, juris_id)
     })
     console.log('Event Data if any', eventsData)
   } catch (err) {
