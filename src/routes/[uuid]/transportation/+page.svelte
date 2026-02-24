@@ -114,23 +114,6 @@ const cleanVehicles = $derived(
 			],
 			'Motorist Assistance Program (MAP) Services'
 		),
-
-makeValueCountPie(
-  '35_rtp',
-  selectSplitSubtable(tablesData, '35_rtp', 'rtp_projects'),
-  'project_type',           // primary
-  'project_subcategory',    // secondary → drilldown
-  'Regional Transportation Projects: # of Projects Grouped by Type'
-),
-
-makeValueCountPie(
-  '35_rtp',
-  selectSplitSubtable(tablesData, '35_rtp', 'yr10_projects'),
-  'project_type',
-  'project_subcategory',
-  '10 Year RTP Projects: # of Projects Grouped by Type'
-),
-
 // Same pattern for TIP and LET
 makeValueCountPie(
   '36_transportation_improvement_plan',
@@ -147,8 +130,21 @@ makeValueCountPie(
   'project_subcategory',
   'LET Projects: # of Projects grouped by Type'
 ),
+makeValueCountPie(
+  '35_rtp',
+  selectSplitSubtable(tablesData, '35_rtp', 'rtp_projects'),
+  'project_type',           // primary
+  'project_subcategory',    // secondary → drilldown
+  'Regional Transportation Projects: # of Projects Grouped by Type'
+),
 
-
+makeValueCountPie(
+  '35_rtp',
+  selectSplitSubtable(tablesData, '35_rtp', 'yr10_projects'),
+  'project_type',
+  'project_subcategory',
+  '10 Year RTP Projects: # of Projects Grouped by Type'
+),
     {
       parent_table: "35_rtp",
       table: rtpProcessed?.data ?? null,

@@ -12,6 +12,52 @@ import type {
 
 import type { EChartsOption, DefaultLabelFormatterCallbackParams } from "echarts";
 
+
+export function toTitleCase(str: string): string {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/**
+ * Reusable transformation for callout names (TIP / RTP / TSM).
+ * 
+ * - "Tip" / "tip" / "TIP" → display: "TIP", legend: "Transportation Improvement Programs"
+ * - "Rtp" / "rtp" / "RTP" → display: "RTP", legend: "Regional Transportation Projects"
+ * - "Tsm" / "tsm" / "TSM" → display: "TSM", legend: "Transportation Planning Studies."
+ * 
+ * Falls back to cleanCategoryName for everything else.
+ * Drop this into your shared utils (e.g. src/lib/utils/charts.ts) and reuse
+ * in any pie, table, or filter component across your Svelte 5 + Tailwind + PocketBase app.
+ */
+export function getCalloutDisplayInfo(value: string): { display: string; full: string } {
+  const cleaned = cleanCategoryName(String(value), true);
+  if (!cleaned) {
+    return { display: '', full: '' };
+  }
+
+  const lower = cleaned.toLowerCase().trim();
+
+  switch (lower) {
+    case 'tip':
+      return { display: 'TIP', full: 'Transportation Improvement Programs' };
+    case 'rtp':
+      return { display: 'RTP', full: 'Regional Transportation Projects' };
+    case 'tsm':
+      return { display: 'TSM', full: 'Transportation Systems Manangement' };
+    case 'let':
+      return { display: 'LET', full: 'Let for Construction' };
+    case '10_year_plan':
+      return { display: '10-Year', full: '10-Year' };
+    default:
+      const titleCased = toTitleCase(cleaned);
+      return { display: titleCased, full: titleCased };
+  }
+}
+
+
+
 /**
  * Normalizes a category name by:
  * - Trimming leading/trailing whitespace
@@ -324,7 +370,6 @@ export function makeHierarchicalCategoryDonut<T = any>(
     chartType: "drilldown_donut",
   };
 }
-
 export function makeProjectCountDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[] | null | undefined,
@@ -367,14 +412,19 @@ export function makeProjectCountDrilldownPie<T = any>(
     });
   });
 
-  const programs = Object.keys(projectsMap);
-  const parentData = programs
-    .map((key) => ({
-      name: snakeToHuman(key),
-      value: countMap[key],
-      totalFunding: totalFundingMap[key],
-      projects: projectsMap[key],
-    }))
+  // ── Apply getCalloutDisplayInfo to program/callout keys ──
+  const parentData = Object.keys(projectsMap)
+    .map((key) => {
+      const info = getCalloutDisplayInfo(key);
+      return {
+        name: info.display,           // pie slice + tooltip label → "TIP"
+        value: countMap[key],
+        totalFunding: totalFundingMap[key],
+        projects: projectsMap[key],
+        originalKey: key,             // raw key for drilldown lookup
+        fullName: info.full,          // legend + drilldown title
+      };
+    })
     .sort((a: any, b: any) => b.value - a.value);
 
   const getProjectTypeData = (programKey: string): any[] => {
@@ -390,7 +440,7 @@ export function makeProjectCountDrilldownPie<T = any>(
       let ptype = item.project_type?.trim() || "Other";
       if (!ptype || ptype === "NULL") ptype = "Other";
 
-      const cleanPtype = cleanCategoryName(ptype, true); // ← here
+      const cleanPtype = cleanCategoryName(ptype, true);
 
       if (!typeMap[cleanPtype]) {
         typeMap[cleanPtype] = { count: 0, totalFunding: 0, projects: [] };
@@ -399,7 +449,7 @@ export function makeProjectCountDrilldownPie<T = any>(
       const funding = Number(item.funding) || 0;
       typeMap[cleanPtype].totalFunding += funding;
       typeMap[cleanPtype].count += 1;
-      typeMap[ptype].projects.push({
+      typeMap[cleanPtype].projects.push({
         name: item.project_name?.trim() || "Unnamed Project",
         funding,
       });
@@ -444,32 +494,42 @@ export function makeProjectCountDrilldownPie<T = any>(
   const outerLabel = (params: any) =>
     `${params.name}\n${params.value} projects\n(${params.percent?.toFixed(1)}%)`;
 
+  // Legend always shows full names for TIP/RTP/TSM
+  const legendConfig = {
+    orient: "horizontal",
+    left: "left",
+    bottom: 10,
+    formatter: (name: string) => getCalloutDisplayInfo(name).full,
+  };
+
   const charts: EChartsOption = {
     title: { text: title ?? "Number of Projects by Program/Plan", left: "center", top: 4 },
     tooltip: { trigger: "item", formatter: customTooltipFormatter, confine: true },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: legendConfig,
     series: getStandardPieSeries(parentData, "70%", outerLabel, "{c}"),
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
-    const clickedName = params.name;
-    const programKey = programs.find((k) => snakeToHuman(k) === clickedName);
-    if (!programKey) return;
+    const originalKey = params.data?.originalKey;
+    if (!originalKey) return;
 
-    const childData = getProjectTypeData(programKey);
+    const fullName = params.data?.fullName || params.name;
+    const childData = getProjectTypeData(originalKey);
+
     if (childData.length === 0) {
       chartInstance.setOption(
-        getNoDataOption(`${clickedName} — Projects by Type`, "No data")
+        getNoDataOption(`${fullName} — Projects by Type`, "No data")
       );
       return;
     }
 
     chartInstance.setOption({
       title: {
-        text: `${clickedName} — Number of Projects by Project Type`,
+        text: `${fullName} — Number of Projects by Project Type`,
         left: "center",
         top: 20,
       },
+      legend: legendConfig, // full-name formatter travels to drilldown
       series: getStandardPieSeries(childData, "70%", outerLabel, "{c}"),
     });
   };
@@ -846,24 +906,41 @@ export function makeValueCountPie<T = any>(
 
   const getValueCountPieData = (k: keyof T, ds: T[] = dataset) => {
     const countMap: Record<string, number> = {};
+
     ds.forEach((item) => {
       const rawVal = String(item[k]);
-      const cleanVal = cleanCategoryName(rawVal, true);
-      if (cleanVal) {
-        countMap[cleanVal] = (countMap[cleanVal] || 0) + 1;
+      const cleaned = cleanCategoryName(rawVal, true);
+      if (cleaned) {
+        countMap[cleaned] = (countMap[cleaned] || 0) + 1;
       }
     });
+
     return Object.entries(countMap)
-      .map(([name, value]) => ({ name, value, originalName: name })) // originalName can stay raw if needed
+      .map(([cleaned, value]) => {
+        const info = getCalloutDisplayInfo(cleaned);
+        return {
+          name: info.display,          // short name → pie slice labels + tooltip
+          value,
+          originalName: cleaned,       // exact match key used in original filter logic
+          fullName: info.full,         // full name for titles / drilldown
+        };
+      })
       .sort((a, b) => b.value - a.value);
   };
 
   const parentData = getValueCountPieData(primaryKey);
 
+  const legendConfig = {
+    orient: "horizontal",
+    left: "left",
+    bottom: 10,
+    formatter: (name: string) => getCalloutDisplayInfo(name).full, // legend always shows full name
+  };
+
   const charts: EChartsOption = {
     title: { text: title ?? snakeToHuman(String(primaryKey)), left: "center" },
     tooltip: { trigger: "item" },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: legendConfig,
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -871,18 +948,20 @@ export function makeValueCountPie<T = any>(
     const originalVal = params.data.originalName;
     if (!originalVal) return;
 
+    const fullName = params.data.fullName || params.data.name;
     const filtered = dataset.filter((item) => String(item[primaryKey]) === originalVal);
     const pieData = getValueCountPieData(secondaryKey, filtered);
 
+    const drillTitle = `${fullName} by ${snakeToHuman(String(secondaryKey))}`;
+
     if (pieData.length === 0) {
-      chartInstance.setOption(
-        getNoDataOption(`${params.data.name} by ${snakeToHuman(String(secondaryKey))}`)
-      );
+      chartInstance.setOption(getNoDataOption(drillTitle));
       return;
     }
 
     chartInstance.setOption({
-      title: { text: `${params.data.name} by ${snakeToHuman(String(secondaryKey))}`, left: "center" },
+      title: { text: drillTitle, left: "center" },
+      legend: legendConfig, // ensure formatter travels to drilldown chart
       series: getStandardPieSeries(pieData, "50%"),
     });
   };
@@ -1774,3 +1853,7 @@ export function combineRelatedRecords(
 
   return buildTableData(combinedRecords, hasMultipleSources, columnOrder, sortBy);
 }
+
+
+
+

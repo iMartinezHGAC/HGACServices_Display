@@ -46,7 +46,7 @@ const subCollectionsByTable = $derived(
 	const combinedProjectData = $derived([
 		{
 			RTP: rtpSubs['35_rtp_rtp_projects'] ??  [] ,
-			'10_year': rtpSubs['35_rtp_yr10_projects'] ??  [] 
+			'10_Year_Plan': rtpSubs['35_rtp_yr10_projects'] ??  [] 
 		},
 		{
 			TIP: tipSubs['36_transportation_improvement_plan_tip'] ??  [] ,
@@ -56,6 +56,7 @@ const subCollectionsByTable = $derived(
 	// Safe LET data – splitTableData now returns [] if missing
 	const letData = $derived(splitTableData(tipSubs, '36_transportation_improvement_plan_let'));
 
+  $inspect('RTP', combinedProjectData)
 	// Charts (derived for reactivity)
 	const chartA = $derived(
 		makeProjectCountDrilldownPie('35_rtp', combinedProjectData, 'Transportation Projects')
@@ -90,8 +91,8 @@ const subCollectionsByTable = $derived(
     return acc;
   }, {} as Record<string, number>);
 
-	$inspect('data potential raw', data.potential_tabs);
-	$inspect('data potential', dataPotential);
+	//$inspect('data potential raw', data.potential_tabs);
+	//$inspect('data potential', dataPotential);
 
 
 const tabCodeMap = {
