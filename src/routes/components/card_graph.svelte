@@ -54,12 +54,16 @@
 	function getNonEmptyChartCount(charts: ChartType[]): number {
 		return charts.filter(chart => !isAllComponentsEmptyOrZero(chart)).length;
 	}
-
+  let filteredCharts = $derived(
+    charts.filter(chart => !isAllComponentsEmptyOrZero(chart))
+  )
 	let displayedCharts = $derived(
-		getNonEmptyChartCount(charts) <= 2 || accordionFlag
-			? charts
-			: charts.slice(0, 2)
+		filteredCharts.length <= 2 || accordionFlag
+			? filteredCharts
+			: filteredCharts.slice(0, 2)
 	);
+
+
 </script>
 
 <div>
