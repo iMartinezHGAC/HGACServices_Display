@@ -15,7 +15,11 @@ import type { EChartsOption, DefaultLabelFormatterCallbackParams } from "echarts
 
 export function toTitleCase(str: string): string {
   if (!str) return '';
+
   return str
+    .replace(/_/g, ' ')                    // snake_case → spaces
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2') // camelCase → spaces
+    .trim()
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -1547,6 +1551,7 @@ export function splitSubtables(tablesData: TableDataResult, tableName: string) {
 
 export function selectSplitSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string) {
   const subtables = splitSubtables(tableData, tableName);
+  console.log('subtables in selectSplitSubtable', subtables)
   if (subtables === null || !(chosenSubtable in subtables)) {
     return null;
   }

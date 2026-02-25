@@ -31,11 +31,6 @@ async function getSubtableSchema(tableName: string) {
   return await res.json()
 }
 
-async function getProjectByID(tableName: string, matchedName: string) {
-  let res = await fetch(`${PB_URL}/api/collections/${tableName}/getproject/${matchedName}`)
-  return await res.json()
-}
-
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const juris_id = params.uuid

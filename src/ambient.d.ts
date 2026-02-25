@@ -234,8 +234,16 @@ type SchemaMultiType = {
   schema: SchemaType[]
 }
 
+type EventFormData = {
+  date: string | string[],
+  entity: string | string[],
+  event: string | string[],
+  jurisdiction: string | string[],
+}
+
 type EventType = {
-  FormData: Object,
+  id: string,
+  FormData: EventFormData,
   email: string,
   event_name: string,
   event_description: string,

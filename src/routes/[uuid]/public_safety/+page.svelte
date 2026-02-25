@@ -38,13 +38,22 @@
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
 	//console.log("Name: ", programNames)
-	//$inspect('table data: ', tablesData);
+	$inspect('table data: ', tablesData);
 
  // $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
 
   const rcjgProcessed  = buildTableData(tablesData['16_regional_criminal_justice_grants'], false,['grant_purpose', 'grant_type', 'grant_dollars', 'entity']);
   //splitSubtables(tablesData, '14_livable_centers'));
-	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+	//console.log('split map table data', 
+
+  let routingTotal = $derived(
+    accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'landline_other') 
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'text')
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'voip')
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'wireless')
+  )
+  const service911Processed  = buildTableData(tablesData["25_911"], false, ['service', 'dollar_amount']);
+  $inspect('test split', buildTableData(tablesData['25_911']['support'],false, ['service', 'dollar_amount']))
 
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
@@ -100,6 +109,20 @@
     'dollar_amount',
     'Dollar Amount by Service Type'          // Optional custom title
   ),
+    makeDrilldownDonut(
+      '25_911',
+      selectSplitSubtable(tablesData, '25_911', 'routing'),
+      ["landline_other", "text", "voip", "wireless"],
+      "Placeholder",
+      routingTotal.toLocaleString() ?? ''
+    ),
+   {
+      parent_table: "25_911",
+      table: selectSplitSubtable(tablesData, '25_911', 'support'), 
+      columns: service911Processed?.columns,
+      fullWidth: true,
+      title: "Support"
+    },
 	)
 
 
