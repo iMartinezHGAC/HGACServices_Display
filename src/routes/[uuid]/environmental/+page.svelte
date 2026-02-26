@@ -74,6 +74,15 @@
       },
       chartType: "indicator"
     },    
+		makeDrilldownDonut(
+			'01_solid_waste',
+      selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
+			[
+				'grant_type',
+			],
+			'Monitoring Costs',
+      "$" + (accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toLocaleString() ?? '0')
+		),
     {
       parent_table: "01_solid_waste",
       indicator: {

@@ -302,6 +302,7 @@ export function makeActualPotentialStackedBar(
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
 	<div class="sticky min-h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
 		<!-- Total Funding Indicator -->
+      {#if fundingIndicator.indicator.indicatorVal}
 		<div class="flex h-[18rem] w-full items-center justify-center bg-slate-700">
 			<Indicator
 				above={true}
@@ -312,16 +313,17 @@ export function makeActualPotentialStackedBar(
         symbol_pre={fundingIndicator.indicator?.indicatorSymPre}
 			/>
 		</div>
+      {/if}
 
 		<!-- Charts Row -->
 		<div class="flex gap-12 justify-center pt-8 w-full">
 
-			<div class="flex h-[36rem] w-[44rem] items-center justify-center rounded bg-slate-100">
+			<div class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
 				<RenderEchart chart={actualPotentialChart.chart?.charts!} />
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
-			<div class="flex h-[36rem] w-[44rem] items-center justify-center rounded bg-slate-100">
+			<div class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
 				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} />
 			</div>
 
