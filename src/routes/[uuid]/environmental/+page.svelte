@@ -111,7 +111,7 @@
 				'monitoring_event_cost_inkind',
 			],
 			'Monitoring Costs',
-      accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toString() ?? ''
+      "$" + (accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toLocaleString() ?? '0')
 		),
     {
       parent_table: "03_wqmp",
@@ -178,7 +178,7 @@
 				'vol_scouts',
 			],
 			'Volunteers',
-      accumulateMappedField(tablesData, '05_trash_bash', 'tot_volunteer_count').toString() ?? ""
+      (accumulateMappedField(tablesData, '05_trash_bash', 'tot_volunteer_count').toLocaleString() ?? "")
 		),
     {
       parent_table: "10_parks_and_natural_areas",

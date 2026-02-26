@@ -117,46 +117,37 @@ const innerLabelFormatter = (params: DefaultLabelFormatterCallbackParams) => {
   return valueStr;
 };
 
-const tooltipFormatter = (
-  params: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[]
-) => {
-  const formatOne = (p: DefaultLabelFormatterCallbackParams) => {
-    let valueStr = formatNumber(p.value ?? 0);
-    if ((p.data as any)?.isMoney) {
-      valueStr = "$" + valueStr;
-    }
-    return `${p.name}: ${valueStr} (${p.percent ?? 0}%)`;
-  };
-
-  if (Array.isArray(params)) {
-    return params.map(formatOne).join("<br/>");
-  }
-  return formatOne(params);
-};
 
 const monetaryKeywords = [
-  "cost",
-  "dollar",
-  "budget",
-  "price",
-  "revenue",
-  "expense",
-  "amount",
-  "fee",
-  "charge",
-  "payment",
-  "spend",
-  "profit",
-  "loss",
-  "income",
-  "sale",
-  "total",
+  "cost", "dollar", "budget", "price", "revenue", "expense", "amount",
+  "fee", "charge", "payment", "spend", "profit", "loss", "income", "sale", "total"
 ];
 
 const isMonetary = (key: string): boolean => {
   const lower = key.toLowerCase();
   return monetaryKeywords.some((kw) => lower.includes(kw));
 };
+
+// ✅ FIXED tooltipFormatter – now checks the slice NAME directly
+// (bypasses any stripping that getStandardPieSeries might do)
+const tooltipFormatter = (
+  params: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[]
+) => {
+  const formatOne = (p: DefaultLabelFormatterCallbackParams) => {
+    let valueStr = formatNumber(p.value ?? 0);
+
+    if (isMonetary(p.name)) {
+      valueStr = "$" + valueStr;
+    }
+
+    return `${p.name}: ${valueStr} (${p.percent ?? 0}%)`;
+  };
+
+  return Array.isArray(params)
+    ? params.map(formatOne).join("<br/>")
+    : formatOne(params);
+};
+
 
 // === No-Data Option ===
 const getNoDataOption = (mainTitle?: string, subtext?: string): EChartsOption => ({
@@ -179,12 +170,17 @@ const getNoDataOption = (mainTitle?: string, subtext?: string): EChartsOption =>
     },
   },
 });
+// src/lib/chart-utils.ts
+const monetaryOuterFormatter = (p: any) => {
+  let valueStr = formatNumber(p.value ?? 0);
+  if (isMonetary(p.name)) valueStr = "$" + valueStr;
+  return `${p.name}\n${valueStr}`;
+};
 
-// === Standard Pie/Donut Series ===
 const getStandardPieSeries = (
   data: any[],
-  radius: string | string[],
-  outerFormatter: any = createLabelFormatter(true),
+  radius: string | string[] = ["35%", "62%"],   // tighter donut = more label space
+  outerFormatter: any = monetaryOuterFormatter, // ← new default (with $)
   innerFormatter: any = innerLabelFormatter,
   showOuterLabels = true
 ) => [
@@ -200,8 +196,24 @@ const getStandardPieSeries = (
         show: showOuterLabels,
         position: "outside" as const,
         formatter: outerFormatter,
+        alignTo: "labelLine" as const,   // ← fixes the long horizontal lines
+        distanceToLabelLine: 6,
+        lineHeight: 18,
+        fontSize: 12.8,
+        fontWeight: 500,
+        color: "#374151",
+        padding: [0, 8],
       },
-      labelLine: { show: showOuterLabels },
+      labelLine: {
+        show: showOuterLabels,
+        length: 18,
+        length2: 32,
+        smooth: 0.2,
+        lineStyle: {
+          width: 1.6,
+          color: "#94a3b8",
+        },
+      },
     },
     {
       type: "pie",
@@ -219,6 +231,7 @@ const getStandardPieSeries = (
       labelLine: { show: false },
     },
   ];
+
 
 // === Chart Functions (names unchanged) ===
 
@@ -562,25 +575,28 @@ export function makeDrilldownDonut<T = any>(
   if (dataArray.length === 0 || keys.length === 0) {
     return {
       parent_table,
-      chart: {
-        charts: getNoDataOption(title ?? keys.map((k) => snakeToHuman(String(k))).join(" vs ")),
-      },
+      chart: { charts: getNoDataOption(title ?? keys.map((k) => snakeToHuman(String(k))).join(" vs ")) },
       chartType: "drilldown_donut",
     };
   }
 
+  // Parent level – no extra flags needed anymore
   const parentData = keys.map((key) => {
     const total = dataArray.reduce(
       (sum, item) => sum + (Number((item as any)[key]) || 0),
       0
     );
-    return { name: snakeToHuman(String(key)), value: total };
+    return {
+      name: snakeToHuman(String(key)),
+      value: total,
+    };
   });
 
+  // Breakdown = counts → never monetary (kept clean)
   const getBreakdownData = (k: keyof T) => {
     const map: Record<string, number> = {};
     dataArray.forEach((item) => {
-      const val = String((item as any)[k]);
+      const val = String((item as any)[k] ?? "");
       if (val) map[val] = (map[val] || 0) + 1;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
@@ -601,8 +617,18 @@ export function makeDrilldownDonut<T = any>(
   const charts: EChartsOption = {
     title: titleConfig,
     tooltip: { trigger: "item", formatter: tooltipFormatter },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
-    series: getStandardPieSeries(parentData, ["40%", "70%"]),
+
+    grid: { left: 40, right: 40, top: 75, bottom: 125 }, // extra bottom space for labels + legend
+
+    legend: {
+      orient: "horizontal",
+      left: "center",
+      bottom: 42,
+      itemGap: 26,
+      textStyle: { fontSize: 13.5 }
+    },
+
+    series: getStandardPieSeries(parentData),
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
@@ -622,12 +648,12 @@ export function makeDrilldownDonut<T = any>(
     chartInstance.setOption({
       title: drillTitleConfig,
       series: getStandardPieSeries(breakdownData, ["40%", "70%"]),
+      // tooltip formatter stays the same (already set on the chart)
     });
   };
 
   return { parent_table, chart: { charts, onDrilldown }, chartType: "drilldown_donut" };
 }
-
 export function makeDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[] | null | undefined,

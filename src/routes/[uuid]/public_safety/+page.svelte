@@ -113,7 +113,7 @@
       '25_911',
       selectSplitSubtable(tablesData, '25_911', 'routing'),
       ["landline_other", "text", "voip", "wireless"],
-      "Placeholder",
+      "9-1-1 Service Requests",
       routingTotal.toLocaleString() ?? ''
     ),
    {
