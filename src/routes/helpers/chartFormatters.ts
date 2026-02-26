@@ -1537,13 +1537,14 @@ export function splitAndMapTable(tableData: TableDataResult, tableName: string, 
 }
 
 export function splitExpandedMapTable(tableData: TableDataResult, tableName: string, chosenSubtable: string, field: string) {
-  const table = splitSubtables(tableData, tableName)[chosenSubtable];
+  const table = selectSplitSubtable(tableData, tableName, chosenSubtable)
   return mapTableData(table, field);
 }
 
 export function splitSubtables(tablesData: TableDataResult, tableName: string) {
   const splitData = splitTableData(tablesData, tableName);
   if (!splitData || splitData.length === 0) return null;
+  console.log('split data in splitSubtables', splitData)
   const data = splitData[0];
   if (isInvalid(data)) return null;
   return data.expand;
@@ -1551,7 +1552,6 @@ export function splitSubtables(tablesData: TableDataResult, tableName: string) {
 
 export function selectSplitSubtable(tableData: TableDataResult, tableName: string, chosenSubtable: string) {
   const subtables = splitSubtables(tableData, tableName);
-  console.log('subtables in selectSplitSubtable', subtables)
   if (subtables === null || !(chosenSubtable in subtables)) {
     return null;
   }
