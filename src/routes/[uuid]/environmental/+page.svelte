@@ -42,7 +42,7 @@
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
 	 console.log('test table', selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
 );
-	 console.log('test water',  splitTableData(tablesData, water_innovation));
+	 console.log('test water',  accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost_inkind'));
 	//console.log('split table data', 
 //accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
 //)
@@ -79,17 +79,14 @@
 			'01_solid_waste',
       selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
       'grant_type',
-			'Monitoring Costs',
+			'Grants',
 		),
-    {
-      parent_table: "01_solid_waste",
-      indicator: {
-        indicatorName: "Grant Funding",
-        indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grant_dollars'),
-        indicatorSymPre: '$'
-      },
-      chartType: "indicator"
-    },  
+		makeCategoryCountDrilldownPie (
+     "01_solid_waste",
+      selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
+      'grant_dollars',
+			'Grant Cost',
+    ),
     {
       parent_table: "01_solid_waste",
       table: selectSplitSubtable(tablesData, '01_solid_waste', 'workshop') as PB_Record_Type
@@ -118,7 +115,8 @@
 				'monitoring_event_cost_inkind',
 			],
 			'Monitoring Costs',
-      "$" + (accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toLocaleString() ?? '0')
+      "$" + 
+        (accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost_hgac') + accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost_inkind')).toLocaleString() 
 		),
     {
       parent_table: "03_wqmp",

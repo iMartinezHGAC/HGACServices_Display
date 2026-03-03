@@ -174,7 +174,7 @@ const monetaryOuterFormatter = (p: any) => {
   const name = p.name || "Unknown";
   let valueStr = formatNumber(p.value ?? 0);
   if (isMonetary(name)) valueStr = "$" + valueStr;
-  return `${name}\n${valueStr} projects\n(${p.percent?.toFixed(1)}%)`;
+  return `${name}\n${valueStr} (${p.percent?.toFixed(1)}%)`;
 };
 
 
@@ -818,7 +818,6 @@ export function makeProjectCountDrilldownPie<T = any>(
 
   return { parent_table, chart: { charts, onDrilldown }, chartType: "drilldown_pie" };
 }
-
 export function makeDrilldownDonut<T = any>(
   parent_table: string,
   dataset: T | T[] | null | undefined,
@@ -840,7 +839,7 @@ export function makeDrilldownDonut<T = any>(
     };
   }
 
-  // Parent level – no extra flags needed anymore
+  // Parent level aggregates
   const parentData = keys.map((key) => {
     const total = dataArray.reduce(
       (sum, item) => sum + (Number((item as any)[key]) || 0),
@@ -852,7 +851,7 @@ export function makeDrilldownDonut<T = any>(
     };
   });
 
-  // Breakdown = counts → never monetary (kept clean)
+  // Breakdown counts (never monetary)
   const getBreakdownData = (k: keyof T) => {
     const map: Record<string, number> = {};
     dataArray.forEach((item) => {
@@ -861,6 +860,9 @@ export function makeDrilldownDonut<T = any>(
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
   };
+
+  // Donut radius – now used on BOTH parent and drilldown levels
+  const donutRadius: [string, string] = ["40%", "70%"];
 
   const titleConfig: any[] = [
     { text: title ?? keys.map((k) => snakeToHuman(String(k))).join(" vs "), left: "center", top: 20 },
@@ -878,7 +880,7 @@ export function makeDrilldownDonut<T = any>(
     title: titleConfig,
     tooltip: { trigger: "item", formatter: tooltipFormatter },
 
-    grid: { left: 40, right: 40, top: 75, bottom: 125 }, // extra bottom space for labels + legend
+    grid: { left: 40, right: 40, top: 75, bottom: 125 },
 
     legend: {
       orient: "horizontal",
@@ -888,7 +890,7 @@ export function makeDrilldownDonut<T = any>(
       textStyle: { fontSize: 13.5 }
     },
 
-    series: getStandardPieSeries(parentData),
+    series: getStandardPieSeries(parentData, donutRadius), // ← now a donut
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
@@ -907,13 +909,13 @@ export function makeDrilldownDonut<T = any>(
 
     chartInstance.setOption({
       title: drillTitleConfig,
-      series: getStandardPieSeries(breakdownData, ["40%", "70%"]),
-      // tooltip formatter stays the same (already set on the chart)
+      series: getStandardPieSeries(breakdownData, donutRadius), // ← same donut radius
     });
   };
 
   return { parent_table, chart: { charts, onDrilldown }, chartType: "drilldown_donut" };
 }
+
 export function makeDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[] | null | undefined,
