@@ -170,10 +170,12 @@ const getNoDataOption = (mainTitle?: string, subtext?: string): EChartsOption =>
     },
   },
 });
+
 const monetaryOuterFormatter = (p: any) => {
   const name = p.name || "Unknown";
   let valueStr = formatNumber(p.value ?? 0);
   if (isMonetary(name)) valueStr = "$" + valueStr;
+  if (typeof p.value === "string") return `${p.percent?.toFixed(1)}%`
   return `${valueStr} (${p.percent?.toFixed(1)}%)`;
 };
 
@@ -211,7 +213,7 @@ const getStandardPieSeries = (
         show: showOuterLabels,
         length: 22,
         length2: 38,
-        smooth: 0.2,
+        smooth: 0.3,
         lineStyle: { width: 1.6, color: "#94a3b8" },
       },
     },
@@ -542,6 +544,178 @@ export function makeValueSumDonut<T = any>(
     chartType: "drilldown_donut",
   };
 }
+
+export function makeCategoryCountDrilldownDonut<T = any>(
+  parent_table: string,
+  dataset: T[] | null | undefined,
+  categoryField: string,
+  title?: string,
+  centerText?: string,                      // ← optional; if omitted → auto total count
+  fundingField: string = "grant_dollars"
+): ChartType {
+  if (!dataset || dataset.length === 0) {
+    return {
+      parent_table,
+      chart: { charts: getNoDataOption(title ?? `Distribution by ${categoryField}`) },
+      chartType: "drilldown_pie",
+    };
+  }
+
+  const categoryMap: Record<string, {
+    count: number;
+    totalFunding: number;
+    items: T[]
+  }> = {};
+
+  dataset.forEach((item: any) => {
+    if (!item) return;
+
+    let key = item[categoryField];
+    key = (key == null || String(key).trim() === '') ? 'Other' : String(key).trim();
+
+    if (!categoryMap[key]) {
+      categoryMap[key] = { count: 0, totalFunding: 0, items: [] };
+    }
+
+    const funding = Number(item[fundingField] ?? item.funding ?? 0) || 0;
+    categoryMap[key].count += 1;
+    categoryMap[key].totalFunding += funding;
+    categoryMap[key].items.push(item);
+  });
+
+  const totalCount = Object.values(categoryMap).reduce((sum, g) => sum + g.count, 0);
+
+  const parentData = Object.keys(categoryMap)
+    .map((key) => ({
+      name: key,
+      value: categoryMap[key].count,
+      totalFunding: categoryMap[key].totalFunding,
+      originalKey: key,
+      fullName: key,
+      projects: categoryMap[key].items
+        .map((item: any) => ({
+          name: item.project_name ?? item.id?.slice(0, 12) ?? "Grant",
+          funding: Number(item[fundingField] ?? item.funding ?? 0) || 0,
+        }))
+        .sort((a, b) => b.funding - a.funding),
+    }))
+    .filter((item) => item.value > 0)
+    .sort((a: any, b: any) => b.value - a.value);
+
+  const customTooltipFormatter = (params: any): string => {
+    /* ← paste your original customTooltipFormatter here (unchanged) */
+  };
+
+  const legendConfig = {
+    orient: "horizontal",
+    left: "center",
+    bottom: 0,
+    width: "92%",
+    itemWidth: 18,
+    itemHeight: 12,
+    itemGap: 18,
+    textStyle: { fontSize: 13.2 },
+    formatter: (name: string) => name,
+  };
+
+  // Build donut series + force % callouts
+  let seriesConfig = getStandardPieSeries(parentData, "72%", (v: number) => `${v}`);
+  if (!Array.isArray(seriesConfig)) seriesConfig = [seriesConfig];
+
+  seriesConfig.forEach((s: any) => {
+    if (s) {
+      s.radius = ['42%', '72%'];
+      s.label = {
+        formatter: '{d}%',                    // ← ONLY percentage in callouts
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1f2937',
+        distanceToLabelLine: 8
+      };
+      s.labelLine = { show: true, length: 12, length2: 8, smooth: true };
+    }
+  });
+
+  const charts: EChartsOption = {
+    title: {
+      text: title ?? `Distribution by ${categoryField}`,
+      left: "center",
+      top: 16
+    },
+    tooltip: { trigger: "item", formatter: customTooltipFormatter, confine: true },
+    legend: legendConfig,
+    series: seriesConfig,
+    graphic: {
+      elements: [{
+        type: 'text',
+        left: 'center',
+        top: 'middle',
+        style: {
+          text: centerText ?? `${totalCount}`,   // ← auto total if no arg passed
+          fontSize: 32,
+          fontWeight: '700',
+          fill: '#1f2937',
+          textAlign: 'center',
+          lineHeight: 1.1,
+        }
+      }]
+    },
+  };
+
+  const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
+    const originalKey = params.data?.originalKey;
+    if (!originalKey) return;
+
+    const group = categoryMap[originalKey];
+    if (!group?.items.length) {
+      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`));
+      return;
+    }
+
+    const drillData = group.items
+      .map((item: any) => ({
+        name: item.id ? `#${item.id.slice(-8)}` : "Grant",
+        value: Number(item[fundingField] ?? item.funding ?? 0) || 0,
+        fullName: item.project_name ?? item.id ?? "Grant",
+      }))
+      .filter(d => d.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    let drillSeries = getStandardPieSeries(drillData, "72%", monetaryOuterFormatter);
+    if (!Array.isArray(drillSeries)) drillSeries = [drillSeries];
+
+    drillSeries.forEach((s: any) => {
+      if (s) {
+        s.radius = ['42%', '72%'];
+        s.label = {
+          formatter: '{d}%',                    // ← % callouts on drilldown too
+          fontSize: 14,
+          fontWeight: '600',
+          color: '#1f2937'
+        };
+        s.labelLine = { show: true, length: 12, length2: 8 };
+      }
+    });
+
+    chartInstance.setOption({
+      title: {
+        text: `${originalKey} — ${group.count} Grants by Funding`,
+        left: "center",
+        top: 16
+      },
+      legend: legendConfig,
+      series: drillSeries,
+      graphic: undefined,
+    });
+  };
+
+  return {
+    parent_table,
+    chart: { charts, onDrilldown },
+    chartType: "drilldown_pie"
+  };
+}
+
 export function makeCategoryCountDrilldownPie<T = any>(
   parent_table: string,
   dataset: T[] | null | undefined,

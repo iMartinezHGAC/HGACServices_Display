@@ -16,7 +16,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeCategoryCountDrilldownPie, makeDrilldownDonut, selectSplitSubtable, splitExpandedMapTable, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeCategoryCountDrilldownDonut, makeCategoryCountDrilldownPie, makeDrilldownDonut, selectSplitSubtable, splitExpandedMapTable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
   const water_innovation = '13_water_innovation'
@@ -66,27 +66,22 @@
 			'paid_tows'
 		]),
     */
-
-    {
-      parent_table: "01_solid_waste",
-      indicator: {
-        indicatorName: "Grants",
-        indicatorVal: accumulateMappedField(tablesData, '01_solid_waste', 'grants'),
-      },
-      chartType: "indicator"
-    },    
-		makeCategoryCountDrilldownPie (
+		makeCategoryCountDrilldownDonut (
 			'01_solid_waste',
       selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
       'grant_type',
 			'Grants',
 		),
-		makeCategoryCountDrilldownPie (
+		makeDrilldownDonut(
      "01_solid_waste",
       selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
+			[
       'grant_dollars',
+			],
 			'Grant Cost',
-    ),
+      "$" + 
+        (accumulateMappedFieldSubtable(tablesData, '01_solid_waste', 'grants', 'grant_dollars')).toLocaleString() 
+		),
     {
       parent_table: "01_solid_waste",
       table: selectSplitSubtable(tablesData, '01_solid_waste', 'workshop') as PB_Record_Type
