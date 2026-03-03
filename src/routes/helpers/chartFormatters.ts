@@ -120,12 +120,24 @@ const innerLabelFormatter = (params: DefaultLabelFormatterCallbackParams) => {
 
 const monetaryKeywords = [
   "cost", "dollar", "budget", "price", "revenue", "expense", "amount",
-  "fee", "charge", "payment", "spend", "profit", "loss", "income", "sale", "total"
-];
+  "fee", "charge", "payment", "spend", "profit", "loss", "income", "sale", "total",
+  "grant_dollars", "dollars", "funding"];
 
 const isMonetary = (key: string): boolean => {
   const lower = key.toLowerCase();
   return monetaryKeywords.some((kw) => lower.includes(kw));
+};
+
+const createOuterFormatter = (forceMonetary = false) => (p: any) => {
+  const name = p.name || "Unknown";
+  let valueStr = formatNumber(p.value ?? 0);
+
+  if (forceMonetary || isMonetary(name)) {
+    valueStr = "$" + valueStr;
+  }
+
+  if (typeof p.value === "string") return `${p.percent?.toFixed(1)}%`;
+  return `${valueStr} (${p.percent?.toFixed(1)}%)`;
 };
 
 // ✅ FIXED tooltipFormatter – now checks the slice NAME directly
@@ -1487,6 +1499,8 @@ export function makeValueSumPie<T = any>(
   const parentData = getSumPieData(primaryKey, secondaryKey);
   const manyCategories = parentData.length > 5;
 
+  const isMonetaryValue = isMonetary(String(secondaryKey));   // ← new
+
   const charts: EChartsOption = {
     title: {
       text: title ?? `${snakeToHuman(String(secondaryKey))} by ${snakeToHuman(String(primaryKey))}`,
@@ -1494,7 +1508,7 @@ export function makeValueSumPie<T = any>(
     },
     tooltip: { trigger: "item" },
     legend: { show: !manyCategories, orient: "horizontal", left: "left", bottom: 10 },
-    series: getStandardPieSeries(parentData, "50%", createLabelFormatter(true), innerLabelFormatter, !manyCategories),
+    series: getStandardPieSeries(parentData, "50%", createOuterFormatter(isMonetaryValue), innerLabelFormatter, !manyCategories),
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {

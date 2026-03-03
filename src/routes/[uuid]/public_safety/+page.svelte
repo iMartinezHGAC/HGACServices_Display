@@ -38,7 +38,9 @@
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
 	//console.log("Name: ", programNames)
-	$inspect('table data: ', tablesData);
+	$inspect('table data: ', 
+    splitTableData(tablesData, '16_regional_criminal_justice_grants'),
+);
 
  // $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
 
@@ -81,7 +83,6 @@
     'contact_hours_provided',                      // The key to count unique values for
     'Contact Hours by Class Name'          // Optional custom title
   ),
-
     makeValueSumPie(
     '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
     splitTableData(tablesData, '16_regional_criminal_justice_grants'),
