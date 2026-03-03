@@ -1,6 +1,6 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
-  import help from "$lib/assets/help.svg"
+  import help from "$lib/assets/feedback.svg"
 	import type { DashboardType, TabCountType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
@@ -118,7 +118,7 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
 
   function toTippy(element: HTMLElement) {
     tippy(element, {
-      content: "Submit help form",
+      content: "Submit feedback",
       placement: "right-start",
       theme: 'slateful',
     })
