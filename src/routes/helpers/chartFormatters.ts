@@ -174,7 +174,7 @@ const monetaryOuterFormatter = (p: any) => {
   const name = p.name || "Unknown";
   let valueStr = formatNumber(p.value ?? 0);
   if (isMonetary(name)) valueStr = "$" + valueStr;
-  return `${name}\n${valueStr} (${p.percent?.toFixed(1)}%)`;
+  return `${valueStr} (${p.percent?.toFixed(1)}%)`;
 };
 
 

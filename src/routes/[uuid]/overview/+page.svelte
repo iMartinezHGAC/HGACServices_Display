@@ -201,7 +201,7 @@ export function makeActualPotentialStackedBar(
   }));
 
   const option: echarts.EChartsOption = {
-    backgroundColor: "#fff",
+    backgroundColor: '#f1f5f9',
     title: {
       text: title,
       left: "center",

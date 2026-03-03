@@ -49,7 +49,7 @@
 
 {#if shouldRenderCard(charts, additionalWork, project)}
 	<div
-		class="mb-4 w-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
+		class="mb-4 w-full h-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
 	>
 		<div class="flex w-full bg-slate-700">
 			<div class="flex w-full flex-col">
@@ -60,13 +60,13 @@
 					<div class="flex flex-grow"></div>
 				</h1>
 				{#if linkUrls.length > 0}
-					<div class="flex flex-col pb-4 pl-10">
+					<div class="flex flex-col pb-4 ml-10 w-1/4">
 						{#each linkUrls as link}
 							<a
 								href={link.url_string}
 								id="programLink"
 								aria-label="link"
-								class="font-[Metropolis] font-medium text-white"
+								class="font-[Metropolis] font-medium text-white w-auto"
 							>
 								{link.display_text}
 							</a>
@@ -74,8 +74,10 @@
 					</div>
 				{/if}
 			</div>
-			<CardBlurbTb text={blurb} />
-			<span class="flex-grow"></span>
+      <div class="flex w-3/4 mr-40">
+        <CardBlurbTb text={blurb} />
+      </div>
+      <div class="flex-grow"></div>
       <!--
 			<button
 				onclick={handleExportClick}
