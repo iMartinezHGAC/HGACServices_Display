@@ -16,7 +16,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, makeCategoryCountDrilldownPie, makeDrilldownDonut, selectSplitSubtable, splitExpandedMapTable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
   const water_innovation = '13_water_innovation'
@@ -40,7 +40,8 @@
 
 	$inspect('table data: ', tablesData);
 	//console.log('test splt',  splitSubtables(tablesData, '03_wqmp') ?? "empty");
-	 console.log('test table',  selectSplitSubtable(tablesData, '03_wqmp', "ossf"));
+	 console.log('test table', selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
+);
 	 console.log('test water',  splitTableData(tablesData, water_innovation));
 	//console.log('split table data', 
 //accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')
@@ -74,14 +75,11 @@
       },
       chartType: "indicator"
     },    
-		makeDrilldownDonut(
+		makeCategoryCountDrilldownPie (
 			'01_solid_waste',
       selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
-			[
-				'grant_type',
-			],
+      'grant_type',
 			'Monitoring Costs',
-      "$" + (accumulateMappedFieldSubtable(tablesData, '02_water_quality_monitoring', 'clean_rivers_program', 'monitoring_event_cost')?.toLocaleString() ?? '0')
 		),
     {
       parent_table: "01_solid_waste",

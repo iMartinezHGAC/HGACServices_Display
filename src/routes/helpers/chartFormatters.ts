@@ -542,7 +542,136 @@ export function makeValueSumDonut<T = any>(
     chartType: "drilldown_donut",
   };
 }
+export function makeCategoryCountDrilldownPie<T = any>(
+  parent_table: string,
+  dataset: T[] | null | undefined,
+  categoryField: string,                    // ← e.g. "grant_type"
+  title?: string,
+  fundingField: string = "grant_dollars"
+): ChartType {
+  if (!dataset || dataset.length === 0) {
+    return {
+      parent_table,
+      chart: { charts: getNoDataOption(title ?? `Distribution by ${categoryField}`) },
+      chartType: "drilldown_pie",
+    };
+  }
 
+  const categoryMap: Record<string, {
+    count: number;
+    totalFunding: number;
+    items: T[]
+  }> = {};
+
+  dataset.forEach((item: any) => {
+    if (!item) return;
+
+    let key = item[categoryField];
+    key = (key == null || String(key).trim() === '') ? 'Other' : String(key).trim();
+
+    if (!categoryMap[key]) {
+      categoryMap[key] = { count: 0, totalFunding: 0, items: [] };
+    }
+
+    const funding = Number(item[fundingField] ?? item.funding ?? 0) || 0;
+    categoryMap[key].count += 1;
+    categoryMap[key].totalFunding += funding;
+    categoryMap[key].items.push(item);
+  });
+
+  const parentData = Object.keys(categoryMap)
+    .map((key) => ({
+      name: key,                          // ← clean string (this was the root cause)
+      value: categoryMap[key].count,
+      totalFunding: categoryMap[key].totalFunding,
+      originalKey: key,
+      fullName: key,
+      projects: categoryMap[key].items
+        .map((item: any) => ({
+          name: item.project_name ?? item.id?.slice(0, 12) ?? "Grant",
+          funding: Number(item[fundingField] ?? item.funding ?? 0) || 0,
+        }))
+        .sort((a, b) => b.funding - a.funding),
+    }))
+    .filter((item) => item.value > 0)
+    .sort((a: any, b: any) => b.value - a.value);
+
+  // === YOUR ORIGINAL CUSTOM TOOLTIP (paste it here - 100% unchanged) ===
+  const customTooltipFormatter = (params: any): string => {
+    /* ← PUT YOUR EXISTING customTooltipFormatter CODE HERE */
+    // (it will now receive clean .name and .fullName strings)
+  };
+
+  const legendConfig = {
+    orient: "horizontal",
+    left: "center",
+    bottom: 0,
+    width: "92%",
+    itemWidth: 18,
+    itemHeight: 12,
+    itemGap: 18,
+    textStyle: { fontSize: 13.2 },
+    formatter: (name: string) => name,   // ← CRITICAL FIX: forces string, kills [object Object]
+  };
+
+  // Get standard series then FORCE clean callout labels
+  let seriesConfig = getStandardPieSeries(parentData, "68%", (v: number) => `${v}`);
+
+  if (!Array.isArray(seriesConfig)) seriesConfig = [seriesConfig];
+
+  // Override label/callout formatter to guarantee string output (fixes the bug)
+  seriesConfig.forEach((s: any) => {
+    if (s.label) {
+      s.label.formatter = '{b}';           // just the name
+      s.label.fontSize = 13;
+      s.label.distanceToLabelLine = 8;
+    }
+    if (s.labelLine) s.labelLine.show = true;
+  });
+
+  const charts: EChartsOption = {
+    title: {
+      text: title ?? `Distribution by ${categoryField}`,
+      left: "center",
+      top: 12
+    },
+    tooltip: { trigger: "item", formatter: customTooltipFormatter, confine: true },
+    legend: legendConfig,
+    series: seriesConfig,
+  };
+
+  const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
+    const originalKey = params.data?.originalKey;
+    if (!originalKey) return;
+
+    const group = categoryMap[originalKey];
+    if (!group?.items.length) {
+      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`));
+      return;
+    }
+
+    const drillData = group.items
+      .map((item: any) => ({
+        name: item.id ? `#${item.id.slice(-8)}` : "Grant",
+        value: Number(item[fundingField] ?? item.funding ?? 0) || 0,
+        fullName: item.project_name ?? item.id ?? "Grant",
+      }))
+      .filter(d => d.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    chartInstance.setOption({
+      title: { text: `${originalKey} — ${group.count} Grants by Funding`, left: "center", top: 12 },
+      legend: legendConfig,
+      series: getStandardPieSeries(drillData, "68%", monetaryOuterFormatter),
+    });
+  };
+
+  return {
+    parent_table,
+    chart: { charts, onDrilldown },
+    chartType: "drilldown_pie"
+  };
+}
 
 export function makeProjectCountDrilldownPie<T = any>(
   parent_table: string,
