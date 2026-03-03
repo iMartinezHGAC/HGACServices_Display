@@ -121,7 +121,9 @@
 
 	{#if hasAdditionalWork}
 		<div class="flexy flex-col" {@attach toGraphWork}>
+    {#if getNonEmptyChartCount(charts) > 0}
 			<h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
+    {/if}
 
 			{#each itemsToShow as adWork}
 				<AdditionalWork adwork={adWork} />
