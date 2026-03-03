@@ -5,6 +5,7 @@
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
+	import tippy from 'tippy.js';
 
 	interface props {
 		chosenTab: string;
@@ -114,6 +115,14 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
   }
 
   //$inspect('coded tabs', codedTabs)
+
+  function toTippy(element: HTMLElement) {
+    tippy(element, {
+      content: "Submit help form",
+      placement: "right-start",
+      theme: 'slateful',
+    })
+  }
   
 </script>
 
@@ -160,7 +169,7 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
 		{/each}
 	</div>
   <div class="flex items-end justify-center ml-20">
-  <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded">
+  <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
     <img src={help} alt="sumbit help form"/>
   </a>
   </div>
