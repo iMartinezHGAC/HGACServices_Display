@@ -1,5 +1,6 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
+  import help from "$lib/assets/help.svg"
 	import type { DashboardType, TabCountType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
@@ -158,7 +159,12 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
       {/if}
 		{/each}
 	</div>
-	<div class="flex-grow"></div>
+  <div class="flex items-end justify-center ml-20">
+  <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded">
+    <img src={help} alt="sumbit help form"/>
+  </a>
+  </div>
+	<div class="flex-grow-[1]"></div>
 	<img src={logo} alt="HGAC" class="right-4 h-24" />
 </div>
 
