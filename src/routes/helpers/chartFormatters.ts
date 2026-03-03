@@ -1004,6 +1004,7 @@ export function makeProjectCountDrilldownPie<T = any>(
 
   return { parent_table, chart: { charts, onDrilldown }, chartType: "drilldown_pie" };
 }
+
 export function makeDrilldownDonut<T = any>(
   parent_table: string,
   dataset: T | T[] | null | undefined,
@@ -1025,29 +1026,32 @@ export function makeDrilldownDonut<T = any>(
     };
   }
 
-  // Parent level aggregates
-  const parentData = keys.map((key) => {
-    const total = dataArray.reduce(
-      (sum, item) => sum + (Number((item as any)[key]) || 0),
-      0
-    );
-    return {
-      name: snakeToHuman(String(key)),
-      value: total,
-    };
-  });
+  // Parent level – zeros filtered (no more $0 callouts/legend entries)
+  const parentData = keys
+    .map((key) => {
+      const total = dataArray.reduce(
+        (sum, item) => sum + (Number((item as any)[key]) || 0),
+        0
+      );
+      return {
+        name: snakeToHuman(String(key)),
+        value: total,
+      };
+    })
+    .filter((item) => item.value > 0);
 
-  // Breakdown counts (never monetary)
+  // Breakdown counts – zeros filtered
   const getBreakdownData = (k: keyof T) => {
     const map: Record<string, number> = {};
     dataArray.forEach((item) => {
       const val = String((item as any)[k] ?? "");
       if (val) map[val] = (map[val] || 0) + 1;
     });
-    return Object.entries(map).map(([name, value]) => ({ name, value }));
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .filter((item) => item.value > 0);
   };
 
-  // Donut radius – now used on BOTH parent and drilldown levels
   const donutRadius: [string, string] = ["40%", "70%"];
 
   const titleConfig: any[] = [
@@ -1062,21 +1066,68 @@ export function makeDrilldownDonut<T = any>(
     });
   }
 
+  // Helper that brings callouts back intelligently
+  const getSeriesWithCallouts = (data: any[]) => {
+    const baseSeries = getStandardPieSeries(data, donutRadius);
+    const hasMultiple = data.length > 1;
+
+    const labelConfig = hasMultiple
+      ? {
+        show: true,
+        position: "outside",
+        formatter: (params: any) => {
+          const formattedValue = Number(params.value).toLocaleString("en-US");
+          const percent = params.percent.toFixed(1);
+          return `${formattedValue} (${percent}%)`;
+        },
+        fontSize: 13,
+        color: "#333",
+        distanceToLabelLine: 8,
+      }
+      : { show: false };
+
+    const labelLineConfig = hasMultiple
+      ? {
+        show: true,
+        length: 25,
+        length2: 20,
+        smooth: true,
+        lineStyle: { width: 1.5 },
+      }
+      : { show: false };
+
+    const seriesConfig = Array.isArray(baseSeries)
+      ? baseSeries.map((s: any) => ({
+        ...s,
+        label: labelConfig,
+        labelLine: labelLineConfig,
+        labelLayout: { hideOverlap: true },
+      }))
+      : {
+        ...baseSeries,
+        label: labelConfig,
+        labelLine: labelLineConfig,
+        labelLayout: { hideOverlap: true },
+      };
+
+    return seriesConfig;
+  };
+
   const charts: EChartsOption = {
     title: titleConfig,
     tooltip: { trigger: "item", formatter: tooltipFormatter },
 
-    grid: { left: 40, right: 40, top: 75, bottom: 125 },
+    grid: { left: 40, right: 40, top: 75, bottom: 170 }, // extra space for legend + callouts when shown
 
     legend: {
       orient: "horizontal",
       left: "center",
       bottom: 42,
       itemGap: 26,
-      textStyle: { fontSize: 13.5 }
+      textStyle: { fontSize: 13.5 },
     },
 
-    series: getStandardPieSeries(parentData, donutRadius), // ← now a donut
+    series: getSeriesWithCallouts(parentData),
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
@@ -1095,7 +1146,7 @@ export function makeDrilldownDonut<T = any>(
 
     chartInstance.setOption({
       title: drillTitleConfig,
-      series: getStandardPieSeries(breakdownData, donutRadius), // ← same donut radius
+      series: getSeriesWithCallouts(breakdownData),
     });
   };
 
