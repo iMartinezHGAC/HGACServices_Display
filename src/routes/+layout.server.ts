@@ -6,11 +6,9 @@ import type { DashboardType, PotentialTabType, TabCountType } from "../ambient";
 import { filter } from "d3";
 
 export const load: LayoutServerLoad = async ({ locals, url, params }) => {
-  /* no selector redirect
   if (url.pathname === "/") {
     throw redirect(302, "/selector");
   }
-  */
 
   const juris_id = params.uuid;
   //console.log("juris_id in layout", juris_id);
