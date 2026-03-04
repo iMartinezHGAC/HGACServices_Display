@@ -164,6 +164,7 @@ interface ChartType {
   chart?: CustomEchartType,
   indicator?: IndicatorType,
   table?: PB_Record_Type | PB_Record_Type[] | EventType[] | null,
+  fields?: string[],
   columns?: string[],
   chartType?: string,
   fullWidth?: boolean,

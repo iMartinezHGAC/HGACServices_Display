@@ -69,6 +69,10 @@
     {
       parent_table: "17_elder_justice",
       table: scaledLCProcessed,
+        fields: [
+          ...lcProcessed?.fields,
+        'estimated_value_provided',
+        ],
       columns: [
       ...lcProcessed?.columns,
       'estimated_value_provided',
@@ -124,6 +128,7 @@
     {
       parent_table: "17_elder_justice",
       table: trainingProcessed?.data,
+      fields: trainingProcessed?.fields,
       columns: trainingProcessed?.columns,
       fullWidth: true
     },

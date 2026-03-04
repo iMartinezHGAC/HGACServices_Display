@@ -81,7 +81,8 @@
       parent_table: "31_hgac_energy_corp",
       indicator: {
         indicatorName: "Dollars spent on electricity through H-GAC Energy",
-        indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'dollar_amount')
+        indicatorVal: accumulateMappedField(tablesData, '31_hgac_energy_corp', 'dollar_amount'),
+        indicatorSymPre: '$',
       },
       chartType: "indicator"
     },

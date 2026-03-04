@@ -59,7 +59,11 @@ const rtpProcessed = combineRelatedRecords(
     ["fiscal_year", "project_name", "project_description", "funding", "project_type", "project_category", "project_subcategory2"] // optional
   );
 
-  const tpsProcessed  = buildTableData(tablesData['38_transportation_planning_studies'], false,['study_name', 'study_description', 'study_type', 'schedule', 'estimated_cost', 'study_url']);
+  const tpsProcessed  = buildTableData(
+    tablesData['38_transportation_planning_studies'], 
+    false,
+    ['study_name', 'study_description', 'study_type', 'schedule', 'estimated_cost', 'study_url']
+  );
 const cleanVehicles = $derived(
     splitTableData(tablesData, '37_clean_vehicles')
   );
@@ -157,12 +161,14 @@ makeValueCountPie(
     {
       parent_table: "35_rtp",
       table: rtpProcessed?.data ?? null,
+      fields: rtpProcessed?.fields,
       columns: rtpProcessed?.columns,
       fullWidth: true
     },
     {
       parent_table: "36_transportation_improvement_plan",
       table: tipProcessed?.data ?? null,
+      fields: tipProcessed?.fields,
       columns: tipProcessed?.columns,
       fullWidth: true,
       title: "Projects"
@@ -197,6 +203,7 @@ makeValueCountPie(
     {
       parent_table: "38_transportation_planning_studies",
       table: tpsProcessed?.data ?? null,
+      fields: tpsProcessed?.fields,
       columns: tpsProcessed?.columns,
       fullWidth: true
     },
