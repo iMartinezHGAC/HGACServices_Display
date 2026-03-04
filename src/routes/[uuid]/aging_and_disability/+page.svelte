@@ -176,7 +176,7 @@ export function makeTwoSlicePie(
             radius: '60%', // larger solid pie = plenty of room for inside labels
             avoidLabelOverlap: true,
             minAngle: 15,
-            color: ['#10b981', '#f59e0b'], // exact green Home + orange Congregate from your screenshot
+            color: ['#10b981', '#f59e0b'], // exact green Home Delivered + orange Congregate from your screenshot
             data: pieData,
             label: {
               show: true,
@@ -220,7 +220,7 @@ charts.push(
     '26_aging_nutrition_transport',
     'Elderly Fed',
     'Elderly Fed',
-    'Home',
+    'Home Delivered',
     personsHome,
     'Congregate',
     personsCongregate
@@ -235,7 +235,7 @@ charts.push(
     '26_aging_nutrition_transport',
     'Meals Provided',
     'Meals Provided',
-    'Home',
+    'Home Delivered',
     mealsHome,
     'Congregate',
     mealsCongregate
@@ -250,7 +250,7 @@ charts.push(
     '26_aging_nutrition_transport',
     'Funding',
     'Funding',
-    'Home',
+    'Home Delivered',
     costHome,
     'Congregate',
     costCongregate
