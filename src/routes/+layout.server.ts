@@ -41,10 +41,19 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     tabCounts = [];
   }
 
+  let potentialTabCounts: TabCountType[]
+  try {
+    potentialTabCounts = await locals.pb.collection("dashboard_potential_project_count").getFullList<TabCountType>();
+  } catch (err) {
+    console.error("Failed to fetch programs:", err);
+    potentialTabCounts = [];
+  }
+
   return {
     uuid: params.uuid,
     routeID: url.pathname,
     dashboard_groups: dash_tabs,
     dash_count: tabCounts,
+    potential_tab_counts: potentialTabCounts
   };
 };

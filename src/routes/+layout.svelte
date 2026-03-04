@@ -37,6 +37,7 @@
 
 	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
 	$inspect('data layout', data.dash_count);
+  $inspect('potential count', data.potential_tab_counts)
 </script>
 
 <main
