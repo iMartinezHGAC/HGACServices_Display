@@ -91,6 +91,15 @@ export function cleanCategoryName(
   return str;
 }
 
+const standardLegend: echarts.LegendComponentOption = { 
+      orient: "horizontal", 
+      left: "left", 
+      bottom: -1, 
+      textStyle: { 
+      fontSize: 14, 
+      fontFamily: "Metropolis"
+  } 
+}
 
 // === Shared Formatters ===
 const formatNumber = (value: number | string | undefined): string => {
@@ -215,7 +224,7 @@ const getStandardPieSeries = (
         alignTo: "labelLine" as const,
         distanceToLabelLine: 6,
         lineHeight: 17,
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: 500,
         color: "#374151",
         padding: [2, 8],
@@ -369,7 +378,7 @@ export function makeHierarchicalCategoryDonut<T = any>(
         formatter: (params: any) =>
           `${params.name}: ${params.value} projects (${params.percent?.toFixed(1)}%)`,
       },
-      legend: { orient: "horizontal", left: "left", bottom: 0 },
+      legend: standardLegend,
       series: pieData.length === 0 ? [] : getStandardPieSeries(pieData, ["40%", "70%"], "{b}\n{c} projects ({d}%)", "{c}"),
     };
   };
@@ -616,7 +625,7 @@ export function makeCategoryCountDrilldownDonut<T = any>(
     .sort((a: any, b: any) => b.value - a.value);
 
 
-  const legendConfig = {
+  const legendConfig: echarts.LegendComponentOption = {
     orient: "horizontal",
     left: "center",
     bottom: 0,
@@ -1079,7 +1088,7 @@ export function makeDrilldownDonut<T = any>(
           const percent = params.percent.toFixed(1);
           return `${formattedValue} (${percent}%)`;
         },
-        fontSize: 13,
+        fontSize: 14,
         color: "#333",
         distanceToLabelLine: 8,
       }
@@ -1118,13 +1127,7 @@ export function makeDrilldownDonut<T = any>(
 
     grid: { left: 40, right: 40, top: 75, bottom: 170 }, // extra space for legend + callouts when shown
 
-    legend: {
-      orient: "horizontal",
-      left: "center",
-      bottom: 0,
-      itemGap: 26,
-      textStyle: { fontSize: 14, fontFamily: "Metropolis" },
-    },
+    legend: standardLegend,
 
     series: getSeriesWithCallouts(parentData),
   };
@@ -1206,7 +1209,7 @@ export function makeDrilldownPie<T = any>(
   const charts: EChartsOption = {
     title: { text: title ?? keys.map((k) => snakeToHuman(String(k))).join(" vs "), left: "center" },
     tooltip: { trigger: "item", formatter: tooltipFormatter },
-    legend: { orient: "horizontal", left: "left", bottom: 0 },
+    legend: standardLegend,
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1303,7 +1306,7 @@ export function makeTableDrilldownPie<T = any>(
   const charts: EChartsOption = {
     title: { text: title ?? "Table Sizes", left: "center" },
     tooltip: { trigger: "item" },
-    legend: { orient: "horizontal", left: "left", bottom: 0 },
+    legend: standardLegend,
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1393,7 +1396,7 @@ export function makeDrilldownMultPie<T = any>(
       left: "center",
     },
     tooltip: { trigger: "item", formatter: tooltipFormatter },
-    legend: { orient: "horizontal", left: "left", bottom: 0 },
+    legend: standardLegend,
     series: getStandardPieSeries(initialPieData, "50%"),
   };
 
@@ -1471,6 +1474,10 @@ export function makeValueCountPie<T = any>(
     orient: "horizontal",
     left: "left",
     bottom: 0,
+    textStyle: {
+    fontFamily: "Metropolis",
+    fontSize: 14
+    },
     formatter: (name: string) => getCalloutDisplayInfo(name).full, // legend always shows full name
   };
 
@@ -1663,7 +1670,7 @@ export function makeValueSumPieTop10<T = any>(
       left: "center",
     },
     tooltip: { trigger: "item" },
-    legend: { orient: "horizontal", left: "left", bottom: 0 },
+    legend: standardLegend,
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1729,7 +1736,7 @@ export function makePie<T = any>(
       charts: {
         title: { text: snakeToHuman(String(key1)), left: "center" },
         tooltip: { trigger: "item" },
-        legend: { orient: "horizontal", left: "left", bottom: 0 },
+        legend: standardLegend,
         series: [
           {
             name: snakeToHuman(String(key1)),
@@ -1809,7 +1816,7 @@ export function makeBar<T extends Record<string, any>>(
       axisLabel: {
         rotate: 45,
         interval: 0,
-        fontSize: 11.5,
+        fontSize: 12.5,
         margin: 15,
         color: '#4b5563'
       }
@@ -1989,12 +1996,12 @@ export function makeActualPotentialStackedBar(
       axisLabel: {
         rotate: 45,
         interval: 0,
-        fontSize: 12,
+        fontSize: 13,
       },
     },
     yAxis: {
       type: "value",
-      axisLabel: { fontSize: 12 },
+      axisLabel: { fontSize: 13 },
     },
     series: [
       {
