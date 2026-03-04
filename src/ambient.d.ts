@@ -166,7 +166,8 @@ interface ChartType {
   table?: PB_Record_Type | PB_Record_Type[] | EventType[] | null,
   columns?: string[],
   chartType?: string,
-  fullWidth?: boolean
+  fullWidth?: boolean,
+  title?: string
 }
 
 interface CardDataType {
@@ -233,8 +234,16 @@ type SchemaMultiType = {
   schema: SchemaType[]
 }
 
+type EventFormData = {
+  date: string | string[],
+  entity: string | string[],
+  event: string | string[],
+  jurisdiction: string | string[],
+}
+
 type EventType = {
-  FormData: Object,
+  id: string,
+  FormData: EventFormData,
   email: string,
   event_name: string,
   event_description: string,
@@ -259,12 +268,41 @@ type TabCountType = {
   id: string;
   jurisdiction: JurisdictionType;
   jurisdiction_name: string;
-  workforce: number;
-  environmental: number;
+  has_workforce: number;
+  has_environmental: number;
   has_enterprise_solutions: number;
+  has_economic_development: number;
+  has_aging_disability: number;
+  has_community_services: number;
+  has_public_safety: number;
+  has_transportation: number;
+};
+
+interface TabCountRecord {
+  id: string;
+  jurisdiction: string;
+  jurisdiction_name: string;
+  workforce: number;
+  workforce_programs: string[];
+  environmental: number;
+  environmental_programs: string[];
+  enterprise_solutions: number;
+  enterprise_solutions_programs: string[];
   economic_development: number;
+  economic_development_programs: string[];
   aging_disability: number;
+  aging_disability_programs: string[];
   community_services: number;
+  community_services_programs: string[];
   public_safety: number;
+  public_safety_programs: string[];
   transportation: number;
+  transportation_programs: string[];
+}
+
+type PotentialTabType = {
+  collectionId: string;
+  collectionName: string;
+  id: string;
+  tab_project_count: number;
 };

@@ -63,7 +63,7 @@ function formatDate(input: string | Date | null | undefined): string {
 
 	<div class="flex w-full items-center justify-start">
 
-		{#if adwork.budget !== undefined}
+		{#if adwork.budget !== undefined || adwork.budget !== 0}
 			<p class="pl-8 font-[Metropolis] text-xl font-medium">
 				Budget: ${adwork.budget.toLocaleString()}
 			</p>

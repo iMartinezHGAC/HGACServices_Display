@@ -16,7 +16,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateArray, accumulateMappedField, accumulateMappedFieldSubtable, collectAllSubrecords, mapTableData } from '../../helpers/chartFormatters';
+	import { accumulateArray, accumulateMappedField, accumulateMappedFieldSubtable, collectAllSubrecords, combineRelatedRecords, mapTableData, selectSplitSubtable } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -55,12 +55,25 @@
 	];
 
 
+  const lcProcessed = combineRelatedRecords(
+    tablesData,
+    '17_elder_justice',
+    ['legal_clinics'],
+    ['legal_clinics_sponsor', 'legal_clinics_attendees', 'legal_clinics_documents' ] 
+  );
+
+  const trainingProcessed = combineRelatedRecords(
+    tablesData,
+    '17_elder_justice',
+    ['training'],
+    ['training_name', 'training_sponsor', 'trainings_hours', 'attendees_count' ]  
+  );
 	charts.push(
     {
       parent_table: "27_aging_direct_services",
       indicator: {
         indicatorName: "Elderly Transported ",
-        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'assistance', 'persons') + accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'respite', 'persons')) ?? 0, 
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'assistance', 'persons') + accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'respite', 'persons')), 
       },
       chartType: "indicator"
     },  
@@ -68,7 +81,7 @@
       parent_table: "26_aging_nutrition_transport",
       indicator: {
         indicatorName: "Trips Provided",
-        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'transport','trips_provided'))
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '26_aging_nutrition_transport', 'transport','trips_provided'))
       },
       chartType: "indicator"
     },  
@@ -76,13 +89,41 @@
       parent_table: "26_aging_nutrition_transport",
       indicator: {
         indicatorName: "Funding",
-        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '27_aging_direct_services', 'transport','trips_cost'))
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '26_aging_nutrition_transport', 'transport','trips_cost')),
+			indicatorSymPre: '$'
       },
       chartType: "indicator"
     },  
+    {
+      parent_table: "17_elder_justice",
+      indicator: {
+        indicatorName: "New Crime Victim Clients",
+        indicatorVal: (accumulateMappedFieldSubtable(tablesData, '17_elder_justice', 'crime_victims','new_client_count')),
+      },
+      chartType: "indicator"
+    },  
+    {
+      parent_table: "17_elder_justice",
+      table: lcProcessed?.data,
+      columns: lcProcessed?.columns,
+      fullWidth: true
+    },
+    {
+      parent_table: "17_elder_justice",
+      table: trainingProcessed?.data,
+      columns: trainingProcessed?.columns,
+      fullWidth: true
+    },
 	)
 
   // New function adapted from makePie for two-slice sum-based pies
+
+// Updated makeTwoSlicePie.ts (TypeScript – Svelte 5 + Tailwind + PocketBase ready)
+// ✅ Data (value + percent) now **inside** each slice (big, bold, x,xxx format)
+// ✅ Callout lines completely removed (fixes all distortion/truncation)
+// ✅ Colors matched to your screenshot
+// ✅ Tooltip still shows full formatted info on hover
+
 export function makeTwoSlicePie(
   parent_table: string,
   titleText: string,
@@ -103,27 +144,59 @@ export function makeTwoSlicePie(
       charts: {
         title: {
           text: titleText,
-          left: 'center'
+          left: 'center',
+          textStyle: { fontSize: 18, fontWeight: '600' }
         },
         tooltip: {
-          trigger: 'item'
+          trigger: 'item',
+          formatter: (params: any) => {
+            const formattedValue = Number(params.value).toLocaleString('en-US');
+                return titleText.toLowerCase() === 'funding'
+            ? `${params.seriesName}<br/>${params.name}: $${formattedValue} (${params.percent.toFixed(1)}%)`
+            : `${params.seriesName}<br/>${params.name}: ${formattedValue} (${params.percent.toFixed(1)}%)`
+
+          }
         },
         legend: {
           orient: 'vertical',
           left: 'left',
           top: 30,
+          textStyle: { fontSize: 14 }
         },
         series: [
           {
             name: seriesName,
             type: 'pie',
-            radius: '50%',
+            radius: '60%', // larger solid pie = plenty of room for inside labels
+            avoidLabelOverlap: true,
+            minAngle: 15,
+            color: ['#10b981', '#f59e0b'], // exact green Home + orange Congregate from your screenshot
             data: pieData,
+            label: {
+              show: true,
+              position: 'inside',
+              formatter: (params: any) => {
+                const formattedValue = Number(params.value).toLocaleString('en-US');
+                return titleText.toLowerCase() === 'funding'
+                    ? `$${formattedValue}\n(${params.percent.toFixed(1)}%)`
+                    : `${formattedValue}\n(${params.percent.toFixed(1)}%)`
+              },
+              fontSize: 14,
+              lineHeight: 15,
+              fontWeight: 600,
+              color: '#ffffff', // high contrast on colored slices
+              align: 'center'
+            },
             emphasis: {
               itemStyle: {
-                shadowBlur: 10,
+                shadowBlur: 15,
                 shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                shadowColor: 'rgba(0, 0, 0, 0.7)'
+              },
+              label: {
+                show: true,
+                fontSize: 15.5,
+                fontWeight: 'bold'
               }
             }
           }
@@ -133,8 +206,6 @@ export function makeTwoSlicePie(
     chartType: 'piechart'
   };
 }
-
-
 // Elderly Fed pie
 const personsHome = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'home'), 'persons') as number[]) || []) || 0;
 const personsCongregate = accumulateArray((mapTableData(collectAllSubrecords(tablesData, '26_aging_nutrition_transport', 'congregate'), 'persons') as number[]) || []) || 0;

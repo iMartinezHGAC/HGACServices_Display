@@ -1,4 +1,3 @@
-
 <script lang="ts">
 
 	import { navigating } from '$app/state';
@@ -39,7 +38,7 @@
 	const tablesData = data.tablesData;
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
-	//$inspect('table data: ', tablesData);
+	$inspect('table data: ', tablesData);
 	//console.log('test splt', splitSubtables(tablesData, '14_livable_centers'));
 	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
 	//$inspect('data', data);
@@ -58,7 +57,8 @@
     tablesData,
     '14_livable_centers',
     ['studies'],
-    ['year', 'study_name', 'status', 'study_progress', 'cost', 'awards'  ] // optional – omit for auto columns
+    ['year', 'study_name', 'status', 'study_progress', 'cost', 'awards'  ],
+    "-year"
   );
 
   console.log('processe')
@@ -70,6 +70,7 @@
     '14_livable_centers', 
 			splitSubtables(tablesData, '14_livable_centers').studies,
     'status',            
+      '',
     'Study Status'      
   ),  
     makeValueCountPie(
@@ -91,7 +92,8 @@
     parent_table: "14_livable_centers",
     table: lcProcessed?.data,
     columns: lcProcessed?.columns,
-    fullWidth: true
+    fullWidth: true,
+    title: "Studies"
   },
     /*
     makeValueCountPie(

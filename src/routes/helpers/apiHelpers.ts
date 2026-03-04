@@ -1,60 +1,73 @@
+
+import PocketBase from 'pocketbase'
+import type { AdworkType, PB_Record_Type, TableFetchOptions } from '../../ambient';
+
 export function GetFiveQuarters() {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentQuarter = Math.floor(currentMonth / 3);
+
   let startQuarter = currentQuarter - 5;
   let startYear = now.getFullYear();
+
   while (startQuarter < 0) {
     startQuarter += 4;
     startYear -= 1;
   }
-  const startMonth = startQuarter * 3;
-  const start = new Date(Date.UTC(startYear, startMonth, 1, 0, 0, 0));
-  const startISO = start.toISOString().replace('T', ' ');
-  const nowISO = now.toISOString().replace('T', ' ');
 
-  return { start: startISO, now: nowISO };
+  const startMonth = startQuarter * 3;
+  const start = new Date(Date.UTC(startYear, startMonth, 1));
+
+  // PocketBase loves clean "YYYY-MM-DD HH:MM:SS" (no ms, no Z)
+  const formatDate = (d: Date): string =>
+    d.toISOString().replace('T', ' ').slice(0, 19);
+
+  return {
+    start: formatDate(start),
+    now: formatDate(now)
+  };
 }
 
 export function GenerateFilter(
   subCollectionNames: string[] | null | undefined,
-  juris_id: string | undefined // Also guard juris_id for safety
-) {
-  // Ensure subCollectionNames is always a valid array
-  const subs = Array.isArray(subCollectionNames) ? subCollectionNames : [];
+  juris_id: string | undefined
+): string {
+  // Defensive clean-up – remove empty strings, nulls, undefined
+  const subs = Array.isArray(subCollectionNames)
+    ? subCollectionNames
+      .filter((name): name is string => typeof name === 'string' && name.trim() !== '')
+      .map(name => name.trim())
+    : [];
 
-  // Guard juris_id – if missing/undefined, return empty filter (no records)
-  if (!juris_id) {
-    console.warn("GenerateFilter called with missing juris_id – returning empty filter");
-    return "id = ''"; // Invalid on purpose → no records match
+  if (!juris_id?.trim()) {
+    console.warn('GenerateFilter: missing juris_id → returning empty filter');
+    return "id = ''";
   }
 
-  const { start: startISO } = GetFiveQuarters();
+  const { start, now } = GetFiveQuarters();
 
-  const jurisdictionCondition = `jurisdiction = "${juris_id}"`;
+  const jurisdictionCondition = `jurisdiction = "${juris_id.trim()}"`;
 
   let dateCondition: string;
 
   if (subs.length > 0) {
-    // No space before ? operator (critical for PocketBase filter parsing)
-    const subConditions = subs.map(
-      (name) => `${name}.from_date?>= "${startISO}"`
+    // Relation fields (multiple or single) – any linked record must be inside the 5-quarter window
+    const subConditions = subs.map(name =>
+      `(${name}.from_date?<= "${now}" || ${name}.to_date?>= "${start}")`
     );
 
     dateCondition =
       subConditions.length > 1
-        ? `(${subConditions.join(" || ")})`
+        ? `(${subConditions.join(' || ')})`
         : subConditions[0];
   } else {
-    dateCondition = `from_date >= "${startISO}"`;
+    // Direct fields on the main collection (your 38_table_of_data case)
+    dateCondition = `(from_date?<= "${now}" || to_date?>= "${start}")`
   }
 
+  // Final PocketBase filter – 100% safe syntax
   return `(${jurisdictionCondition}) && (${dateCondition})`;
 }
-
-import PocketBase from 'pocketbase'
-import type { PB_Record_Type, TableFetchOptions } from '../../ambient';
-
 export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<PB_Record_Type[] | { error: string }> {
   const defaultOptions: TableFetchOptions = {
     sort: '',
@@ -89,4 +102,48 @@ export async function getSchema(tableName: string, PB_URL: string) {
 export async function getSubtableSchema(tableName: string, PB_URL: string) {
   let res = await fetch(`${PB_URL}/api/collections/${tableName}/dashboard-schema`)
   return await res.json()
+}
+
+export function buildEventFilter(tableNames: string[], juris_id: string) {
+  const filterParts = tableNames.map((name: string) =>
+    `program = "${name.replace(/"/g, '\\"')}"`
+  ); // Escape double quotes if present
+
+  const programFilter = filterParts.join(' || ');
+
+  // Add AND with jurisdiction using PocketBase's `?=` operator
+  // (?= = "any/at-least-one equals" – perfect for multi-select/relation fields)
+  const escapedJurisId = String(juris_id ?? '').replace(/"/g, '\\"');
+
+  return programFilter
+    ? `(${programFilter}) && jurisdiction.id ?= "${escapedJurisId}"`
+    : `jurisdiction.id ?= "${escapedJurisId}"`; // fallback if no programs
+
+}
+
+export function buildAdworkFilter(tableNames: string[], juris_id: string) {
+  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`);
+  const filterAdwork = filterPartsAdwork.join(' || ');
+
+  // Critical fix: For multiple relations, use "?=" to mean "at least one" related record matches
+  // Without the "?", PocketBase treats it as "all must match" or fails to match subfields properly.
+  const jurisFilterPart = juris_id ? `jurisdiction.id ?= "${juris_id.replace(/"/g, '\\"')}"` : '';
+
+  // Combine: (existing OR conditions) && jurisdiction condition
+  let filter = '';
+
+  if (filterAdwork) {
+    filter = `(${filterAdwork})`;
+  }
+
+  if (jurisFilterPart) {
+    if (filter) {
+      filter = `${filter} && ${jurisFilterPart}`;
+    } else {
+      filter = jurisFilterPart;
+    }
+  }
+
+  //console.log('Generated filter:', filter || '(no filter)');
+  return filter
 }

@@ -1,13 +1,12 @@
-
 import { PB_URL } from '$env/static/private';
-import type { AdworkType, SchemaMultiType, SchemaType, TableDataResult, TableFetchOptions } from '../../../ambient';
-import { FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
+import type { AdworkType, EventType, SchemaMultiType, SchemaType, TableDataResult } from '../../../ambient';
+import { buildAdworkFilter, buildEventFilter, FetchTable, GenerateFilter } from '../../helpers/apiHelpers';
 import type { PageServerLoad } from './$types';
+
 
 async function getSchema(tableName: string): Promise<SchemaType[]> {
   try {
     const response = await fetch(`${PB_URL}/api/collections/${tableName}/schema`);
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -21,7 +20,6 @@ async function getSchema(tableName: string): Promise<SchemaType[]> {
 
 async function useGetSchema(tableName: string = "05_trash_bash"): Promise<SchemaMultiType> {
   const schema = await getSchema(tableName);
-
   return {
     tableName,
     schema
@@ -49,7 +47,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   let tableNames: string[] = await programData.map((program: ProgramType) => program.parent_table)
   console.log("table names", tableNames)
 
-
   let tablesData: TableDataResult = {}
   let schema: SchemaMultiType[] = []
 
@@ -67,25 +64,22 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   let projectDetails: AdworkType[] = []
-  const filterPartsAdwork = tableNames.map(name => `program.parent_table = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
-  const filterAdwork = filterPartsAdwork.join(' || ');
   try {
     projectDetails = await locals.pb.collection('one_liners').getFullList({
-      filter: filterAdwork
-    })
-    //console.log('Project Details if any', projectDetails)
+      filter: buildAdworkFilter(tableNames, juris_id) || undefined,  // PocketBase ignores empty/undefined filters
+      expand: 'program'
+    });
+    console.log('Project Details if any', projectDetails);
   } catch (err) {
-    console.error('Error trying to get project details', err)
+    console.error('Error trying to get project details', err);
   }
 
   let eventsData: EventType[] = []
-  const filterParts = tableNames.map(name => `program = "${name.replace(/"/g, '\\"')}"`); // Escape double quotes if present
-  const filter = filterParts.join(' || ');
   try {
     eventsData = await locals.pb.collection('events_json').getFullList({
-      filter: filter
+      filter: buildEventFilter(tableNames, juris_id)
     })
-    console.log('Event Data if any', eventsData)
+    //console.log('Event Data if any', eventsData)
   } catch (err) {
     console.error('Error trying to get events data', err)
   }

@@ -2,7 +2,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { PB_GENERIC_USER, PB_GENERIC_PASS, PB_URL } from "$env/static/private";
-import type { DashboardType, TabCountType } from "../ambient";
+import type { DashboardType, PotentialTabType, TabCountType } from "../ambient";
 import { filter } from "d3";
 
 export const load: LayoutServerLoad = async ({ locals, url, params }) => {
@@ -11,7 +11,7 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
   }
 
   const juris_id = params.uuid;
-  console.log("juris_id in layout", juris_id);
+  //console.log("juris_id in layout", juris_id);
 
   // Generic authentication with diagnostics
   try {

@@ -17,7 +17,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, accumulateMappedFieldSubtable, buildTableData, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 
 	let {
@@ -38,15 +38,26 @@
 	const cardNames = $derived(programs.map((program) => program.program_name));
 
 	//console.log("Name: ", programNames)
-	$inspect('table data: ', tablesData);
+	$inspect('table data: ', 
+    splitTableData(tablesData, '16_regional_criminal_justice_grants'),
+);
 
-  $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
+ // $inspect('test split', splitTableData(tablesData, '19_regional_juvenile_mental_health'))
 
+  const rcjgProcessed  = buildTableData(tablesData['16_regional_criminal_justice_grants'], false,['grant_purpose', 'grant_type', 'grant_dollars', 'entity']);
   //splitSubtables(tablesData, '14_livable_centers'));
+	//console.log('split map table data', 
 
-	//console.log('split map table data', splitAndMapTable(tablesData, '37_clean_vehicles', 'emissions_reduction'));
+  let routingTotal = $derived(
+    accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'landline_other') 
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'text')
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'voip')
+      + accumulateMappedFieldSubtable(tablesData, '25_911', 'routing', 'wireless')
+  )
+  const service911Processed  = buildTableData(tablesData["25_911"], false, ['service', 'dollar_amount']);
+  $inspect('test split', buildTableData(tablesData['25_911']['support'],false, ['service', 'dollar_amount']))
 
-	$inspect('data', data);
+	//$inspect('data', data);
 	const charts: ChartType[] = [];
 	const exclusions = [
 		'collectionId',
@@ -72,10 +83,6 @@
     'contact_hours_provided',                      // The key to count unique values for
     'Contact Hours by Class Name'          // Optional custom title
   ),
-    {
-      parent_table: "16_regional_criminal_justice_grants",
-      table: splitTableData(tablesData, '16_regional_criminal_justice_grants'), 
-    },
     makeValueSumPie(
     '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
     splitTableData(tablesData, '16_regional_criminal_justice_grants'),
@@ -83,6 +90,13 @@
     'grant_dollars',
     'Grants Prioritized'          // Optional custom title
   ),
+    {
+      parent_table: "16_regional_criminal_justice_grants",
+      table: rcjgProcessed?.data, 
+      columns: rcjgProcessed?.columns,
+      fullWidth: true,
+      title: "Grants"
+    },
     makeValueSumPie(
     '19_regional_juvenile_mental_health',  // Parent table name (from your data example)
 			splitTableData(tablesData, '19_regional_juvenile_mental_health'),
@@ -96,6 +110,20 @@
     'dollar_amount',
     'Dollar Amount by Service Type'          // Optional custom title
   ),
+    makeDrilldownDonut(
+      '25_911',
+      selectSplitSubtable(tablesData, '25_911', 'routing'),
+      ["landline_other", "text", "voip", "wireless"],
+      "9-1-1 Service Requests",
+      routingTotal.toLocaleString() ?? ''
+    ),
+   {
+      parent_table: "25_911",
+      table: selectSplitSubtable(tablesData, '25_911', 'support'), 
+      columns: service911Processed?.columns,
+      fullWidth: true,
+      title: "Support"
+    },
 	)
 
 
@@ -111,7 +139,7 @@ data.tableNames.forEach((tableName: string) => {
 });
 
 
-	$inspect('charts data', charts);
+	//$inspect('charts data', charts);
 	const cardData: CardDataType[] = $derived(
 		programs.map((program: ProgramType) => {
 			const eCharts = charts.filter((chart) => chart.parent_table == program.parent_table);
@@ -120,7 +148,7 @@ data.tableNames.forEach((tableName: string) => {
 		})
 	);
 
-	$inspect('card data', cardData);
+	//$inspect('card data', cardData);
 
 </script>
 

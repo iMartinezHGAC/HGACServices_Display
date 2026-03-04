@@ -1,9 +1,11 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
+  import help from "$lib/assets/feedback.svg"
 	import type { DashboardType, TabCountType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
+	import tippy from 'tippy.js';
 
 	interface props {
 		chosenTab: string;
@@ -90,28 +92,37 @@ type CodedTabCounts = {
 
 function mapToCodedTabs(data: TabCountType): CodedTabCounts {
   return {
-    "41": data.workforce,
-    "64": data.environmental,
+    "41": data.has_workforce,
+    "64": data.has_environmental,
     "71": data.has_enterprise_solutions,
-    "55": data.economic_development,
-    "07": data.aging_disability,
-    "92": data.community_services,
-    "74": data.public_safety,
-    "76": data.transportation,
+    "55": data.has_economic_development,
+    "07": data.has_aging_disability,
+    "92": data.has_community_services,
+    "74": data.has_public_safety,
+    "76": data.has_transportation,
   };
 }
 
+  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
   const overview: DashboardType = {
     id: '00',
     tab_name: "overview",
     sort_order: 0,
     tab_color: '#f8fafc',
-    tab_text_light_mode: false,
+    tab_text_lightmode: false,
     collectionId: 'pbc_575699702',
     collectionName: 'dashboard_tabs',
   }
 
-  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
+  //$inspect('coded tabs', codedTabs)
+
+  function toTippy(element: HTMLElement) {
+    tippy(element, {
+      content: "Submit feedback",
+      placement: "right-start",
+      theme: 'slateful',
+    })
+  }
   
 </script>
 
@@ -157,7 +168,12 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
       {/if}
 		{/each}
 	</div>
-	<div class="flex-grow"></div>
+  <div class="flex items-end justify-center ml-20">
+  <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
+    <img src={help} alt="sumbit help form"/>
+  </a>
+  </div>
+	<div class="flex-grow-[1]"></div>
 	<img src={logo} alt="HGAC" class="right-4 h-24" />
 </div>
 
