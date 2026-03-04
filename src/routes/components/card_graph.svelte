@@ -83,7 +83,7 @@
 						below={false}
 						aboveText={chart.indicator.indicatorName}
 						belowText={''}
-						numericValue={Number(chart.indicator.indicatorVal)}
+						numericValue={chart.indicator.indicatorVal as number}
 						symbol_pre={chart.indicator.indicatorSymPre}
 					/>
 

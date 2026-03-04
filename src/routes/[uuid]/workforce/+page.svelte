@@ -166,7 +166,8 @@
       parent_table: "22_workforce_TEAMS",
       indicator: {
         indicatorName: "Estimated Funding",
-        indicatorVal: accumulateMappedField(tablesData, '22_workforce_TEAMS', 'estimated_funding')
+        indicatorVal: accumulateMappedField(tablesData, '22_workforce_TEAMS', 'estimated_funding'),
+        indicatorSymPre: '$'
       },
       chartType: "indicator"
     },
@@ -191,7 +192,8 @@
       parent_table: "23_workforce_TX3C",
       indicator: {
         indicatorName: "Estimated Funding",
-        indicatorVal: accumulateMappedField(tablesData, '23_workforce_TX3C', 'estimated_funding')
+        indicatorVal: accumulateMappedField(tablesData, '23_workforce_TX3C', 'estimated_funding'),
+        indicatorSymPre: '$'
       },
       chartType: "indicator"
     },
@@ -199,7 +201,8 @@
         parent_table: "24_workforce_wit",
         indicator: {
           indicatorName: "Estimated Funding",
-          indicatorVal: accumulateMappedField(tablesData, '24_workforce_wit', 'estimated_funding')
+          indicatorVal: accumulateMappedField(tablesData, '24_workforce_wit', 'estimated_funding'),
+        indicatorSymPre: '$'
         },
         chartType: "indicator"
       },
