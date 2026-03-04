@@ -16,8 +16,9 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateArray, accumulateMappedField, accumulateMappedFieldSubtable, collectAllSubrecords, combineRelatedRecords, mapTableData, selectSplitSubtable } from '../../helpers/chartFormatters';
+	import { accumulateArray, accumulateMappedFieldSubtable, collectAllSubrecords, mapTableData} from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
+	import { addScaledColumn, combineRelatedRecords } from '../../helpers/tableFormatters';
 
 	let {
 		data
@@ -61,6 +62,23 @@
     ['legal_clinics'],
     ['legal_clinics_sponsor', 'legal_clinics_attendees', 'legal_clinics_documents' ] 
   );
+  if (lcProcessed) {
+    let scaledLCProcessed = lcProcessed.data
+   scaledLCProcessed = addScaledColumn(scaledLCProcessed, "estimated_value_added", "legal_clinics_attendees", 2500) 
+    charts.push(
+    {
+      parent_table: "17_elder_justice",
+      table: scaledLCProcessed,
+      columns: [
+      ...lcProcessed?.columns,
+      'estimated_value_added',
+        ],
+      fullWidth: true
+    },
+    )
+  }
+
+  $inspect('legal clinics', lcProcessed)
 
   const trainingProcessed = combineRelatedRecords(
     tablesData,
@@ -102,12 +120,7 @@
       },
       chartType: "indicator"
     },  
-    {
-      parent_table: "17_elder_justice",
-      table: lcProcessed?.data,
-      columns: lcProcessed?.columns,
-      fullWidth: true
-    },
+
     {
       parent_table: "17_elder_justice",
       table: trainingProcessed?.data,
@@ -116,13 +129,6 @@
     },
 	)
 
-  // New function adapted from makePie for two-slice sum-based pies
-
-// Updated makeTwoSlicePie.ts (TypeScript – Svelte 5 + Tailwind + PocketBase ready)
-// ✅ Data (value + percent) now **inside** each slice (big, bold, x,xxx format)
-// ✅ Callout lines completely removed (fixes all distortion/truncation)
-// ✅ Colors matched to your screenshot
-// ✅ Tooltip still shows full formatted info on hover
 
 export function makeTwoSlicePie(
   parent_table: string,

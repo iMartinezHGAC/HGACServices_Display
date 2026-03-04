@@ -81,11 +81,17 @@ const cleanVehicles = $derived(
       '34_gc_tow_and_go', selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'), [
 			'free_tows',
 			'paid_tows'
-		]),
+		],
+      'Free and Paid Tows',
+      false
+    ),
 		makeDrilldownPie('34_gc_tow_and_go', selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'), [
 			'towing_charge',
 			'towing_charge_free'
-		]),
+		],
+      'Towing Charges',
+      false
+    ),
 		makeDrilldownPie(
 			'34_gc_tow_and_go',
 			selectSplitSubtable(tablesData, '34_gc_tow_and_go', 'tng'),
@@ -96,7 +102,8 @@ const cleanVehicles = $derived(
 				'medical_fire',
 				'other'
 			],
-			'Other Tow and Go Services Provided'
+			'Other Tow and Go Services Provided',
+      false
 		),
 		makeDrilldownPie(
 			'34_gc_tow_and_go',
@@ -112,7 +119,8 @@ const cleanVehicles = $derived(
 				'towing_services',
 				'traffic_control'
 			],
-			'Motorist Assistance Program (MAP) Services'
+			'Motorist Assistance Program (MAP) Services',
+      false
 		),
 // Same pattern for TIP and LET
 makeValueCountPie(

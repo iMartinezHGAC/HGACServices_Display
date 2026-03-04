@@ -36,13 +36,6 @@
 	}
 
 	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
-<<<<<<< HEAD
-	$inspect('data layout', data.dash_count);
-  $inspect('potential count', data.potential_tab_counts)
-||||||| tabs refactor - get from DB view
-	$inspect('data layout', data.dash_count);
-=======
->>>>>>> master
 </script>
 
 <main
