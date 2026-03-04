@@ -115,7 +115,7 @@
     {
       parent_table: "17_elder_justice",
       indicator: {
-        indicatorName: "New Crime Victim Clients",
+        indicatorName: "New People Receiving Victim Assistance",
         indicatorVal: (accumulateMappedFieldSubtable(tablesData, '17_elder_justice', 'crime_victims','new_client_count')),
       },
       chartType: "indicator"
