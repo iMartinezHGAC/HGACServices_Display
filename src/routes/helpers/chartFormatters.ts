@@ -1773,23 +1773,32 @@ function formatShortDate(value: any): string {
 export function makeBar<T extends Record<string, any>>(
   parent_table: string,
   dataset: T[] | null | undefined,
-  xKey: keyof T, // 'from_date'
-  yKey: keyof T, // 'emissions_reduction' or 'vehicles_monitored'
+  xKey: keyof T,           // e.g. 'from_date'
+  yKey: keyof T,           // e.g. 'emissions_reduction'
   customTitle?: string
 ): ChartType {
-  if (!dataset?.length) {
-    return {
-      parent_table,
-      chart: { charts: getNoDataOption(customTitle ?? snakeToHuman(String(yKey))) },
-      chartType: 'barchart'
-    };
+  if (!dataset || !Array.isArray(dataset) || dataset.length === 0) {
+    return noDataResult(parent_table, yKey, customTitle);
   }
 
-  const xAxisData = dataset.map((item) => formatShortDate(item[xKey]));
-
-  const seriesData = dataset.map((item) => {
+  // Filter to only rows that have a valid numeric y-value
+  const validData = dataset.filter((item) => {
     const v = item[yKey];
-    return typeof v === 'number' && !isNaN(v) ? v : 0;
+    return typeof v === 'number' && !isNaN(v) && v !== null;
+  });
+
+  if (validData.length === 0) {
+    return noDataResult(parent_table, yKey, customTitle);
+  }
+
+  const xAxisData = validData.map((item) =>
+    formatShortDate(item[xKey])
+  );
+
+  const seriesData = validData.map((item) => {
+    const v = item[yKey];
+    // Already checked above, but TypeScript might still be cautious
+    return Number(item[yKey]); // or just item[yKey] as number
   });
 
   const option: echarts.EChartsOption = {
@@ -1797,7 +1806,12 @@ export function makeBar<T extends Record<string, any>>(
     title: {
       text: customTitle ?? snakeToHuman(String(yKey)),
       left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937', fontFamily: "Metropolis" }
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 600,
+        color: '#1f2937',
+        fontFamily: "Metropolis"
+      }
     },
     tooltip: {
       trigger: 'axis',
@@ -1806,7 +1820,7 @@ export function makeBar<T extends Record<string, any>>(
     grid: {
       left: '4%',
       right: '4%',
-      bottom: '10%', // extra space for rotated labels
+      bottom: '10%', // room for rotated labels
       top: '15%',
       containLabel: true
     },
@@ -1839,7 +1853,7 @@ export function makeBar<T extends Record<string, any>>(
         data: seriesData,
         barMaxWidth: 60,
         itemStyle: {
-          color: '#3b82f6', // Tailwind blue-500
+          color: '#3b82f6', // blue-500
           borderRadius: [8, 8, 0, 0]
         },
         emphasis: {
@@ -1852,6 +1866,22 @@ export function makeBar<T extends Record<string, any>>(
   return {
     parent_table,
     chart: { charts: option },
+    chartType: 'barchart'
+  };
+}
+
+// ────────────────────────────────────────────────
+
+function noDataResult(
+  parent_table: string,
+  yKey: PropertyKey,
+  customTitle?: string
+): ChartType {
+  return {
+    parent_table,
+    chart: {
+      charts: getNoDataOption(customTitle ?? snakeToHuman(String(yKey)))
+    },
     chartType: 'barchart'
   };
 }
