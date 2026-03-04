@@ -92,6 +92,7 @@
   {
     parent_table: "14_livable_centers",
     table: lcProcessed?.data,
+      fields: lcProcessed?.fields,
     columns: lcProcessed?.columns,
     fullWidth: true,
     title: "Studies"

@@ -89,7 +89,7 @@
 
 				{:else if chart.table}
 				<!--	{console.log("Table in Card_Graph", chart)}-->
-					<Table data={chart.table} columns={chart.columns} title={chart.title} />
+					<Table data={chart.table} columns={chart.columns} title={chart.title} fields={chart.fields} />
 
 				{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
 

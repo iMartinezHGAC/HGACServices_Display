@@ -59,13 +59,6 @@
 	const charts: ChartType[] = [];
 
 	charts.push(
-    /*
-		makeDrilldownPie('10_parks_and_natural_areas', 
-      splitSubtables(tablesData, '10_parks_and_natural_areas').tng, [
-			'free_tows',
-			'paid_tows'
-		]),
-    */
 		makeCategoryCountDrilldownDonut (
 			'01_solid_waste',
       selectSplitSubtable(tablesData, '01_solid_waste', 'grants'),
@@ -78,7 +71,7 @@
 			[
       'grant_dollars',
 			],
-			'Grant Dollars',
+			'Grant ',
       "$" + 
         (accumulateMappedFieldSubtable(tablesData, '01_solid_waste', 'grants', 'grant_dollars')).toLocaleString() 
 		),

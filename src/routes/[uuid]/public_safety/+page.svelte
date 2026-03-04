@@ -16,7 +16,7 @@
 	import CardBody from '../../components/card_body.svelte';
 	import { accumulateMappedFieldSubtable, makeDrilldownDonut, makeValueSumPie, makeValueSumPieTop10, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
-	import { buildTableData } from '../../helpers/tableFormatters';
+	import { buildTableData, combineRelatedRecords } from '../../helpers/tableFormatters';
 
 	let {
 		data
@@ -66,21 +66,26 @@
 		'to_date'
 	];
 
+  const letProcessed = buildTableData(
+    splitTableData(tablesData, '15_regional_law_enforcement_training'), 
+    false, 
+    ['class_name', 'participants', 'contact_hours_provided', 'from_date'],
+    'class_name',
+    {
+      contact_hours_provided: 'contact_hours',
+      from_date:  'class_date'
+    }
+  )
+
 	charts.push(
-    makeValueSumPieTop10(
-    '15_regional_law_enforcement_training',  // Parent table name (from your data example)
-			splitTableData(tablesData, '15_regional_law_enforcement_training'),
-    'class_name',
-    'participants',                      // The key to count unique values for
-    'Participants by Class Name'          // Optional custom title
-  ),
-    makeValueSumPieTop10(
-    '15_regional_law_enforcement_training',  // Parent table name (from your data example)
-			splitTableData(tablesData, '15_regional_law_enforcement_training'),
-    'class_name',
-    'contact_hours_provided',                      // The key to count unique values for
-    'Contact Hours by Class Name'          // Optional custom title
-  ),
+    {
+      parent_table: "15_regional_law_enforcement_training",
+      table: letProcessed?.data, 
+      columns: letProcessed?.columns,
+      fields: letProcessed?.fields,
+      fullWidth: true,
+      title: "Law Enforcemment Training"
+    },
     makeValueSumPie(
     '16_regional_criminal_justice_grants',  // Parent table name (from your data example)
     splitTableData(tablesData, '16_regional_criminal_justice_grants'),
