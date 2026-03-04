@@ -78,7 +78,7 @@
 			[
       'grant_dollars',
 			],
-			'Grant Cost',
+			'Grant Dollars',
       "$" + 
         (accumulateMappedFieldSubtable(tablesData, '01_solid_waste', 'grants', 'grant_dollars')).toLocaleString() 
 		),

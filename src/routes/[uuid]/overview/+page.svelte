@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { makeDrilldownMultPie, makeProjectCountDrilldownPie, splitTableData } from '../../helpers/chartFormatters';
 	import RenderEchart from '../../components/renderEchart.svelte';
-	import type { ChartType, PB_Record_Type, ProgramType, TabCountType } from '../../../ambient';
+	import type { ChartType, PB_Record_Type} from '../../../ambient';
 	import Indicator from '../../components/indicator.svelte';
-	import StackedEchartBar from '../../charts/StackedEchartBar.svelte';
 
 	const { data }: { data: {
     pbData: PB_Record_Type[],

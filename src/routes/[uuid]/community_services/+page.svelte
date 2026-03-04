@@ -18,8 +18,9 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeGroupedBar, makeValueCountPie, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { makeGroupedBar, makeValueCountPie, splitSubtables} from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
+	import { combineRelatedRecords } from '../../helpers/tableFormatters';
 
 	let {
 		data

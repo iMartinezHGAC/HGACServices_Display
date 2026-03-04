@@ -11,14 +11,12 @@
 		ChartType,
 		CardDataType,
 		EventType,
-
-		PB_Record_Type
-
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, accumulateMappedFieldSubtable, buildTableData, combineRelatedRecords, makeBar, makeDrilldownDonut, makeDrilldownPie, makeValueCountPie, makeValueSumPie, makeValueSumPieTop10, mapSelectedSubtable, safeSelectObjectField, selectSplitSubtable, splitAndMapTable, splitExpandedMapTable, splitSubtables, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedFieldSubtable, makeDrilldownDonut, makeValueSumPie, makeValueSumPieTop10, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
+	import { buildTableData } from '../../helpers/tableFormatters';
 
 	let {
 		data

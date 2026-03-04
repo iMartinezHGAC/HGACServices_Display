@@ -168,8 +168,8 @@ const getNoDataOption = (mainTitle?: string, subtext?: string): EChartsOption =>
     subtext: subtext ?? "No data available",
     left: "center",
     top: 20,
-    textStyle: { fontSize: 16, fontWeight: "bold" },
-    subtextStyle: { fontSize: 14, color: "#999" },
+    textStyle: { fontSize: 16, fontWeight: "bold", fontFamily: "Metropolis"  },
+    subtextStyle: { fontSize: 14, color: "#999", fontFamily: "Metropolis"  },
   },
   graphic: {
     type: "text",
@@ -360,8 +360,8 @@ export function makeHierarchicalCategoryDonut<T = any>(
         subtext: levelText,
         left: "center",
         top: 10,
-        textStyle: { fontSize: 16, fontWeight: "bold" },
-        subtextStyle: { fontSize: 14, color: "#666" },
+        textStyle: { fontSize: 16, fontWeight: "bold", fontFamily: "Metropolis"  },
+        subtextStyle: { fontSize: 14, color: "#666", fontFamily: "Metropolis"  },
       },
       graphic: graphicElements,
       tooltip: {
@@ -369,7 +369,7 @@ export function makeHierarchicalCategoryDonut<T = any>(
         formatter: (params: any) =>
           `${params.name}: ${params.value} projects (${params.percent?.toFixed(1)}%)`,
       },
-      legend: { orient: "horizontal", left: "left", bottom: 10 },
+      legend: { orient: "horizontal", left: "left", bottom: 0 },
       series: pieData.length === 0 ? [] : getStandardPieSeries(pieData, ["40%", "70%"], "{b}\n{c} projects ({d}%)", "{c}"),
     };
   };
@@ -481,6 +481,7 @@ export function makeValueSumDonut<T = any>(
         fontSize: 26,
         fontWeight: "700",
         color: "#1f2937",
+fontFamily: "Metropolis" 
       },
     },
   ];
@@ -495,9 +496,9 @@ export function makeValueSumDonut<T = any>(
       show: !manyCategories,
       orient: "horizontal",
       left: "center",
-      bottom: 38,
+      bottom: 0,
       itemGap: 22,
-      textStyle: { fontSize: 13.5 },
+      textStyle: { fontSize: 14, fontFamily: "Metropolis"  },
     },
     grid: { left: 40, right: 40, top: 90, bottom: 120 },
     series: getStandardPieSeries(parentData, ["40%", "68%"]), // ← donut!
@@ -527,7 +528,7 @@ export function makeValueSumDonut<T = any>(
         text: `${subTotal} items`,
         left: "center",
         top: "center",
-        textStyle: { fontSize: 24, fontWeight: "700", color: "#1f2937" },
+        textStyle: { fontSize: 24, fontWeight: "700", color: "#1f2937", fontFamily: "Metropolis"  },
       },
     ];
 
@@ -541,9 +542,9 @@ export function makeValueSumDonut<T = any>(
         show: !manySub,
         orient: "horizontal",
         left: "center",
-        bottom: 38,
+        bottom: 0,
         itemGap: 22,
-        textStyle: { fontSize: 13.5 },
+        textStyle: { fontSize: 14, fontFamily: "Metropolis"  },
       },
       grid: { left: 40, right: 40, top: 90, bottom: 120 },
       series: getStandardPieSeries(childData, ["40%", "68%"]),
@@ -614,9 +615,6 @@ export function makeCategoryCountDrilldownDonut<T = any>(
     .filter((item) => item.value > 0)
     .sort((a: any, b: any) => b.value - a.value);
 
-  const customTooltipFormatter = (params: any): string => {
-    /* ← paste your original customTooltipFormatter here (unchanged) */
-  };
 
   const legendConfig = {
     orient: "horizontal",
@@ -626,7 +624,7 @@ export function makeCategoryCountDrilldownDonut<T = any>(
     itemWidth: 18,
     itemHeight: 12,
     itemGap: 18,
-    textStyle: { fontSize: 13.2 },
+    textStyle: { fontSize: 14, fontFamily: "Metropolis"  },
     formatter: (name: string) => name,
   };
 
@@ -654,7 +652,7 @@ export function makeCategoryCountDrilldownDonut<T = any>(
       left: "center",
       top: 16
     },
-    tooltip: { trigger: "item", formatter: customTooltipFormatter, confine: true },
+    tooltip: { trigger: "item", formatter: tooltipFormatter, confine: true },
     legend: legendConfig,
     series: seriesConfig,
     graphic: {
@@ -666,6 +664,7 @@ export function makeCategoryCountDrilldownDonut<T = any>(
           text: centerText ?? `${totalCount}`,   // ← auto total if no arg passed
           fontSize: 32,
           fontWeight: '700',
+          fontFamily: "Metropolis",
           fill: '#1f2937',
           textAlign: 'center',
           lineHeight: 1.1,
@@ -796,7 +795,7 @@ export function makeCategoryCountDrilldownPie<T = any>(
     itemWidth: 18,
     itemHeight: 12,
     itemGap: 18,
-    textStyle: { fontSize: 13.2 },
+    textStyle: { fontSize: 14, fontFamily: "Metropolis" },
     formatter: (name: string) => name,   // ← CRITICAL FIX: forces string, kills [object Object]
   };
 
@@ -966,7 +965,7 @@ export function makeProjectCountDrilldownPie<T = any>(
     itemWidth: 18,
     itemHeight: 12,
     itemGap: 22,
-    textStyle: { fontSize: 13.2 },
+    textStyle: { fontSize: 14, fontFamily: "Metropolis"  },
     formatter: (name: string) => getCalloutDisplayInfo(name).full,
   };
 
@@ -1062,7 +1061,7 @@ export function makeDrilldownDonut<T = any>(
       text: centerText,
       left: "center",
       top: "center",
-      textStyle: { fontSize: 20, fontWeight: "bold" },
+      textStyle: { fontSize: 20, fontWeight: "bold", fontFamily: "Metropolis" },
     });
   }
 
@@ -1122,9 +1121,9 @@ export function makeDrilldownDonut<T = any>(
     legend: {
       orient: "horizontal",
       left: "center",
-      bottom: 42,
+      bottom: 0,
       itemGap: 26,
-      textStyle: { fontSize: 13.5 },
+      textStyle: { fontSize: 14, fontFamily: "Metropolis" },
     },
 
     series: getSeriesWithCallouts(parentData),
@@ -1207,7 +1206,7 @@ export function makeDrilldownPie<T = any>(
   const charts: EChartsOption = {
     title: { text: title ?? keys.map((k) => snakeToHuman(String(k))).join(" vs "), left: "center" },
     tooltip: { trigger: "item", formatter: tooltipFormatter },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: { orient: "horizontal", left: "left", bottom: 0 },
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1304,7 +1303,7 @@ export function makeTableDrilldownPie<T = any>(
   const charts: EChartsOption = {
     title: { text: title ?? "Table Sizes", left: "center" },
     tooltip: { trigger: "item" },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: { orient: "horizontal", left: "left", bottom: 0 },
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1394,7 +1393,7 @@ export function makeDrilldownMultPie<T = any>(
       left: "center",
     },
     tooltip: { trigger: "item", formatter: tooltipFormatter },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: { orient: "horizontal", left: "left", bottom: 0 },
     series: getStandardPieSeries(initialPieData, "50%"),
   };
 
@@ -1471,7 +1470,7 @@ export function makeValueCountPie<T = any>(
   const legendConfig = {
     orient: "horizontal",
     left: "left",
-    bottom: 10,
+    bottom: 0,
     formatter: (name: string) => getCalloutDisplayInfo(name).full, // legend always shows full name
   };
 
@@ -1562,7 +1561,7 @@ export function makeValueSumPie<T = any>(
       left: "center",
     },
     tooltip: { trigger: "item" },
-    legend: { show: !manyCategories, orient: "horizontal", left: "left", bottom: 10 },
+    legend: { show: !manyCategories, orient: "horizontal", left: "left", bottom: 0 },
     series: getStandardPieSeries(parentData, "50%", createOuterFormatter(isMonetaryValue), innerLabelFormatter, !manyCategories),
   };
 
@@ -1664,7 +1663,7 @@ export function makeValueSumPieTop10<T = any>(
       left: "center",
     },
     tooltip: { trigger: "item" },
-    legend: { orient: "horizontal", left: "left", bottom: 10 },
+    legend: { orient: "horizontal", left: "left", bottom: 0 },
     series: getStandardPieSeries(parentData, "50%"),
   };
 
@@ -1730,7 +1729,7 @@ export function makePie<T = any>(
       charts: {
         title: { text: snakeToHuman(String(key1)), left: "center" },
         tooltip: { trigger: "item" },
-        legend: { orient: "horizontal", left: "left", bottom: 10 },
+        legend: { orient: "horizontal", left: "left", bottom: 0 },
         series: [
           {
             name: snakeToHuman(String(key1)),
@@ -1791,7 +1790,7 @@ export function makeBar<T extends Record<string, any>>(
     title: {
       text: customTitle ?? snakeToHuman(String(yKey)),
       left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
+      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937', fontFamily: "Metropolis" }
     },
     tooltip: {
       trigger: 'axis',
