@@ -64,14 +64,14 @@
   );
   if (lcProcessed) {
     let scaledLCProcessed = lcProcessed.data
-   scaledLCProcessed = addScaledColumn(scaledLCProcessed, "estimated_value_added", "legal_clinics_attendees", 2500) 
+   scaledLCProcessed = addScaledColumn(scaledLCProcessed, "estimated_value_provided", "legal_clinics_attendees", 2500) 
     charts.push(
     {
       parent_table: "17_elder_justice",
       table: scaledLCProcessed,
       columns: [
       ...lcProcessed?.columns,
-      'estimated_value_added',
+      'estimated_value_provided',
         ],
       fullWidth: true
     },
