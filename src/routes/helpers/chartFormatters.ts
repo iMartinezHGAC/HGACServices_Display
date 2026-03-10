@@ -2267,6 +2267,7 @@ export const shouldRenderCard = (
   return hasRealCharts || hasAdwork;
 };
 
+<<<<<<< HEAD
 export function makeActualProgramsBar(
   utilizationData: UtilizationType | null | undefined,
   title: string = "Utilized Programs by Tab"
@@ -2382,3 +2383,112 @@ export function makeActualProgramsBar(
     chartType: "barchart",
   };
 }
+||||||| post-meeting feedback pt.1
+=======
+// Updated helper – single blue bar chart (actual data only, no stacking)
+export function makeActualProgramsBar(
+  fullActualData: FullTabData | null | undefined,
+  title: string
+): ChartType {
+  if (!fullActualData) {
+    return {
+      chart: { charts: getNoDataOption(title) },
+      chartType: "barchart",
+    };
+  }
+
+  const keyToName: Record<string, string> = {
+    '07': 'Aging Disability',
+    '41': 'Workforce',
+    '55': 'Economic Development',
+    '64': 'Environmental',
+    '71': 'Enterprise Solutions',
+    '74': 'Public Safety',
+    '76': 'Transportation',
+    '92': 'Community Services'
+  };
+
+  const sortedKeys = ['07', '41', '55', '64', '71', '74', '76', '92'];
+
+  const categories = sortedKeys.map((code) => keyToName[code] ?? code);
+
+  // Attach programs directly to each bar data point (for tooltip)
+  const actualData = sortedKeys.map((code) => ({
+    value: fullActualData[code as TabCode].count,
+    programs: fullActualData[code as TabCode].programs,
+  }));
+
+  const option: echarts.EChartsOption = {
+    backgroundColor: '#f1f5f9',
+    title: {
+      text: title,
+      left: "center",
+      textStyle: { fontWeight: "normal", fontSize: 18, fontFamily: 'Metropolis' },
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: (params: any[]) => {
+        const idx = params[0]?.dataIndex ?? 0;
+        const categoryName = categories[idx];
+        const actualItem = actualData[idx];
+        const actual = actualItem.value;
+
+        let html = `<b style="font-size:14px;">${categoryName}</b><br/>`;
+        if (actualItem.programs.length > 0) {
+          html += actualItem.programs.map((p) => `• ${p}`).join('<br/>');
+        }
+
+        return html;
+      },
+    },
+    legend: {
+      data: ["Utilized Programs"],
+      top: 30,
+    },
+    grid: {
+      left: 70,
+      right: 50,
+      bottom: 10,
+      top: 100,
+      containLabel: true,
+    },
+    xAxis: {
+      type: "category",
+      data: categories,
+      axisLabel: {
+        rotate: 45,
+        interval: 0,
+        fontSize: 12,
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { fontSize: 12 },
+    },
+    series: [
+      {
+        name: "Utilized Programs",
+        type: "bar",
+        barWidth: "60px",
+        data: actualData,
+        itemStyle: { color: "#5470c6" },
+        emphasis: { focus: "series" },
+        label: {
+          show: true,
+          position: "inside",
+          fontWeight: "bold",
+          color: "#fff",
+          formatter: (p: any) => (p.data.value > 0 ? p.data.value : ""),
+        },
+      },
+    ],
+  };
+
+  return {
+    chart: { charts: option },
+    chartType: "barchart",
+  };
+}
+
+>>>>>>> master
