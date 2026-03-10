@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { makeActualProgramsBar, makeDrilldownMultPie, makeProjectCountDrilldownPie, splitTableData } from '../../helpers/chartFormatters';
 	import RenderEchart from '../../components/renderEchart.svelte';
-	import type { ChartType, PB_Record_Type} from '../../../ambient';
+	import type { ChartType, PB_Record_Type, UtilizationType} from '../../../ambient';
 	import Indicator from '../../components/indicator.svelte';
 
 	const { data }: { data: {
     pbData: PB_Record_Type[],
+    utilization: UtilizationType | null,
   }} = $props();
+
+  $inspect(data.utilization)
 
   const pbData = $derived(data.pbData)
 const subCollectionsByTable = $derived(
@@ -85,7 +88,7 @@ const subCollectionsByTable = $derived(
 		chartType: 'indicator'
 	}); 
 
-  // 🔥 ONE mapper for everything (PocketBase array or object)
+  /*
   function mapToFullActualData(raw: any): FullTabData {
     const record = Array.isArray(raw) ? (raw[0] ?? {}) : (raw ?? {});
 
@@ -115,13 +118,12 @@ const subCollectionsByTable = $derived(
     ) as FullTabData;
   }
 
-  // Derived data (Svelte 5 runes)
   let fullActualData = $derived(mapToFullActualData(data.dash_count));
 
-  // Updated chart – now a clean single-bar chart (actual data only)
-  const actualProgramsChart = $derived(
+  */
+   const actualProgramsChart = $derived(
     makeActualProgramsBar(
-      fullActualData,
+      data.utilization,
       "Utilized Programs by Category"
     )
   );
@@ -143,9 +145,9 @@ const subCollectionsByTable = $derived(
 </script>
 
 <div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
-	<div class="sticky min-h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
+	<div class="sticky h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
 		<!-- Total Funding Indicator -->
-      {#if fundingIndicator.indicator.indicatorVal}
+      {#if fundingIndicator.indicator?.indicatorVal}
 		<div class="flex h-[18rem] w-full items-center justify-center bg-slate-700">
 			<Indicator
 				above={true}
@@ -159,7 +161,7 @@ const subCollectionsByTable = $derived(
       {/if}
 
 		<!-- Charts Row -->
-		<div class="flex gap-12 justify-center pt-8 w-full">
+		<div class="flex gap-12 justify-center pt-8 w-full pb-24">
 
 			<div class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} />

@@ -2,31 +2,24 @@
 import { PB_URL } from "$env/static/private";
 import type { PageServerLoad } from "./$types";
 import { FetchTable, GenerateFilter, getSubtableSchema } from "../../helpers/apiHelpers";
-import type { PotentialTabType, TabCountRecord, TabCountType } from "../../../ambient";
+import type { PotentialTabType, TabCountRecord, TabCountType, UtilizationType } from "../../../ambient";
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
   const juris_id = params.uuid;
   const pbData: Array<{ collection: string; subCollections: Record<string, any[]>; error?: string }> = [];
 
-  let potentialTabTotal: PotentialTabType[]
-  try {
-    potentialTabTotal = await locals.pb.collection("dashboard_potential_project_count").getFullList<PotentialTabType>();
-  } catch (err) {
-    console.error("Failed to fetch programs:", err);
-    potentialTabTotal = [];
-  }
+/********************** UTILIZATION **************/
+  let utilData: UtilizationType | null = null
+  const jurisId = params.uuid;
 
-  let tabCounts: TabCountRecord[]
   try {
-    tabCounts = await locals.pb.collection("tab_visibility_union_stringarrays").getFullList({
-      filter: `jurisdiction = '${juris_id}'`
-    });
-    console.log('tabCount Data', tabCounts)
-  } catch (err) {
-    console.error("Failed to fetch programs:", err);
-    tabCounts = [];
+    const res = await fetch(`${PB_URL}/api/jurisdiction/${jurisId}/utilization`)
+    utilData = await res.json()
+  } catch(error) {
+    console.error(error)
   }
+/********************** UTILIZATION **************/
 
   for (const table of collections) {
     console.log('Processing table', table);
@@ -90,8 +83,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   return {
     pbData: pbData,
-    potential_tabs: potentialTabTotal,
-    dash_count: tabCounts,
+    utilization: utilData,
   };
 };
 
