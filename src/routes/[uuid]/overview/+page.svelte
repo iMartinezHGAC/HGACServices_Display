@@ -88,86 +88,9 @@ const subCollectionsByTable = $derived(
 		chartType: 'indicator'
 	}); 
 
-<<<<<<< HEAD
-  /*
-||||||| post-meeting feedback pt.1
-  const dataPotential: Record<string, number> = data.potential_tabs.reduce((acc, item) => {
-    acc[item.id] = item.tab_project_count;
-    return acc;
-  }, {} as Record<string, number>);
-
-	//$inspect('data potential raw', data.potential_tabs);
-	//$inspect('data potential', dataPotential);
-
-
-const tabCodeMap = {
-    "41": "workforce",
-    "64": "environmental",
-    "71": "enterprise_solutions",
-    "55": "economic_development",
-    "07": "aging_disability",
-    "92": "community_services",
-    "74": "public_safety",
-    "76": "transportation"
-  } as const;
-
-  type TabCode = keyof typeof tabCodeMap;
-
-  type FullTabData = Record<TabCode, { count: number; programs: string[] }>;
-
-  // 🔥 ONE mapper for everything (PocketBase array or object)
-=======
-  // 🔥 ONE mapper for everything (PocketBase array or object)
->>>>>>> master
-  function mapToFullActualData(raw: any): FullTabData {
-    const record = Array.isArray(raw) ? (raw[0] ?? {}) : (raw ?? {});
-
-    return Object.fromEntries(
-      Object.entries(tabCodeMap).map(([code, category]) => {
-        const programsField = `${category}_programs` as keyof typeof record;
-        const rawPrograms = record[programsField] ?? [];
-
-        // Handles your exact data format: array of comma-strings
-        const programs = Array.isArray(rawPrograms)
-          ? rawPrograms.flatMap((item: any) => {
-              if (typeof item === 'string') {
-                return item.split(',').map((s) => s.trim()).filter(Boolean);
-              }
-              return [];
-            })
-          : [];
-
-        return [
-          code as TabCode,
-          {
-            count: Number(record[category as keyof typeof record] ?? 0),
-            programs,
-          },
-        ];
-      })
-    ) as FullTabData;
-  }
-
-  let fullActualData = $derived(mapToFullActualData(data.dash_count));
-
-<<<<<<< HEAD
-  */
    const actualProgramsChart = $derived(
     makeActualProgramsBar(
       data.utilization,
-||||||| post-meeting feedback pt.1
-  // Your chart call (no other changes needed)
-  const actualPotentialChart = $derived(
-    makeActualPotentialStackedBar(
-      fullActualData,
-      dataPotential,
-      "Actual vs Potential Programs by Category"
-=======
-  // Updated chart – now a clean single-bar chart (actual data only)
-  const actualProgramsChart = $derived(
-    makeActualProgramsBar(
-      fullActualData,
->>>>>>> master
       "Utilized Programs by Category"
     )
   );
