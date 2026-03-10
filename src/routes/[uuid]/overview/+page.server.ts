@@ -4,22 +4,12 @@ import type { PageServerLoad } from "./$types";
 import { FetchTable, GenerateFilter, getSubtableSchema } from "../../helpers/apiHelpers";
 import type { PotentialTabType, TabCountRecord, TabCountType, UtilizationType } from "../../../ambient";
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load: PageServerLoad = async ({ locals, params, parent }) => {
   const collections = ['34_gc_tow_and_go', '35_rtp', '36_transportation_improvement_plan'];
   const juris_id = params.uuid;
   const pbData: Array<{ collection: string; subCollections: Record<string, any[]>; error?: string }> = [];
 
-/********************** UTILIZATION **************/
-  let utilData: UtilizationType | null = null
-  const jurisId = params.uuid;
-
-  try {
-    const res = await fetch(`${PB_URL}/api/jurisdiction/${jurisId}/utilization`)
-    utilData = await res.json()
-  } catch(error) {
-    console.error(error)
-  }
-/********************** UTILIZATION **************/
+  const parentData = await parent()
 
   for (const table of collections) {
     console.log('Processing table', table);
@@ -82,8 +72,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   }
 
   return {
+    ...parentData,
     pbData: pbData,
-    utilization: utilData,
   };
 };
 

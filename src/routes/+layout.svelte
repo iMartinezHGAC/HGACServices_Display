@@ -42,7 +42,7 @@
 	class="fixed flex h-screen w-screen flex-col items-center justify-start bg-slate-200 bg-cover"
 >
 	{#if data.uuid}
-		<Splash chosenTab={routePath} {jurisdiction} {logo_url} dashboard_groups={data.dashboard_groups as DashboardType[]} dash_count={data.dash_count} />
+		<Splash chosenTab={routePath} {jurisdiction} {logo_url} dashboard_groups={data.dashboard_groups as DashboardType[]} utilization={data.utilization} />
 	{/if}
 	{@render children()}
 </main>
