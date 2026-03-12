@@ -1,4 +1,3 @@
-// +layout.server.ts (revised – sequential checks to avoid "Too many subrequests" overload)
 import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { PB_GENERIC_USER, PB_GENERIC_PASS, PB_URL } from "$env/static/private";
@@ -11,17 +10,17 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
 
   const juris_id = params.uuid;
 
-/********************** UTILIZATION **************/
+  /********************** UTILIZATION **************/
   let utilData: UtilizationType | null = null
   const jurisId = params.uuid;
 
   try {
     const res = await fetch(`${PB_URL}/api/jurisdiction/${jurisId}/utilization`)
     utilData = await res.json()
-  } catch(error) {
+  } catch (error) {
     console.error(error)
   }
-/********************** UTILIZATION **************/
+  /********************** UTILIZATION **************/
   try {
     // Generic authentication with diagnostics
     await locals.pb.collection("users").authWithPassword(PB_GENERIC_USER, PB_GENERIC_PASS);
@@ -44,6 +43,6 @@ export const load: LayoutServerLoad = async ({ locals, url, params }) => {
     uuid: params.uuid,
     routeID: url.pathname,
     dashboard_groups: dash_tabs,
-    utilization:  utilData
+    utilization: utilData
   };
 };

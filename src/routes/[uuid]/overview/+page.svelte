@@ -130,8 +130,9 @@ const subCollectionsByTable = $derived(
 		<!-- Charts Row -->
 		<div class="flex gap-12 justify-center pt-8 w-full pb-24">
 
-			<div class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
+			<div class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} />
+        <p class="font-[Metropolis]">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
