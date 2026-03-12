@@ -7,8 +7,9 @@ interface TableDataResult<T = any> {
   [tableName: string]: T | { error: string }
 }
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load: PageServerLoad = async ({ locals, request, params }) => {
 
+  /*
   let eventsData: EventType[] = []
   // Build program OR conditions (unchanged from your original)
   try {
@@ -24,10 +25,21 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   } catch (err) {
     console.error('Error trying to get jurisdiction data', err)
   }
+  */
+  const pocketbase = new PocketBase('192.168.2.2')
+  locals.pb.authStore.loadFromCookie(request.headers.get('cookie') || '')
 
+  const jurisId = '9dek35nm3dm50xu'
+
+  let res = await fetch(`http://127.0.0.1:8090/api/jurisdiction/${jurisId}/utilization`)
+  let result = await res.json()
+  console.log(result)
   return {
+    /*
     eventsData: eventsData,
     jurisdictionData: jurisdictionData
+    */
+    dashboardData: result
   }
 }
 

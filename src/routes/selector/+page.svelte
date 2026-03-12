@@ -39,7 +39,31 @@
 		return (item: T) => stringFilter(item[prop] as string);
 	}
 
-	let filteredList: JurisdictionType[] = $state(data.data);
+export const jurisdictionComparator = (
+  a: JurisdictionType,
+  b: JurisdictionType
+): number => {
+  const getOrder = (id: string): number => {
+    const upper = id.toUpperCase().trim();
+    if (upper.startsWith('CNTY')) return 0;
+    if (upper.startsWith('CCP'))  return 1;
+    if (upper.startsWith('CITY')) return 2;
+    if (upper.startsWith('ISD'))  return 3;
+    return 99;
+  };
+
+  const orderA = getOrder(a.jurisdiction_id);
+  const orderB = getOrder(b.jurisdiction_id);
+
+  // Primary: CNTY → CCP → CITY → ISD
+  if (orderA !== orderB) return orderA - orderB;
+
+  // Secondary: alphabetical by name (stable & clean for Tailwind tables)
+  return a.name.localeCompare(b.name);
+};
+
+let filteredList: JurisdictionType[] = $derived(
+  [...data.data].sort(jurisdictionComparator))
 
 	let searchTerm: string = '';
 
@@ -47,7 +71,7 @@
 		const input = event.target as HTMLInputElement;
 		searchTerm = input.value;
 		const filterCallback = filterByProperty<JurisdictionType>('name', searchTerm);
-		filteredList = data.data.filter(filterCallback).sort(sortDescending);
+		filteredList = data.data.filter(filterCallback).sort(jurisdictionComparator);
 	}
 
 	// Loading state for the clicked jurisdiction (spinner + disable all buttons while navigating)
@@ -105,6 +129,8 @@
       return fullUrl ?? null;
     }
   }
+
+  $inspect('juris list',filteredList)
 </script>
 
 <!------------------------ PSEUDO SPLASH -------------------------------------------------------------->

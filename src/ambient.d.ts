@@ -5,7 +5,7 @@ type JurisdictionType = {
   collectionId: string,
   collectionName: string,
   name: string,
-  geography: string,
+  jurisdiction_id: string,
   id: string
 }
 
