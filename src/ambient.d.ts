@@ -307,3 +307,20 @@ type PotentialTabType = {
   id: string;
   tab_project_count: number;
 };
+
+type UtilProgramType = {
+    id: string,
+    hasData: boolean,
+    name: string
+}
+
+
+type UtilizationBodyType = {
+  tab: string,
+  programs: UtilProgramType[],
+}
+
+type UtilizationType = {
+  groups: UtilizationBodyType[],
+  jurisdiction: string
+}

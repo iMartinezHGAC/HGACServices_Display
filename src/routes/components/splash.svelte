@@ -1,7 +1,7 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
   import help from "$lib/assets/feedback.svg"
-	import type { DashboardType, TabCountType } from '../../ambient';
+	import type { DashboardType, TabCountType, UtilizationBodyType, UtilizationType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
@@ -12,10 +12,22 @@
 		jurisdiction: string;
     logo_url: string | null;
 		dashboard_groups: DashboardType[];
-    dash_count: TabCountType[]
+    utilization: UtilizationType | null
 	}
 
-	let { chosenTab, jurisdiction, logo_url, dashboard_groups, dash_count }: props = $props();
+	let { chosenTab, jurisdiction, logo_url, dashboard_groups, utilization }: props = $props();
+
+  // Filter out tabs where ALL programs have hasData: false
+  const activeGroups = $derived(utilization?.groups.filter(group =>
+    (group.programs ?? []).some(p => p.hasData)
+  ))
+  $inspect('utilization in layout', utilization)
+  $inspect('not null utilization', activeGroups)
+
+  const hasTab = ( (tab: string) =>
+    activeGroups?.some((group: UtilizationBodyType) => group.tab === tab)
+  )
+
 
 	function toEverettCase(tabName: string) {
 		return tabName.split(' ').join('%20');
@@ -59,51 +71,6 @@
 		return () => clearTimeout(timeoutId);
 	});
 
-  /**
- * Checks if a dashboard tab has any active programs (i.e., programs with non-empty parent tables)
- * 
- * @param dashboardTabsCounts - The filtered counts object where keys are dashboard tab IDs
- *                            and values are the number of active programs for that tab
- * @param dash_id - The dashboard tab ID to check (as string)
- * @returns true if the tab exists in the counts (meaning it has at least one active program),
- *          false otherwise
- */
-export function hasActiveTab(
-  coded_tabs: CodedTabCounts,
-  dash_id: keyof CodedTabCounts
-): boolean {
-  return coded_tabs[dash_id] > 0
-}
-
-  const tabCodeMap = {
-  workforce: "41",
-  environmental: "64",
-  has_enterprise_solutions: "71",
-  economic_development: "55",
-  aging_disability: "07",
-  community_services: "92",
-  public_safety: "74",
-  transportation: "76",
-} as const;
-
-type CodedTabCounts = {
-  [K in keyof typeof tabCodeMap as typeof tabCodeMap[K]]: number;
-};
-
-function mapToCodedTabs(data: TabCountType): CodedTabCounts {
-  return {
-    "41": data.has_workforce,
-    "64": data.has_environmental,
-    "71": data.has_enterprise_solutions,
-    "55": data.has_economic_development,
-    "07": data.has_aging_disability,
-    "92": data.has_community_services,
-    "74": data.has_public_safety,
-    "76": data.has_transportation,
-  };
-}
-
-  let codedTabs = $derived(mapToCodedTabs(dash_count[0]))
   const overview: DashboardType = {
     id: '00',
     tab_name: "overview",
@@ -163,7 +130,7 @@ function mapToCodedTabs(data: TabCountType): CodedTabCounts {
 	<div class="flex flex-wrap items-end justify-start overflow-y-auto">
     {@render tabSnippet(overview)}
 		{#each dashboard_groups as dash}
-      {#if hasActiveTab(codedTabs, dash.id as keyof CodedTabCounts)}
+      {#if hasTab(dash.tab_name)}
         {@render tabSnippet(dash)}
       {/if}
 		{/each}

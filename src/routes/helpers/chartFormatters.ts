@@ -8,6 +8,7 @@ import type {
   IndicatorType,
   EventType,
   AdworkType,
+  UtilizationType,
 } from "../../ambient";
 
 import type { EChartsOption, DefaultLabelFormatterCallbackParams } from "echarts";
@@ -2266,40 +2267,46 @@ export const shouldRenderCard = (
   return hasRealCharts || hasAdwork;
 };
 
-// Updated helper – single blue bar chart (actual data only, no stacking)
 export function makeActualProgramsBar(
-  fullActualData: FullTabData | null | undefined,
-  title: string
-): ChartType {
-  if (!fullActualData) {
+  utilizationData: UtilizationType | null | undefined,
+  title: string = "Utilized Programs by Tab"
+): {
+  chart: { charts: EChartsOption };
+  chartType: "barchart";
+} {
+  if (!utilizationData?.groups?.length) {
     return {
       chart: { charts: getNoDataOption(title) },
       chartType: "barchart",
     };
   }
 
-  const keyToName: Record<string, string> = {
-    '07': 'Aging Disability',
-    '41': 'Workforce',
-    '55': 'Economic Development',
-    '64': 'Environmental',
-    '71': 'Enterprise Solutions',
-    '74': 'Public Safety',
-    '76': 'Transportation',
-    '92': 'Community Services'
-  };
+// Filter out tabs where ALL programs have hasData: false
+  const activeGroups = utilizationData.groups.filter(group =>
+    (group.programs ?? []).some(p => p.hasData)
+  );
 
-  const sortedKeys = ['07', '41', '55', '64', '71', '74', '76', '92'];
+  if (!activeGroups.length) {
+    return {
+      chart: { charts: getNoDataOption(title) },
+      chartType: "barchart",
+    };
+  }
 
-  const categories = sortedKeys.map((code) => keyToName[code] ?? code);
+  // Dynamic tabs from backend (already sorted) + snakeToHuman
+  const categories = activeGroups.map((group) => snakeToHuman(group.tab));
 
-  // Attach programs directly to each bar data point (for tooltip)
-  const actualData = sortedKeys.map((code) => ({
-    value: fullActualData[code as TabCode].count,
-    programs: fullActualData[code as TabCode].programs,
-  }));
+  // Safe map – only utilized programs
+  const barData = activeGroups.map((group) => {
+    const utilizedPrograms = (group.programs ?? [])
+      .filter((p) => p.hasData)
+      .map((p) => p.name);
 
-  const option: echarts.EChartsOption = {
+    return {
+      value: utilizedPrograms.length,
+      programs: utilizedPrograms,
+    };
+  });  const option: EChartsOption = {
     backgroundColor: '#f1f5f9',
     title: {
       text: title,
@@ -2312,12 +2319,16 @@ export function makeActualProgramsBar(
       formatter: (params: any[]) => {
         const idx = params[0]?.dataIndex ?? 0;
         const categoryName = categories[idx];
-        const actualItem = actualData[idx];
-        const actual = actualItem.value;
+        const item = barData[idx];
+        const count = item.value;
 
-        let html = `<b style="font-size:14px;">${categoryName}</b><br/>`;
-        if (actualItem.programs.length > 0) {
-          html += actualItem.programs.map((p) => `• ${p}`).join('<br/>');
+        let html = `<b style="font-size:14px;">${snakeToHuman(categoryName)}</b><br/>`;
+        html += `<span style="color:#5470c6">Utilized Programs: <b>${count}</b></span><br/><br/>`;
+
+        if (item.programs.length > 0) {
+          html += item.programs.map((p: string) => `• ${p}`).join('<br/>');
+        } else {
+          html += "• No programs with data in this tab";
         }
 
         return html;
@@ -2351,8 +2362,8 @@ export function makeActualProgramsBar(
       {
         name: "Utilized Programs",
         type: "bar",
-        barWidth: "60px",
-        data: actualData,
+        barWidth: "50px",
+        data: barData,
         itemStyle: { color: "#5470c6" },
         emphasis: { focus: "series" },
         label: {
@@ -2371,4 +2382,3 @@ export function makeActualProgramsBar(
     chartType: "barchart",
   };
 }
-
