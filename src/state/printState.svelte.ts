@@ -49,6 +49,31 @@ function restoreTitle() {
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 /**
+ * Fonts. Browsers download a web font only once something on screen uses it, and print a
+ * snapshot without waiting for downloads still in flight: content that first appears in print
+ * mode (masthead, expanded sections, chart legends) then prints in a fallback system font, and
+ * only a second attempt (font now cached) comes out right. So every declared face that covers
+ * Latin text is fetched up front, and the Print button also waits for it.
+ */
+let fontsLoading: Promise<unknown> | null = null;
+
+const coversLatin = (face: FontFace) => /U\+0+-(?:0*FF|10FFFF)\b/i.test(face.unicodeRange);
+
+function preloadFonts(): Promise<unknown> {
+	if (typeof document === 'undefined' || !document.fonts) return Promise.resolve();
+	fontsLoading ??= Promise.allSettled(
+		Array.from(document.fonts)
+			.filter(coversLatin)
+			.map((face) => face.load())
+	).then(() => document.fonts.ready);
+	return fontsLoading;
+}
+
+/** Resolves when `promise` does, or after `ms`, whichever is first: never block printing for long. */
+const atMost = (promise: Promise<unknown>, ms: number) =>
+	Promise.race([promise, new Promise((resolve) => setTimeout(resolve, ms))]);
+
+/**
  * Switch to print mode, wait for the expanded content and charts to render,
  * then open the browser's print dialog ("Save as PDF" is a destination there).
  */
@@ -69,6 +94,9 @@ export async function printPage() {
 	await nextFrame();
 	await nextFrame();
 	await new Promise((resolve) => setTimeout(resolve, 150)); // let freshly mounted charts paint
+	// fonts used by the print version (see preloadFonts); capped so a slow network can't stall the dialog
+	await atMost(Promise.all([preloadFonts(), document.fonts?.ready]), 4000);
+	await nextFrame(); // re-layout with the fonts in place
 
 	applyPrintTitle();
 	window.print();
@@ -86,6 +114,11 @@ export function installPrintListeners() {
 	};
 	window.addEventListener('beforeprint', before);
 	window.addEventListener('afterprint', after);
+
+	// Ctrl/Cmd+P cannot be made to wait, so fetch the fonts ahead of time, once the page is idle
+	const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
+	idle(() => void preloadFonts());
+
 	return () => {
 		window.removeEventListener('beforeprint', before);
 		window.removeEventListener('afterprint', after);
