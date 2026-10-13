@@ -62,8 +62,10 @@ export const jurisdictionComparator = (
   return a.name.localeCompare(b.name);
 };
 
+// `?? []`: while goto() leaves this page, it briefly receives the next route's data (no `data` list).
+// Throwing here aborts SvelteKit's navigation, leaving `navigating` set and the splash spinner up for good.
 let filteredList: JurisdictionType[] = $derived(
-  [...data.data].sort(jurisdictionComparator))
+  [...(data.data ?? [])].sort(jurisdictionComparator))
 
 	let searchTerm: string = '';
 
@@ -71,7 +73,7 @@ let filteredList: JurisdictionType[] = $derived(
 		const input = event.target as HTMLInputElement;
 		searchTerm = input.value;
 		const filterCallback = filterByProperty<JurisdictionType>('name', searchTerm);
-		filteredList = data.data.filter(filterCallback).sort(jurisdictionComparator);
+		filteredList = (data.data ?? []).filter(filterCallback).sort(jurisdictionComparator);
 	}
 
 	// Loading state for the clicked jurisdiction (spinner + disable all buttons while navigating)
