@@ -23,3 +23,197 @@
   --font-sans: Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-gothic: "URW Gothic", sans-serif;
 }
+
+/* ───────────────────────────── Print / Save as PDF ─────────────────────────────
+   The app shell is `fixed` + `h-screen` with an inner scroll container, which a
+   browser prints as a single clipped page. These rules flatten it into a normal
+   flowing document and re-lay the content out for paper (Letter, 7.5in wide).
+
+   Hooks set in the Svelte components:
+     [data-print-reset]        un-fix / un-clamp layout containers
+     [data-print-card]         a program section (header + content)
+     [data-print-card-header]  its dark header bar (never split, stays with content)
+     [data-print-grid]         the content grid; becomes plain block flow (see below)
+     [data-print-kind]         "indicator" | "chart" | "table": how a cell is sized
+     [data-print-avoid]        do not split this block across pages
+     [data-print-indicator]    KPI tile
+     [data-print-table]        data table
+     [data-echart]             chart container
+   Tailwind's `print:` variant is used in markup for simple per-element tweaks.
+   Layout-level rules live here with !important because responsive variants
+   (md:) otherwise win: print pages are ~816px wide, which still matches md.
+   ───────────────────────────────────────────────────────────────────────────── */
+@page {
+  size: letter;
+  margin: 0.5in;
+  /* Page numbers: honoured by Chromium/Edge; Firefox and Safari ignore margin boxes */
+  @bottom-center {
+    content: "Page " counter(page) " of " counter(pages);
+    font: 8pt Arial, sans-serif;
+    color: #555;
+  }
+}
+
+@media print {
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    font-size: 10pt;
+  }
+
+  /* Keep header bars, chart colours and table shading (browsers drop backgrounds by default) */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    animation: none !important;
+  }
+
+  [data-print-reset] {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: visible !important;
+  }
+
+  main[data-print-reset] {
+    display: block !important;
+    background: #fff !important;
+  }
+
+  /* Scroll boxes would clip content on paper */
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+  .max-h-96 {
+    max-height: none !important;
+  }
+
+  /* ── Page breaks ── */
+  [data-print-avoid],
+  tr,
+  img,
+  svg {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  /* A card header is never split, and always stays with the first block under it */
+  [data-print-card-header] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* ── Program card ── */
+  [data-print-card] {
+    margin: 0 0 0.18in !important;
+    border-width: 1px !important;
+    border-radius: 4px !important;
+    height: auto !important;
+  }
+
+  /* ── Content grid ──
+     Plain block flow on purpose: KPI tiles are inline-blocks (so they sit side by side and
+     centre), charts and tables are blocks that take the full width. Flex/grid containers
+     fragment poorly across pages (a table would jump whole to the next page). */
+  [data-print-grid] {
+    display: block !important;
+    padding: 0.14in 0.16in 0 !important;
+    text-align: center;
+  }
+  [data-print-kind] {
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible !important;
+    text-align: left;
+    margin: 0 0 0.14in !important;
+  }
+  [data-print-kind="chart"],
+  [data-print-kind="table"] {
+    display: block !important;
+  }
+  [data-print-kind="indicator"] {
+    display: inline-block !important;
+    width: 2.25in !important;
+    margin: 0 0.07in 0.14in !important;
+    vertical-align: top;
+  }
+  [data-print-kind="table"] h2 {
+    font-size: 12pt;
+    margin-bottom: 0.08in;
+    text-align: left;
+  }
+
+  /* KPI tile: compact, no drop shadow */
+  [data-print-indicator] {
+    height: auto !important;
+    min-height: 1.3in;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.12in 0.1in !important;
+    border-radius: 0.1in !important;
+    box-shadow: none !important;
+  }
+
+  /* Charts: a fixed paper-friendly box. ECharts draws at a fixed pixel size, so the
+     SVG (which RenderEchart gives a viewBox) is stretched to the box and the browser
+     scales the whole chart uniformly to fit it: no overflow into neighbouring content. */
+  [data-echart] {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 3.5in !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+  [data-echart] > div:first-child,
+  [data-echart] > div:first-child > svg,
+  [data-echart] > svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  /* ── Tables: dense, zebra-striped, header repeats on each page ── */
+  [data-print-table] {
+    width: 100%;
+    font-size: 7.5pt !important;
+    line-height: 1.25 !important;
+  }
+  [data-print-table] th,
+  [data-print-table] td {
+    padding: 0.035in 0.07in !important;
+    overflow-wrap: break-word; /* NOT "anywhere"/break-all: those collapse column min-widths */
+  }
+  [data-print-table] td.whitespace-nowrap {
+    white-space: nowrap;
+  }
+  [data-print-table] tbody tr:nth-child(even) {
+    background: #f1f5f9;
+  }
+  thead {
+    display: table-header-group; /* repeat table headers on each page */
+  }
+  th.sticky {
+    position: static !important;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}

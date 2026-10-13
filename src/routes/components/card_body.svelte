@@ -64,15 +64,16 @@
 	</div>
 {/snippet}
 
-<div class="w-screen">
+<div class="w-screen" data-print-reset>
 	<div
-		class="fixed top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl"
+		class="fixed top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl print:hidden"
 	>
 		{#each visibleCardNames as cardName}
 			{@render formattedEntryText(cardName)}
 		{/each}
 	</div>
 	<div
+		data-print-reset
 		class="z-10 ml-56 flex h-screen w-[calc(100%-14rem)] flex-col items-center justify-start overflow-auto scroll-smooth pt-[0%] pb-[6%]"
 		transition:fly={{ x: flyValue, duration: 300 }}
 	>

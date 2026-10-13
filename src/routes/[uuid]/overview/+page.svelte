@@ -111,8 +111,8 @@ const subCollectionsByTable = $derived(
   type FullTabData = Record<TabCode, { count: number; programs: string[] }>;
 </script>
 
-<div class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
-	<div class="sticky h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
+<div data-print-reset class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
+	<div data-print-reset class="sticky h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
 		<!-- Total Funding Indicator -->
       {#if fundingIndicator.indicator?.indicatorVal}
 		<div class="flex h-[18rem] w-full items-center justify-center bg-slate-700">
@@ -128,15 +128,15 @@ const subCollectionsByTable = $derived(
       {/if}
 
 		<!-- Charts Row -->
-		<div class="flex gap-12 justify-center pt-8 w-full pb-24">
+		<div class="flex gap-12 justify-center pt-8 w-full pb-24 print:flex-col print:items-center print:gap-4 print:pb-4">
 
-			<div class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
+			<div data-print-avoid class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:w-full print:py-4">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} />
         <p class="font-[Metropolis]">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
-			<div class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100">
+			<div data-print-avoid class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:w-full print:py-4">
 				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} />
 			</div>
 

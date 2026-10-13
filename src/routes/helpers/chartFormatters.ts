@@ -139,6 +139,7 @@ const isMonetary = (key: string): boolean => {
 };
 
 const createOuterFormatter = (forceMonetary = false) => (p: any) => {
+  if (p.value === 0 || p.value === "0") return "";   // no "0 (0.0%)" labels on empty slices
   const name = p.name || "Unknown";
   let valueStr = formatNumber(p.value ?? 0);
 
@@ -194,6 +195,7 @@ const getNoDataOption = (mainTitle?: string, subtext?: string): EChartsOption =>
 });
 
 const monetaryOuterFormatter = (p: any) => {
+  if (p.value === 0 || p.value === "0") return "";   // no "0 (0.0%)" labels on empty slices
   const name = p.name || "Unknown";
   let valueStr = formatNumber(p.value ?? 0);
   if (isMonetary(name)) valueStr = "$" + valueStr;
@@ -214,7 +216,10 @@ const getStandardPieSeries = (
       type: "pie",
       radius,
       center: ["50%", "50%"],
-      data,
+      // Empty slices keep their legend entry but get no label or leader line
+      data: data.map((d: any) =>
+        d && Number(d.value) === 0 ? { ...d, label: { show: false }, labelLine: { show: false } } : d
+      ),
       emphasis: {
         itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.5)" },
       },

@@ -1,9 +1,5 @@
 <script lang="ts">
 	import CardBlurbTb from '../fragments/cardBlurbTB.svelte';
-	import Printer from '$lib/assets/printer.svelte';
-
-	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
-	import { graphsState } from '../charts/graphVectors.svelte';
 	import type { AdworkType, ChartType, ProgramType } from '../../ambient';
 	import CardGraph from './card_graph.svelte';
 	import { shouldRenderCard } from '../helpers/chartFormatters';
@@ -35,38 +31,28 @@
 		return '';
 	});
 
-	const graphState = graphsState();
-
-	function handleExportClick() {
-		exportChartToPDF(graphState.graph, project.program_name + ' - Harris County');
-	}
-
-	function toGraph(vector: HTMLDivElement) {
-		graphState.clear();
-		graphState.add(vector as HTMLDivElement);
-	}
 </script>
 
 {#if shouldRenderCard(charts, additionalWork, project)}
 	<div
+		data-print-card
 		class="mb-4 w-full h-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
 	>
-		<div class="flex w-full bg-slate-700">
-			<div class="flex w-full flex-col">
+		<div class="flex w-full bg-slate-700 print:items-start" data-print-card-header>
+			<div class="flex w-full flex-col print:w-[30%] print:flex-none">
 				<h1
-					class="small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white"
+					class="small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white print:pt-3 print:pb-1 print:pl-4 print:text-[14pt] print:leading-tight"
 				>
 					{project.program_name}
 					<div class="flex flex-grow"></div>
 				</h1>
 				{#if linkUrls.length > 0}
-					<div class="flex flex-col pb-4 ml-10 w-1/4">
+					<div class="flex flex-col pb-4 ml-10 w-1/4 print:ml-4 print:w-full print:pb-2">
 						{#each linkUrls as link}
 							<a
 								href={link.url_string}
-								id="programLink"
 								aria-label="link"
-								class="font-[Metropolis] font-medium text-white w-auto"
+								class="font-[Metropolis] font-medium text-white w-auto print:text-[8pt]"
 							>
 								{link.display_text}
 							</a>
@@ -74,19 +60,10 @@
 					</div>
 				{/if}
 			</div>
-      <div class="flex w-3/4 mr-40">
+      <div class="flex w-3/4 mr-40 print:w-[70%] print:flex-none print:mr-0 print:pr-4">
         <CardBlurbTb text={blurb} />
       </div>
       <div class="flex-grow"></div>
-      <!--
-			<button
-				onclick={handleExportClick}
-				id="printerIcon"
-				class="group mr-8 flex cursor-pointer items-start justify-start bg-slate-700 bg-none pt-8 font-[Staatliches] font-medium active:bg-slate-800"
-			>
-				<Printer id="printerIcon" />
-			</button>
--->
 		</div>
 		<CardGraph {project} {charts} {additionalWork} />
 	</div>

@@ -1,21 +1,19 @@
-let graphs: HTMLDivElement[] = []
+let graphs: HTMLElement[] = []
+
+/** Sort in document order; registration order depends on mount timing and isn't reliable. */
+function byDocumentOrder(a: HTMLElement, b: HTMLElement) {
+  if (a === b) return 0
+  return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+}
 
 export function graphsState() {
 
-  function doesGraphExist(checkedGraph: HTMLDivElement) {
-    if(graphs.find(graph => graph === checkedGraph) === undefined) return false 
-    return true
+  function addGraph(newGraph: HTMLElement) {
+    if (!graphs.includes(newGraph)) graphs.push(newGraph)
   }
 
-  function addGraph(newGraph: HTMLDivElement) {
-    graphs.push(newGraph)
-  }
-
-  function useAddGraph(newGraph: HTMLDivElement) {
-    if(doesGraphExist(newGraph))
-      console.error("Graph already in state")
-    else
-      addGraph(newGraph)
+  function removeGraph(oldGraph: HTMLElement) {
+    graphs = graphs.filter(graph => graph !== oldGraph)
   }
 
   function clearGraphs() {
@@ -23,8 +21,9 @@ export function graphsState() {
   }
 
   return {
-    get graph() {return graphs},
-    add: useAddGraph,
+    get graph() {return graphs.filter(g => g.isConnected).sort(byDocumentOrder)},
+    add: addGraph,
+    remove: removeGraph,
     clear: clearGraphs
   }
 }

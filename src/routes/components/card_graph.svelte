@@ -1,7 +1,7 @@
 <script lang="ts">
-	import exportChartToPDF from '$lib/scripts/convertSVGtoPDF';
 	import type { AdworkType, ChartType, CustomEchartType, ProgramType } from '../../ambient';
 	import { graphsState } from '../charts/graphVectors.svelte';
+	import { printState } from '../../state/printState.svelte';
 	import { isAllComponentsEmptyOrZero, isChartEmptyOrAllZero, isIndicatorEmptyOrZero, isTableEmptyOrAllZero } from '../helpers/chartFormatters';
 	import AdditionalWork from './additionalWork.svelte';
 	import Indicator from './indicator.svelte';
@@ -15,6 +15,8 @@
 		subtitle?: string;
 	}
 	const { project, charts, additionalWork, subtitle }: props = $props();
+
+	const print = printState();
 
 	let accordionFlag = $state(false);
 	let accordionText = $derived.by(() => {
@@ -33,7 +35,7 @@
 	});
 
 	let itemsToShow = $derived.by((): AdworkType[] => {
-		if (expanded) return projectAdditionalWorks;
+		if (expanded || print.active) return projectAdditionalWorks;
 		return projectAdditionalWorks.slice(0, 3);
 	});
 
@@ -48,7 +50,8 @@
 	const graphState = graphsState();
 
 	function toGraphWork(workVector: HTMLDivElement) {
-		if (workVector) graphState.add(workVector);
+		graphState.add(workVector);
+		return () => graphState.remove(workVector);
 	}
 
 	function getNonEmptyChartCount(charts: ChartType[]): number {
@@ -58,7 +61,7 @@
     charts.filter(chart => !isAllComponentsEmptyOrZero(chart))
   )
 	let displayedCharts = $derived(
-		filteredCharts.length <= 2 || accordionFlag
+		filteredCharts.length <= 2 || accordionFlag || print.active
 			? filteredCharts
 			: filteredCharts.slice(0, 2)
 	);
@@ -73,10 +76,20 @@
 		</div>
 	{/if}
 
-	<div class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
+	<div data-print-grid class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
 		{#each displayedCharts as chart}
 			{@const isFullWidth = chart.fullWidth === true}
-			<div class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto">
+			{@const kind =
+				chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)
+					? 'indicator'
+					: chart.table
+						? 'table'
+						: 'chart'}
+			<div
+				data-print-kind={kind}
+				data-print-avoid={kind === 'table' ? undefined : ''}
+				class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto"
+			>
 				{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
 					<Indicator
 						above={true}
@@ -108,7 +121,7 @@
 
 	{#if getNonEmptyChartCount(charts) > 2}
 		<button
-			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white hover:bg-slate-800 transition-colors"
+			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white hover:bg-slate-800 transition-colors print:hidden"
 			onclick={() => {
 				accordionFlag = !accordionFlag;
 			}}
@@ -122,7 +135,7 @@
 	{#if hasAdditionalWork}
 		<div class="flexy flex-col" {@attach toGraphWork}>
     {#if getNonEmptyChartCount(charts) > 0}
-			<h1 class="text-2xl font-extrabold pt-8">Additional Work</h1>
+			<h1 class="text-2xl font-extrabold pt-8 print:pt-3 print:pb-1 print:pl-4 print:text-[13pt]">Additional Work</h1>
     {/if}
 
 			{#each itemsToShow as adWork}
@@ -130,7 +143,7 @@
 			{/each}
 
 			{#if showExpandButton}
-				<div class="expand-toggle mt-6 flex justify-center">
+				<div class="expand-toggle mt-6 flex justify-center print:hidden">
 					<button
 						onclick={toggleExpanded}
 						class="bg-[#7AB66F] hover:bg-[#7AB66F] active:bg-[#7AB66F] px-8 py-3 rounded-lg font-medium text-slate-900 transition-all active:scale-[0.97]"

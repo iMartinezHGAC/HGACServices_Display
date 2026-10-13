@@ -125,7 +125,7 @@
 	});
 
 	const initChart = (element: HTMLElement) => {
-		chartInstance = echarts.init(element);
+		chartInstance = echarts.init(element, null, { renderer: 'svg' });
 		chartInstance.resize();
 
 		return {

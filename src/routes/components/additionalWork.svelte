@@ -25,9 +25,9 @@
 </script>
 
 <div
-	class="flex w-11/12 flex-col items-start justify-center overflow-auto border-t-4 border-slate-700 px-4 py-8"
+	class="flex w-11/12 flex-col items-start justify-center overflow-auto border-t-4 border-slate-700 px-4 py-8 print:w-full print:border-t-2 print:py-3"
 >
-	<div class="w-full pl-12">
+	<div class="w-full pl-12 print:pl-2">
 		<AdditionalWorkBody
 			expanded={false}
 			{adwork}

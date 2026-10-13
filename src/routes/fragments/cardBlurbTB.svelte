@@ -14,6 +14,6 @@
   //$inspect(links)
 </script>
 
-<div class="prose-md flex w-full  text-white font-[Metropolis] font-semibold py-8">
+<div class="prose-md flex w-full  text-white font-[Metropolis] font-semibold py-8 print:py-3 print:text-[8.5pt] print:leading-snug print:font-medium">
   {plainText}
 </div>

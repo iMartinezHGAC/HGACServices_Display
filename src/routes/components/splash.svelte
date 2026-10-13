@@ -4,6 +4,8 @@
 	import type { DashboardType, TabCountType, UtilizationBodyType, UtilizationType } from '../../ambient';
 	import { jurisState } from '../../state/jurisState.svelte';
 	import Tabs from './tabs.svelte';
+	import Printer from '$lib/assets/printer.svelte';
+	import { printPage, printState } from '../../state/printState.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
 	import tippy from 'tippy.js';
 
@@ -51,6 +53,16 @@
 	});
 
 	const jurisId = jurisState();
+	const print = printState();
+
+	// Re-evaluated whenever print mode toggles, so the printed date is never stale
+	// "transportation" / "public_safety" / "economic%20development" -> words, shown under the jurisdiction on paper
+	const tabLabel = $derived(chosenTab.replace(/%20|_/g, ' ').trim());
+
+	const printedOn = $derived.by(() => {
+		void print.active;
+		return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+	});
 
 	// --- Reliable delayed spinner (no loops, hides immediately, shows only on slow loads) ---
 	let showSpinner = $state(false);
@@ -115,7 +127,26 @@
 	{/if}
 {/snippet}
 
-<div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500">
+<!-- Print-only masthead (the interactive header below is hidden on paper) -->
+<div class="mb-3 hidden items-center justify-between border-b-2 border-slate-700 pb-3 print:flex">
+	<div class="flex items-center gap-4">
+		{#if logo_url}
+			<img src={logo_url} alt="" class="h-14" />
+		{/if}
+		<div class="flex flex-col">
+			<p class="small-caps font-[Metropolis] text-2xl font-extrabold leading-tight text-slate-800">{jurisdiction}</p>
+			{#if tabLabel}
+				<p class="font-[Metropolis] text-sm font-semibold tracking-wide text-slate-500 uppercase">{tabLabel}</p>
+			{/if}
+		</div>
+	</div>
+	<div class="flex items-center gap-4">
+		<p class="font-[Metropolis] text-sm text-slate-600">{printedOn}</p>
+		<img src={logo} alt="HGAC" class="h-14" />
+	</div>
+</div>
+
+<div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500 print:hidden">
 	<div class="flex flex-none items-center justify-start">
     {#if logo_url}
       <img src={logo_url} alt="harris" class="h-24 p-2" />
@@ -139,6 +170,17 @@
   <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
     <img src={help} alt="sumbit help form"/>
   </a>
+  </div>
+  <div class="ml-4 flex items-end justify-center">
+    <button
+      type="button"
+      onclick={printPage}
+      aria-label="Print or save this page as PDF"
+      title="Print / Save as PDF"
+      class="flex h-12 w-12 cursor-pointer items-center justify-center rounded hover:bg-slate-700"
+    >
+      <Printer />
+    </button>
   </div>
 	<div class="flex-grow-[1]"></div>
 	<img src={logo} alt="HGAC" class="right-4 h-24" />

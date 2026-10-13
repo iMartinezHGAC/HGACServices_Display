@@ -1,278 +1,248 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas-pro';
+import { planLayout, type ItemSize, type PageSpec } from './pdfLayout';
 
-// Import SVG (adjust path based on your setup)
-import PLACEHOLDER_IMAGE from '$lib/assets/harris_county.svg';
+/**
+ * Raster PDF export (legacy path).
+ *
+ * Each element is cloned off-screen, rendered with html2canvas and placed on a
+ * Letter page by `planLayout`. Text in the result is an image; the browser
+ * print path (see printState.svelte.ts) produces vector, selectable output.
+ */
 
-const LETTER_WIDTH = 8.5; // Letter size in inches (portrait)
-const LETTER_HEIGHT = 11;
+const PX_PER_IN = 96;
+const CANVAS_SCALE = 2;
+const JPEG_QUALITY = 0.92;
 
-// Convert SVG to data URL for jsPDF
-const getSvgDataUrl = async (svgUrl: string): Promise<string> => {
-  try {
-    // Fetch SVG content
-    const response = await fetch(svgUrl);
-    if (!response.ok) throw new Error(`Failed to fetch SVG: ${response.status}`);
-    const svgText = await response.text();
-
-    // Create a temporary canvas to render SVG
-    const canvas = document.createElement('canvas');
-    canvas.width = 48 * 2; // Match printerIcon size, scaled for quality
-    canvas.height = 48 * 2;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Failed to get canvas context');
-
-    // Create an image from SVG
-    const img = new Image();
-    const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
-    await new Promise((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error('Failed to load SVG image'));
-      img.src = url;
-    });
-
-    // Draw SVG on canvas
-    console.log("CANVAS", canvas.width, canvas.height)
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/png');
-    URL.revokeObjectURL(url);
-    return dataUrl;
-  } catch (error) {
-    console.error('Error converting SVG to data URL:', error);
-    throw error;
-  }
+const PAGE: PageSpec = {
+	width: 8.5,
+	height: 11,
+	margin: 0.5,
+	headerHeight: 0.35,
+	footerHeight: 0.35,
+	gap: 0.2,
+	minSlice: 1
 };
 
-export default async function exportChartToPDF(vectors: HTMLDivElement[], title: string) {
-  const pdf = new jsPDF('p', 'in', 'letter'); // Portrait orientation
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 0.3;
-  const bottomMargin = 2;
-  const elementsPerPage = 2; // 2 elements per page (2x1 grid), except for the last element
-  const canvasScale = 2; // Matches html2canvas scale
+/** A link found inside a captured element, in CSS px relative to that element. */
+interface LinkBox {
+	href: string;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
 
-  // Convert SVG to data URL
-  let placeholderImageDataUrl: string;
-  try {
-    placeholderImageDataUrl = await getSvgDataUrl(PLACEHOLDER_IMAGE);
-  } catch (error) {
-    console.error('Failed to load placeholder SVG, using fallback PNG');
-    placeholderImageDataUrl = 'https://via.placeholder.com/30.png'; // Fallback
-  }
+interface Capture {
+	canvas: HTMLCanvasElement;
+	/** Element size in CSS px. */
+	width: number;
+	height: number;
+	links: LinkBox[];
+}
 
-  // Create an off-screen container for cloning elements
-  const offScreenContainer = document.createElement('div');
-  offScreenContainer.style.position = 'absolute';
-  offScreenContainer.style.left = '-9999px';
-  offScreenContainer.style.top = '-9999px';
-  offScreenContainer.style.visibility = 'hidden';
-  offScreenContainer.style.width = '1000px';
-  offScreenContainer.style.height = '1000px';
-  offScreenContainer.style.overflow = 'visible';
-  document.body.appendChild(offScreenContainer);
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-  // Function to capture an element
-  const captureElement = async (element: HTMLDivElement, index: number): Promise<{
-    canvas: HTMLCanvasElement,
-    linkData?: { href: string, x: number, y: number, width: number, height: number },
-    printerIconData?: { x: number, y: number, width: number, height: number }
-  }> => {
-    try {
-      // Clone the element
-      const clonedElement = element.cloneNode(true) as HTMLDivElement;
-      clonedElement.style.display = 'block';
-      clonedElement.style.position = 'static';
-      clonedElement.style.visibility = 'visible';
-      const originalWidth = element.offsetWidth || 1000;
-      const originalHeight = element.offsetHeight || 1000;
-      clonedElement.style.width = `${originalWidth}px`;
-      clonedElement.style.height = `${originalHeight}px`;
-      clonedElement.style.overflow = 'visible';
+/**
+ * `cloneNode` copies a <canvas> element but not its pixels, so any canvas-rendered
+ * chart (ECharts' default renderer) would come out blank. Swap each cloned canvas
+ * for an <img> of the live canvas' current contents.
+ */
+async function freezeCanvases(source: HTMLElement, clone: HTMLElement) {
+	const live = source.querySelectorAll('canvas');
+	const copies = clone.querySelectorAll('canvas');
 
-      // Handle printerIcon in the first vector
-      let printerIconData: { x: number, y: number, width: number, height: number } | undefined;
-      if (index === 0) {
-        const printerIcon = clonedElement.querySelector('#printerIcon') as HTMLElement;
-        if (printerIcon) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          const rect = printerIcon.getBoundingClientRect();
-          const containerRect = clonedElement.getBoundingClientRect();
-          printerIconData = {
-            x: rect.left - containerRect.left,
-            y: rect.top - containerRect.top,
-            width: rect.width,
-            height: rect.height,
-          };
-          printerIcon.style.display = 'none';
-        } else {
-          console.warn('printerIcon not found in first vector');
-        }
-      }
+	await Promise.all(
+		Array.from(live).map(async (canvas, i) => {
+			const copy = copies[i];
+			if (!copy) return;
+			try {
+				const img = document.createElement('img');
+				img.src = canvas.toDataURL('image/png');
+				img.className = copy.className;
+				img.style.width = canvas.style.width || `${canvas.clientWidth}px`;
+				img.style.height = canvas.style.height || `${canvas.clientHeight}px`;
+				await img.decode().catch(() => undefined);
+				copy.replaceWith(img);
+			} catch (error) {
+				// e.g. a tainted canvas; leave the (blank) clone rather than abort the export
+				console.warn('Could not snapshot canvas for PDF export', error);
+			}
+		})
+	);
+}
 
-      // Get programLink data
-      let linkData: { href: string, x: number, y: number, width: number, height: number } | undefined;
-      const programLink = clonedElement.querySelector('#programLink') as HTMLAnchorElement;
-      if (programLink && programLink.href) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        const rect = programLink.getBoundingClientRect();
-        const containerRect = clonedElement.getBoundingClientRect();
-        linkData = {
-          href: programLink.href,
-          x: rect.left - containerRect.left,
-          y: rect.top - containerRect.top,
-          width: rect.width,
-          height: rect.height,
-        };
-        console.log('programLink data:', { ...linkData, containerRect: { left: containerRect.left, top: containerRect.top, width: containerRect.width, height: containerRect.height } });
-      }
+async function captureElement(element: HTMLElement, host: HTMLElement): Promise<Capture> {
+	const clone = element.cloneNode(true) as HTMLElement;
+	const width = Math.ceil(element.offsetWidth || element.getBoundingClientRect().width || 1000);
 
-      // Append to off-screen container
-      offScreenContainer.appendChild(clonedElement);
+	clone.style.position = 'static';
+	clone.style.visibility = 'visible';
+	clone.style.width = `${width}px`;
+	clone.style.height = 'auto';
+	clone.style.overflow = 'visible';
 
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 200));
+	// UI chrome that should not appear in the document
+	clone.querySelectorAll('[data-export-ignore], .expand-toggle').forEach((n) => n.remove());
 
-      const canvas = await html2canvas(clonedElement, {
-        logging: true,
-        scale: canvasScale,
-        useCORS: true,
-        allowTaint: false,
-        width: originalWidth,
-        height: originalHeight
-      });
+	await freezeCanvases(element, clone);
 
-      // Remove cloned element
-      offScreenContainer.removeChild(clonedElement);
+	host.style.width = `${width}px`;
+	host.appendChild(clone);
 
-      return { canvas, linkData, printerIconData };
-    } catch (error) {
-      console.error('Error capturing element:', element, error);
-      throw error;
-    }
-  };
+	try {
+		// Measure only AFTER the clone is in the DOM; detached nodes report zero-size rects.
+		await document.fonts?.ready;
+		await nextFrame();
+		await nextFrame();
 
-  // Layout settings
-  const contentWidth = (pageWidth - 3 * margin); // Width for each element (2 per row)
-  const contentHeight = (pageHeight - margin - bottomMargin); // Height for each element
-  const elementsPerRow = 2; // 2 elements per row
+		const cloneRect = clone.getBoundingClientRect();
+		const height = Math.ceil(cloneRect.height);
 
-  // Process elements sequentially
-  for (let index = 0; index < vectors.length; index++) {
-    const vector = vectors[index];
-    const { canvas, linkData, printerIconData } = await captureElement(vector, index);
+		const links: LinkBox[] = Array.from(clone.querySelectorAll<HTMLAnchorElement>('a[href]'))
+			.map((a) => {
+				const r = a.getBoundingClientRect();
+				return {
+					href: a.href,
+					x: r.left - cloneRect.left,
+					y: r.top - cloneRect.top,
+					width: r.width,
+					height: r.height
+				};
+			})
+			.filter((l) => l.width > 0 && l.height > 0 && /^(https?:|mailto:)/i.test(l.href));
 
-    // Force the last element onto a new page
-    if (index === vectors.length - 1) {
-      pdf.addPage();
-    }
+		const canvas = await html2canvas(clone, {
+			scale: CANVAS_SCALE,
+			useCORS: true,
+			allowTaint: false,
+			width,
+			height,
+			backgroundColor: '#ffffff',
+			logging: false
+		});
 
-    // Calculate position
-    const isLastElement = index === vectors.length - 1;
-    const row = isLastElement ? 0 : Math.floor((index % elementsPerPage) / elementsPerRow);
-    const col = isLastElement ? 0 : index % elementsPerRow;
+		return { canvas, width, height, links };
+	} finally {
+		clone.remove();
+	}
+}
 
-    const x = margin + col * (contentWidth + margin);
-    const y = margin + row * (contentHeight + margin);
+/** Crop [sy, sy + sh) (canvas px) out of a canvas. */
+function cropCanvas(source: HTMLCanvasElement, sy: number, sh: number): HTMLCanvasElement {
+	const out = document.createElement('canvas');
+	out.width = source.width;
+	out.height = sh;
+	const ctx = out.getContext('2d');
+	if (!ctx) throw new Error('Failed to get 2D canvas context');
+	ctx.fillStyle = '#ffffff';
+	ctx.fillRect(0, 0, out.width, out.height);
+	ctx.drawImage(source, 0, sy, source.width, sh, 0, 0, source.width, sh);
+	return out;
+}
 
-    // Add image to PDF, preserving aspect ratio
-    try {
-      const imgHeight = contentHeight * (canvas.height / canvas.width);
-      pdf.addImage(
-        canvas.toDataURL('image/jpeg', 0.9),
-        'JPEG',
-        x,
-        y,
-        contentWidth,
-        imgHeight
-      );
+const pad = (n: number) => n.toString().padStart(2, '0');
 
-      // Add clickable link for programLink
-      if (linkData && linkData.width > 0 && linkData.height > 0) {
-        const pdfScale = contentWidth / canvas.width;
-        const linkX = x + (linkData.x / canvasScale) * pdfScale;
-        const linkY = y + (linkData.y / canvasScale) * pdfScale;
-        const linkWidth = (linkData.width / canvasScale) * pdfScale;
-        const linkHeight = (linkData.height / canvasScale) * pdfScale;
+export default async function exportChartToPDF(
+	vectors: HTMLElement[],
+	title = 'Harris County'
+): Promise<void> {
+	const targets = vectors.filter((v) => v && v.isConnected);
+	if (targets.length === 0) {
+		console.warn('exportChartToPDF: nothing to export');
+		return;
+	}
 
-        console.log('PDF link coordinates:', { linkX, linkY, linkWidth, linkHeight, href: linkData.href });
+	// Off-screen host. Not `visibility: hidden`, which html2canvas would honour.
+	const host = document.createElement('div');
+	host.setAttribute('aria-hidden', 'true');
+	host.style.cssText =
+		'position:fixed;left:-10000px;top:0;pointer-events:none;overflow:visible;background:#fff;';
+	document.body.appendChild(host);
 
-        pdf.setFontSize(10);
-        pdf.setTextColor(0, 0, 255);
-        pdf.textWithLink(linkData.href, linkX, linkY + linkHeight, { url: linkData.href });
-        pdf.setTextColor(0, 0, 0);
-      } else if (linkData) {
-        console.warn('Zero dimensions for programLink, using fallback position');
-        pdf.setFontSize(10);
-        pdf.setTextColor(0, 0, 255);
-        pdf.textWithLink(linkData.href, x, y + imgHeight + 0.2, { url: linkData.href });
-        pdf.setTextColor(0, 0, 0);
-      }
+	try {
+		const captures: Capture[] = [];
+		for (const target of targets) {
+			captures.push(await captureElement(target, host)); // sequential: html2canvas is heavy
+		}
 
-      // Add new image in place of printerIcon for first vector
-      if (index === 0 && printerIconData && printerIconData.width > 0 && printerIconData.height > 0) {
-        const pdfScale = contentWidth / canvas.width;
-        const iconX = x + (printerIconData.x / canvasScale) * pdfScale;
-        const iconY = y + (printerIconData.y / canvasScale) * pdfScale;
-        const iconWidth = 48
-        const iconHeight = 48
+		const sizes: ItemSize[] = captures.map((c) => ({
+			width: c.width / PX_PER_IN,
+			height: c.height / PX_PER_IN
+		}));
+		const { placements, pageCount } = planLayout(sizes, PAGE);
 
-        console.log('printerIcon PDF coordinates:', { iconX, iconY, iconWidth, iconHeight });
+		const pdf = new jsPDF({ orientation: 'p', unit: 'in', format: 'letter', compress: true });
+		for (let p = 2; p <= pageCount; p++) pdf.addPage();
 
-        pdf.addImage(
-          placeholderImageDataUrl,
-          'PNG', // Use PNG for rendered SVG
-          iconX,
-          iconY,
-          iconWidth,
-          iconHeight
-        );
-      } else if (index === 0) {
-        console.warn('Zero dimensions for printerIcon or not found, using fallback position');
-        const iconWidth = 48 / 96; // 48px at 96 DPI
-        const iconHeight = 48 / 96; // 32px at 96 DPI
-        const iconX = x + contentWidth - iconWidth - 0.1; // Top-right
-        const iconY = y + 0.3;
-        pdf.addImage(
-          placeholderImageDataUrl,
-          'PNG',
-          iconX,
-          iconY,
-          iconWidth,
-          iconHeight
-        );
-      }
-    } catch (error) {
-      console.error('Error adding image or link to PDF:', error);
-    }
+		for (const pl of placements) {
+			const cap = captures[pl.item];
+			pdf.setPage(pl.page);
 
+			// canvas pixels per output inch for this item
+			const pxPerInch = cap.canvas.width / pl.width;
+			const sy = Math.min(Math.round(pl.srcY * pxPerInch), cap.canvas.height - 1);
+			const sh = Math.max(1, Math.min(Math.round(pl.srcHeight * pxPerInch), cap.canvas.height - sy));
+			const isWhole = sy === 0 && sh >= cap.canvas.height - 1;
 
-    // Add new page for non-last elements, if needed
-    if (index < vectors.length - 2 && (index + 1) % elementsPerPage === 0) {
-      pdf.addPage();
-    }
-  }
+			const source = isWhole ? cap.canvas : cropCanvas(cap.canvas, sy, sh);
+			// Derive height from the pixels actually drawn, so rounding can't distort the aspect ratio.
+			pdf.addImage(
+				source.toDataURL('image/jpeg', JPEG_QUALITY),
+				'JPEG',
+				pl.x,
+				pl.y,
+				pl.width,
+				source.height / pxPerInch
+			);
 
- //////////////////////////////////////////// ADD DATE ////////////////////////////////////////////////// 
- // Get current date and format as MM-DD-YY
-  const today = new Date();
-  const formattedDate = `${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}-${today.getFullYear().toString().slice(-2)}`;
- // Add date to PDF at position (10, 10)
-  const dateText = `${formattedDate}`;
-  const textWidth = pdf.getTextWidth(dateText);
-  const datePosX = pageWidth - textWidth - margin
-  const datePosY = pageHeight - bottomMargin
-  pdf.text(dateText, datePosX, datePosY)
- //////////////////////////////////////////// ADD DATE ////////////////////////////////////////////////// 
+			// Real, clickable link annotations laid over the image
+			const inchesPerCssPx = pl.scale / PX_PER_IN;
+			for (const link of cap.links) {
+				const linkTop = link.y * inchesPerCssPx;
+				const linkBottom = linkTop + link.height * inchesPerCssPx;
+				const top = Math.max(linkTop, pl.srcY);
+				const bottom = Math.min(linkBottom, pl.srcY + pl.srcHeight);
+				if (bottom - top <= 0) continue;
 
-  // Save the PDF
-  pdf.save(`document-${formattedDate}.pdf`);
+				pdf.link(
+					pl.x + link.x * inchesPerCssPx,
+					pl.y + (top - pl.srcY),
+					link.width * inchesPerCssPx,
+					bottom - top,
+					{ url: link.href }
+				);
+			}
+		}
 
-  // Clean up off-screen container
-  document.body.removeChild(offScreenContainer);
+		// Running header / footer on every page
+		const now = new Date();
+		const displayDate = now.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+		const fileDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-  // Save the PDF
-  pdf.save('output.pdf');
+		pdf.setFontSize(9);
+		pdf.setTextColor(80, 80, 80);
+		for (let p = 1; p <= pageCount; p++) {
+			pdf.setPage(p);
+			pdf.text(title, PAGE.margin, PAGE.margin + 0.2);
+			pdf.text(displayDate, PAGE.width - PAGE.margin, PAGE.margin + 0.2, { align: 'right' });
+			pdf.text(`Page ${p} of ${pageCount}`, PAGE.width / 2, PAGE.height - PAGE.margin - 0.1, {
+				align: 'center'
+			});
+		}
+
+		const slug =
+			title
+				.toLowerCase()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/^-+|-+$/g, '') || 'export';
+
+		pdf.save(`${slug}-${fileDate}.pdf`); // once (previously saved twice)
+	} finally {
+		host.remove(); // runs on success *and* failure
+	}
 }

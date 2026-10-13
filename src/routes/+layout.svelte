@@ -11,10 +11,14 @@
 
 	import '../app.css';
 	import { jurisState } from '../state/jurisState.svelte';
+	import { installPrintListeners, setPrintTitleParts } from '../state/printState.svelte';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	const jurisId = jurisState();
+
+	// Ctrl/Cmd+P and the browser menu: switch components to their print version
+	$effect(() => installPrintListeners());
 
 	let jurisdiction = $derived.by(() => {
 		if (jurisId.jurisdiction) return jurisId.jurisdiction.name;
@@ -36,9 +40,19 @@
 	}
 
 	let routePath = $derived(toSnakeCase(getEndOfPath(data.routeID).toLowerCase()));
+
+	// Names the PDF when saving from the print dialog: "<Jurisdiction> - <Tab> - <date>"
+	$effect(() => {
+		const tab = routePath
+			.replace(/%20|_/g, ' ')
+			.trim()
+			.replace(/\b\w/g, (c) => c.toUpperCase());
+		setPrintTitleParts([jurisdiction, tab]);
+	});
 </script>
 
 <main
+	data-print-reset
 	class="fixed flex h-screen w-screen flex-col items-center justify-start bg-slate-200 bg-cover"
 >
 	{#if data.uuid}

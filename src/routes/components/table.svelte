@@ -119,8 +119,25 @@ function isMonetaryField(key: string): boolean {
 		const lowerHeader = snakeToHuman(key).toLowerCase();
 		return keywords.some(word => lowerKey.includes(word) || lowerHeader.includes(word));
 	}
+// URLs are shown as a compact clickable label ("PDF ↗" or the site name); the full URL stays
+	// in href and in the hover title. Long file names wrapped to 3 lines and made ragged rows.
+	function isUrl(val: unknown): val is string {
+		return typeof val === 'string' && /^https?:\/\//i.test(val.trim());
+	}
+
+	function urlLabel(raw: string): string {
+		try {
+			const url = new URL(raw.trim());
+			return /\.pdf$/i.test(url.pathname) ? 'PDF ↗' : `${url.hostname.replace(/^www\./, '')} ↗`;
+		} catch {
+			return 'Link ↗';
+		}
+	}
+
 function formatDisplayValue(key: string, val: any): string {
 		if (val == null) return '-';
+		// Database NULLs that arrive as the literal string "NULL"
+		if (typeof val === 'string' && ['', 'null'].includes(val.trim().toLowerCase())) return '-';
 
 		// 1. Numbers first — this prevents 0 → "1970-01-01" on attendee counts
 		if (typeof val === 'number') {
@@ -169,7 +186,7 @@ function formatDisplayValue(key: string, val: any): string {
 	{/if}
 
 	<div class="w-full overflow-x-auto max-h-96">
-		<table class="table-auto border-collapse border border-gray-400 mx-auto w-full">
+		<table data-print-table class="table-auto border-collapse border border-gray-400 mx-auto w-full">
 			{#if records && dataKeys.length > 0}
 				<thead>
 					<tr>
@@ -186,8 +203,18 @@ function formatDisplayValue(key: string, val: any): string {
 							{#each dataKeys as key (key)}
 								{@const val = record[key] ?? null}
 								{@const isNumeric = typeof val === 'number'}
-								<td class="px-4 py-2 border border-gray-300 {isNumeric ? 'text-right font-medium' : ''}">
-									{formatDisplayValue(key, val)}
+								<td class="px-4 py-2 border border-gray-300 {isNumeric ? 'text-right font-medium whitespace-nowrap' : ''}">
+									{#if isUrl(val)}
+										<a
+											href={val.trim()}
+											target="_blank"
+											rel="noopener noreferrer"
+											title={val.trim()}
+											class="whitespace-nowrap text-blue-700 underline print:text-slate-800"
+										>{urlLabel(val)}</a>
+									{:else}
+										{formatDisplayValue(key, val)}
+									{/if}
 								</td>
 							{/each}
 						</tr>
