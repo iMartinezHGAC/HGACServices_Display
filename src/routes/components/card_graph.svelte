@@ -7,6 +7,7 @@
 	import Indicator from './indicator.svelte';
 	import RenderEchart from './renderEchart.svelte';
 	import Table from './table.svelte';
+	import { aloneInRow, fitsHalfWidth, pairForPrint } from '../helpers/printPairing';
 
 	interface props {
 		project: ProgramType;
@@ -66,6 +67,32 @@
 			: filteredCharts.slice(0, 2)
 	);
 
+	function cellKind(chart: ChartType): 'indicator' | 'table' | 'chart' {
+		if (chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)) return 'indicator';
+		return chart.table ? 'table' : 'chart';
+	}
+
+	/** Stays readable at half the page width, with its legend printed below it */
+	function canHalf(chart: ChartType): boolean {
+		return (
+			cellKind(chart) === 'chart' &&
+			chart.fullWidth !== true &&
+			!!chart.chart?.charts &&
+			!isChartEmptyOrAllZero(chart) &&
+			fitsHalfWidth(chart.chart.charts)
+		);
+	}
+
+	// On paper, consecutive half-width charts share a row; one without a partner is centred alone
+	let printRows = $derived(pairForPrint(displayedCharts, canHalf));
+
+	// On screen, a cell (chart, KPI tile or table) left alone in its grid row spans the row so it
+	// sits centred rather than in the left-hand column
+	let screenAlone = $derived.by(() => {
+		const alone = aloneInRow(displayedCharts, (chart) => chart.fullWidth === true);
+		return new Set(displayedCharts.filter((_, i) => alone[i]));
+	});
+
 
 </script>
 
@@ -76,46 +103,56 @@
 		</div>
 	{/if}
 
+	{#snippet cell(chart: ChartType, paired: boolean)}
+		{@const isFullWidth = chart.fullWidth === true}
+		{@const kind = cellKind(chart)}
+		{@const printHalf = canHalf(chart)}
+		<div
+			data-print-kind={kind}
+			data-print-avoid={kind === 'table' ? undefined : ''}
+			data-print-single={printHalf && !paired ? '' : undefined}
+			class="{isFullWidth || screenAlone.has(chart) ? 'md:col-span-2' : ''} w-full overflow-x-auto"
+		>
+			{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
+				<Indicator
+					above={true}
+					below={false}
+					aboveText={chart.indicator.indicatorName}
+					belowText={''}
+					numericValue={chart.indicator.indicatorVal as number}
+					symbol_pre={chart.indicator.indicatorSymPre}
+				/>
+
+			{:else if chart.table}
+			<!--	{console.log("Table in Card_Graph", chart)}-->
+				<Table data={chart.table} columns={chart.columns} title={chart.title} fields={chart.fields} />
+
+			{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
+
+				{console.log(chart)}
+				<RenderEchart
+					chart={chart.chart.charts}
+					onDrilldown={chart.chart.onDrilldown}
+					{printHalf}
+				/>
+
+			{:else}
+				<!-- Empty state (uncomment if needed) -->
+			{/if}
+		</div>
+	{/snippet}
+
 	<div data-print-grid class="grid w-full grid-cols-1 md:grid-cols-2 gap-6 px-12 py-8">
-		{#each displayedCharts as chart}
-			{@const isFullWidth = chart.fullWidth === true}
-			{@const kind =
-				chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)
-					? 'indicator'
-					: chart.table
-						? 'table'
-						: 'chart'}
-			<div
-				data-print-kind={kind}
-				data-print-avoid={kind === 'table' ? undefined : ''}
-				class="{isFullWidth ? 'md:col-span-2' : ''} w-full overflow-x-auto"
-			>
-				{#if chart.indicator && !isIndicatorEmptyOrZero(chart.indicator)}
-					<Indicator
-						above={true}
-						below={false}
-						aboveText={chart.indicator.indicatorName}
-						belowText={''}
-						numericValue={chart.indicator.indicatorVal as number}
-						symbol_pre={chart.indicator.indicatorSymPre}
-					/>
-
-				{:else if chart.table}
-				<!--	{console.log("Table in Card_Graph", chart)}-->
-					<Table data={chart.table} columns={chart.columns} title={chart.title} fields={chart.fields} />
-
-				{:else if chart.chart && !isChartEmptyOrAllZero(chart)}
-
-					{console.log(chart)}
-					<RenderEchart
-						chart={chart.chart.charts}
-						onDrilldown={chart.chart.onDrilldown}
-					/>
-
-				{:else}
-					<!-- Empty state (uncomment if needed) -->
-				{/if}
-			</div>
+		{#each printRows as row}
+			{#if row.length === 2}
+				<!-- `contents` on screen (the grid lays the cells out); a two-column row on paper -->
+				<div data-print-pair class="contents">
+					{@render cell(row[0], true)}
+					{@render cell(row[1], true)}
+				</div>
+			{:else}
+				{@render cell(row[0], false)}
+			{/if}
 		{/each}
 	</div>
 

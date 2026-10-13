@@ -3,6 +3,7 @@
 	import RenderEchart from '../../components/renderEchart.svelte';
 	import type { ChartType, PB_Record_Type, UtilizationType} from '../../../ambient';
 	import Indicator from '../../components/indicator.svelte';
+	import { fitsHalfWidth } from '../../helpers/printPairing';
 
 	const { data }: { data: {
     pbData: PB_Record_Type[],
@@ -106,6 +107,14 @@ const subCollectionsByTable = $derived(
     "76": "transportation"
   } as const;
 
+  // On paper a chart that stays readable at half width prints at half width, its legend below it;
+  // the two share a row when both do, otherwise each is centred on its own
+  const programsHalf = $derived(fitsHalfWidth(actualProgramsChart.chart?.charts));
+  const projectsHalf = $derived(fitsHalfWidth(chartA.chart?.charts));
+  const printPair = $derived(programsHalf && projectsHalf);
+  const printCellClass = (half: boolean) =>
+    printPair ? 'print:w-0 print:flex-1' : half ? 'print:w-1/2' : 'print:w-full';
+
   type TabCode = keyof typeof tabCodeMap;
 
   type FullTabData = Record<TabCode, { count: number; programs: string[] }>;
@@ -128,16 +137,16 @@ const subCollectionsByTable = $derived(
       {/if}
 
 		<!-- Charts Row -->
-		<div class="flex gap-12 justify-center pt-8 w-full pb-24 print:flex-col print:items-center print:gap-4 print:pb-4">
+		<div class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
 
-			<div data-print-avoid class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:w-full print:py-4">
-				<RenderEchart chart={actualProgramsChart.chart?.charts!} />
-        <p class="font-[Metropolis]">For a full list of programs H-GAC offers, please visit our website</p>
+			<div data-print-avoid class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
+				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} />
+        <p class="font-[Metropolis] print:hidden">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
-			<div data-print-avoid class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:w-full print:py-4">
-				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} />
+			<div data-print-avoid class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
+				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} printHalf={projectsHalf} />
 			</div>
 
 			<!-- LET Funding Multi-Drilldown -->

@@ -34,11 +34,14 @@
      [data-print-card]         a program section (header + content)
      [data-print-card-header]  its dark header bar (never split, stays with content)
      [data-print-grid]         the content grid; becomes plain block flow (see below)
+     [data-print-pair]         two charts printed side by side
+     [data-print-single]       a half-width chart without a partner, printed centred
+     [data-print-half]         a chart printed at half width; its [data-print-legend] sits below it
      [data-print-kind]         "indicator" | "chart" | "table": how a cell is sized
      [data-print-avoid]        do not split this block across pages
      [data-print-indicator]    KPI tile
      [data-print-table]        data table
-     [data-echart]             chart container
+     [data-echart]             chart container ([data-echart-wrap] is RenderEchart's outer box)
    Tailwind's `print:` variant is used in markup for simple per-element tweaks.
    Layout-level rules live here with !important because responsive variants
    (md:) otherwise win: print pages are ~816px wide, which still matches md.
@@ -148,6 +151,26 @@
   [data-print-kind="table"] {
     display: block !important;
   }
+  /* Two charts side by side (paired in card_graph via printPairing.ts). A short, unsplittable
+     flex row: the fragmentation concern above is about tall content. */
+  [data-print-pair] {
+    display: flex !important;
+    gap: 0.16in;
+    align-items: flex-start;
+    text-align: left;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  [data-print-pair] > [data-print-kind] {
+    flex: 1 1 0;
+    width: 0 !important;
+  }
+  /* A half-width chart with no partner: same size as a paired one, centred */
+  [data-print-kind][data-print-single] {
+    width: calc(50% - 0.08in) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
   [data-print-kind="indicator"] {
     display: inline-block !important;
     width: 2.25in !important;
@@ -174,12 +197,48 @@
   /* Charts: a fixed paper-friendly box. ECharts draws at a fixed pixel size, so the
      SVG (which RenderEchart gives a viewBox) is stretched to the box and the browser
      scales the whole chart uniformly to fit it: no overflow into neighbouring content. */
+  /* RenderEchart's wrapper is a centred flex item in some layouts (e.g. Overview), which would
+     shrink it to its content; the chart's 100% width would then resolve to 0 and print blank. */
+  [data-echart-wrap] {
+    width: 100% !important;
+    align-self: stretch;
+  }
   [data-echart] {
     width: 100% !important;
     max-width: 100% !important;
     height: 3.5in !important;
     padding: 0 !important;
     overflow: hidden;
+  }
+  /* Half-width chart: RenderEchart lays it out at 460x380px; keep that aspect ratio */
+  [data-echart][data-print-half] {
+    height: auto !important;
+    aspect-ratio: 460 / 380;
+  }
+  /* Its legend, moved out of the chart and printed as text just below it */
+  [data-print-legend] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.03in 0.14in;
+    width: 100%;
+    margin: 0.04in 0 0;
+    padding: 0;
+    list-style: none;
+    font: 8pt/1.25 Metropolis, Arial, sans-serif;
+    color: #1f2937;
+  }
+  [data-print-legend] li {
+    display: flex;
+    align-items: center;
+    gap: 0.05in;
+    break-inside: avoid;
+  }
+  [data-print-legend] span {
+    flex: none;
+    width: 0.12in;
+    height: 0.09in;
+    border-radius: 1px;
   }
   [data-echart] > div:first-child,
   [data-echart] > div:first-child > svg,

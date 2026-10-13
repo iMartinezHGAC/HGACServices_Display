@@ -2367,7 +2367,7 @@ export function makeActualProgramsBar(
       {
         name: "Utilized Programs",
         type: "bar",
-        barWidth: "50px",
+        barMaxWidth: 50,   // a cap, not a fixed width: bars narrow (keeping gaps) when the chart is narrow, e.g. half-width print
         data: barData,
         itemStyle: { color: "#5470c6" },
         emphasis: { focus: "series" },

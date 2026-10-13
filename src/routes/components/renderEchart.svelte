@@ -3,6 +3,7 @@
   import { untrack } from "svelte"
   import { printState } from "../../state/printState.svelte"
   import { graphsState } from "../charts/graphVectors.svelte"
+  import { legendNames } from "../helpers/printPairing"
 
   const print = printState()
 
@@ -12,9 +13,11 @@
   interface Props {
     chart: echarts.EChartsOption | null
     onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void  
+    /** Printed at half the page width, beside another chart (see printPairing.ts) */
+    printHalf?: boolean
   }
 
-  const { chart, onDrilldown }: Props = $props()
+  const { chart, onDrilldown, printHalf = false }: Props = $props()
 
   // Custom color palette
   const customColors = [
@@ -64,6 +67,70 @@ console.log("RenderEchart received option →", {
     }
   })
 
+  // ── Half-width print ──
+  // Scaled down to half the page, the in-chart legend would print at ~5pt. Instead the chart is
+  // laid out at a smaller pixel size (so its own text shrinks less), its legend is hidden and
+  // re-drawn as plain text just below it, where it wraps to the column at a readable size.
+  const compact = $derived(print.active && printHalf)
+  let printLegend = $state<{ name: string; label: string; color: string }[]>([])
+  let savedLegendShow: (boolean | undefined)[] | null = null
+
+  /** The legend as currently shown, colours taken from the rendered chart (follows drilldowns). */
+  function readLegend(instance: echarts.ECharts) {
+    const option = instance.getOption() as echarts.EChartsOption
+    const names = new Set(legendNames(option))
+    // the legend's own formatter decides the text (e.g. "LET" -> "Let for Construction")
+    const formatter = ((option.legend ?? []) as any[]).find((l) => l?.formatter)?.formatter
+    const label = (name: string) =>
+      typeof formatter === "function" ? String(formatter(name)) :
+      typeof formatter === "string" ? formatter.replace(/\{name\}/g, name) : name
+    const items: { name: string; label: string; color: string }[] = []
+    const seen = new Set<string>()
+    ;((option.series ?? []) as any[]).forEach((s, seriesIndex) => {
+      const entries: [unknown, number | undefined][] =
+        s?.type === "pie" || s?.type === "funnel"
+          ? (s.data ?? []).map((d: any, dataIndex: number) => [d?.name, dataIndex])
+          : [[s?.name, undefined]]
+      for (const [raw, dataIndex] of entries) {
+        const name = raw == null ? "" : String(raw)
+        if (!names.has(name) || seen.has(name)) continue
+        seen.add(name)
+        const color = instance.getVisual({ seriesIndex, dataIndex }, "color")
+        items.push({ name, label: label(name), color: typeof color === "string" ? color : "#94a3b8" })
+      }
+    })
+    // keep the legend's own order
+    const order = [...names]
+    return items.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name))
+  }
+
+  function relayout(instance: echarts.ECharts) {
+    instance.resize({ animation: { duration: 0 } })
+    // resize() paints on the next frame; Ctrl+P snapshots the page before that, so paint now
+    instance.getZr().flush()
+    instance.getDom().querySelector("svg")?.setAttribute("viewBox", `0 0 ${instance.getWidth()} ${instance.getHeight()}`)
+  }
+
+  $effect(() => {
+    const on = compact
+    untrack(() => {
+      if (!chartInstance || (!on && !savedLegendShow)) return
+      const instance = chartInstance
+      const legends = ((instance.getOption() as any).legend ?? []) as { show?: boolean }[]
+      if (on) {
+        printLegend = readLegend(instance)
+        savedLegendShow = legends.map((l) => l.show)
+        if (legends.length) instance.setOption({ legend: legends.map(() => ({ show: false })) })
+      } else if (savedLegendShow) {
+        instance.setOption({ legend: savedLegendShow.map((show) => ({ show: show ?? true })) })
+        savedLegendShow = null
+        printLegend = []
+      }
+      // the container's size class has already been swapped by the time effects run
+      relayout(instance)
+    })
+  })
+
   function restoreRootChart() {
     if (chartInstance && chart) {
       chartInstance.setOption(getOptionWithColors(chart), true)
@@ -104,7 +171,11 @@ console.log("RenderEchart received option →", {
 
     // Where it does fire (Chromium), re-lay the chart out at its print size for sharper text
     const printQuery = window.matchMedia('print')
-    const refit = () => requestAnimationFrame(() => chartInstance?.resize())
+    // (not for half-width charts: they keep the layout sized for them in `compact`)
+    // (never at zero width: a chart laid out into a collapsed box stays blank on paper)
+    const refit = () => requestAnimationFrame(() => {
+      if (!compact && element.clientWidth > 0 && element.clientHeight > 0) chartInstance?.resize()
+    })
     printQuery.addEventListener('change', refit)
 
     // Attachment cleanup: runs when the chart is removed from the DOM
@@ -117,12 +188,21 @@ console.log("RenderEchart received option →", {
   }
 </script>
 
-<div class="flex flex-col items-center justify-center">
+<div data-echart-wrap class="flex flex-col items-center justify-center">
   <div 
     data-echart
-    class="w-[700px] h-[450px] px-8 scale-100"
+    data-print-half={compact ? "" : undefined}
+    class="{compact ? 'w-[460px] h-[380px]' : 'w-[700px] h-[450px] px-8'} scale-100"
     {@attach to}>
   </div>  
+
+  {#if compact && printLegend.length > 0}
+    <ul data-print-legend>
+      {#each printLegend as item}
+        <li><span style:background-color={item.color}></span>{item.label}</li>
+      {/each}
+    </ul>
+  {/if}
 
   {#if isDrilledDown}
     <button 
