@@ -12,7 +12,7 @@
 
   interface Props {
     chart: echarts.EChartsOption | null
-    onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void  
+    onDrilldown?: (params: any, chartInstance: echarts.ECharts) => boolean | void  
     /** Printed at half the page width, beside another chart (see printPairing.ts) */
     printHalf?: boolean
   }
@@ -150,8 +150,8 @@ console.log("RenderEchart received option →", {
         // Prevent any further drilldown once we have already drilled once
         if (isDrilledDown) return;
 
-        isDrilledDown = true;
-        onDrilldown(params, chartInstance!);
+        // a handler returns false when the click didn't change the chart (no Back button then)
+        if (onDrilldown(params, chartInstance!) !== false) isDrilledDown = true;
       })
     }
 

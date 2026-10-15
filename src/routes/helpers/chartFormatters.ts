@@ -397,7 +397,7 @@ export function makeHierarchicalCategoryDonut<T = any>(
 
   const onDrilldown = (params: any, instance: echarts.ECharts) => {
     chartInstance = instance;
-    if (params.componentType !== "series" || currentLevel >= categoryKeys.length - 1) return;
+    if (params.componentType !== "series" || currentLevel >= categoryKeys.length - 1) return false;
 
     const clickedName = params.name;
     const currentCat = categoryKeys[currentLevel];
@@ -458,7 +458,8 @@ export function makeValueSumDonut<T = any>(
   };
 
   const getValueCountPieData = (k: keyof T, originalVal: string) => {
-    const filtered = dataset.filter((item) => String(item[primaryKey]) === originalVal);
+    // originalVal is the cleaned group name, so clean each row's value the same way before comparing
+    const filtered = dataset.filter((item) => cleanCategoryName(String(item[primaryKey] ?? ""), true) === originalVal);
     const countMap: Record<string, number> = {};
 
     filtered.forEach((item) => {
@@ -521,13 +522,13 @@ fontFamily: "Metropolis"
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalVal = params.data?.originalName;
-    if (!originalVal) return;
+    if (!originalVal) return false;
 
     const childData = getValueCountPieData(secondaryKey, originalVal);
     const manySub = childData.length > 6;
 
     if (childData.length === 0) {
-      chartInstance.setOption(getNoDataOption(`${params.data.name} by ${snakeToHuman(String(secondaryKey))}`));
+      chartInstance.setOption(getNoDataOption(`${params.data.name} by ${snakeToHuman(String(secondaryKey))}`), true);
       return;
     }
 
@@ -690,11 +691,11 @@ export function makeCategoryCountDrilldownDonut<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalKey = params.data?.originalKey;
-    if (!originalKey) return;
+    if (!originalKey) return false;
 
     const group = categoryMap[originalKey];
     if (!group?.items.length) {
-      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`));
+      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`), true);
       return;
     }
 
@@ -842,11 +843,11 @@ export function makeCategoryCountDrilldownPie<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalKey = params.data?.originalKey;
-    if (!originalKey) return;
+    if (!originalKey) return false;
 
     const group = categoryMap[originalKey];
     if (!group?.items.length) {
-      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`));
+      chartInstance.setOption(getNoDataOption(`${originalKey} — No data`), true);
       return;
     }
 
@@ -994,13 +995,13 @@ export function makeProjectCountDrilldownPie<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalKey = params.data?.originalKey;
-    if (!originalKey) return;
+    if (!originalKey) return false;
 
     const fullName = params.data?.fullName || params.name;
     const childData = getProjectTypeData(originalKey);
 
     if (childData.length === 0) {
-      chartInstance.setOption(getNoDataOption(`${fullName} — Projects by Type`, "No data"));
+      chartInstance.setOption(getNoDataOption(`${fullName} — Projects by Type`, "No data"), true);
       return;
     }
 
@@ -1141,11 +1142,11 @@ export function makeDrilldownDonut<T = any>(
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const clickedName = params.data.name;
     const key = keys.find((k) => snakeToHuman(String(k)) === clickedName);
-    if (!key) return;
+    if (!key) return false;
 
     const breakdownData = getBreakdownData(key);
     if (breakdownData.length === 0) {
-      chartInstance.setOption(getNoDataOption(snakeToHuman(String(key)), "No breakdown data"));
+      chartInstance.setOption(getNoDataOption(snakeToHuman(String(key)), "No breakdown data"), true);
       return;
     }
 
@@ -1222,11 +1223,11 @@ export function makeDrilldownPie<T = any>(
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const clickedName = params.data.name;
     const key = keys.find((k) => snakeToHuman(String(k)) === clickedName);
-    if (!key) return;
+    if (!key) return false;
 
     const breakdownData = getBreakdownData(key);
     if (breakdownData.length === 0) {
-      chartInstance.setOption(getNoDataOption(snakeToHuman(String(key)), "No breakdown data"));
+      chartInstance.setOption(getNoDataOption(snakeToHuman(String(key)), "No breakdown data"), true);
       return;
     }
 
@@ -1318,11 +1319,11 @@ export function makeTableDrilldownPie<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const table = tables.find((t) => snakeToHuman(t) === params.data.name);
-    if (!table) return;
+    if (!table) return false;
 
     const fieldData = getFieldCardinalityData(table);
     if (fieldData.length === 0) {
-      chartInstance.setOption(getNoDataOption(snakeToHuman(table), "No fields"));
+      chartInstance.setOption(getNoDataOption(snakeToHuman(table), "No fields"), true);
       return;
     }
 
@@ -1361,8 +1362,11 @@ export function makeDrilldownMultPie<T = any>(
     level: number,
     filters: Partial<Record<keyof T, string>>
   ): { name: string; value: number }[] => {
+    // filter values are the cleaned slice names, so clean each row's value the same way
     const filteredData = dataset.filter((item) =>
-      Object.entries(filters).every(([cat, val]) => String(item[cat as keyof T]) === val)
+      Object.entries(filters).every(
+        ([cat, val]) => (cleanCategoryName(String(item[cat as keyof T] ?? "").trim(), true) || "Uncategorized") === val
+      )
     );
 
     const currentCat = categoryKeys[currentLevel];
@@ -1407,7 +1411,12 @@ export function makeDrilldownMultPie<T = any>(
   };
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
-    if (params.componentType !== "series") return;
+    if (params.componentType !== "series") return false;
+
+    // RenderEchart allows one drilldown from the root view and its Back button restores the
+    // root option, so every click starts from the top level
+    currentLevel = 0;
+    currentFilters = {};
 
     const clickedName = params.data.name;
     const currentCat = categoryKeys[currentLevel];
@@ -1417,12 +1426,12 @@ export function makeDrilldownMultPie<T = any>(
     if (currentLevel >= categoryKeys.length) {
       currentLevel--;
       delete currentFilters[currentCat];
-      return;
+      return false;
     }
 
     const newPieData = computePieData(currentLevel, currentFilters);
     if (newPieData.length === 0) {
-      chartInstance.setOption(getNoDataOption(title ?? "Drilldown Pie", "No data at this level"));
+      chartInstance.setOption(getNoDataOption(title ?? "Drilldown Pie", "No data at this level"), true);
       return;
     }
 
@@ -1496,16 +1505,17 @@ export function makeValueCountPie<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalVal = params.data.originalName;
-    if (!originalVal) return;
+    if (!originalVal) return false;
 
     const fullName = params.data.fullName || params.data.name;
-    const filtered = dataset.filter((item) => String(item[primaryKey]) === originalVal);
+    // originalVal is the cleaned name, so clean each row's value the same way before comparing
+    const filtered = dataset.filter((item) => cleanCategoryName(String(item[primaryKey]), true) === originalVal);
     const pieData = getValueCountPieData(secondaryKey, filtered);
 
     const drillTitle = `${fullName} by ${snakeToHuman(String(secondaryKey))}`;
 
     if (pieData.length === 0) {
-      chartInstance.setOption(getNoDataOption(drillTitle));
+      chartInstance.setOption(getNoDataOption(drillTitle), true);
       return;
     }
 
@@ -1580,15 +1590,17 @@ export function makeValueSumPie<T = any>(
 
   const onDrilldown = (params: any, chartInstance: echarts.ECharts) => {
     const originalVal = params.data.originalName;
-    if (!originalVal) return;
+    if (!originalVal) return false;
 
-    const filtered = dataset.filter((item) => String(item[primaryKey]) === originalVal);
+    // originalVal is the cleaned group name, so clean each row's value the same way before comparing
+    const filtered = dataset.filter((item) => cleanCategoryName(String(item[primaryKey]), true) === originalVal);
     const pieData = getValueCountPieData(secondaryKey, filtered);
     const manySub = pieData.length > 5;
 
     if (pieData.length === 0) {
       chartInstance.setOption(
-        getNoDataOption(`${params.data.name} by ${snakeToHuman(String(secondaryKey))}`)
+        getNoDataOption(`${params.data.name} by ${snakeToHuman(String(secondaryKey))}`),
+        true
       );
       return;
     }
@@ -1695,10 +1707,10 @@ export function makeValueSumPieTop10<T = any>(
       filtered = dataset.filter((item) => String(item[primaryKey]) === originalVal);
       drillTitle = data.name;
     } else {
-      return;
+      return false;
     }
 
-    if (filtered.length === 0) return;
+    if (filtered.length === 0) return false;
 
     const pieData = getValueCountPieData(secondaryKey, filtered);
     const manySub = pieData.length > 5;

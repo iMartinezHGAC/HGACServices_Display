@@ -156,7 +156,7 @@ interface IndicatorType {
 
 interface CustomEchartType {
   charts: echarts.EChartsOption | null,
-  onDrilldown?: (params: any, chartInstance: echarts.ECharts) => void
+  onDrilldown?: (params: any, chartInstance: echarts.ECharts) => boolean | void
 }
 
 interface ChartType {
