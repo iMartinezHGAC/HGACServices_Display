@@ -2,23 +2,21 @@
 import PocketBase from 'pocketbase'
 import type { AdworkType, PB_Record_Type, TableFetchOptions } from '../../ambient';
 
-export function GetFiveQuarters() {
+/** Default reporting window used by the dashboards, in quarters. */
+export const DEFAULT_QUARTERS = 5;
+
+/**
+ * From the first day of the quarter `quarters` quarters before the current one, through today,
+ * e.g. 5 quarters on 2026-10-22 is 2025-07-01 .. 2026-10-22. Returned in PocketBase's
+ * "YYYY-MM-DD HH:MM:SS" format (no ms, no Z).
+ */
+export function GetQuarters(quarters: number = DEFAULT_QUARTERS) {
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentQuarter = Math.floor(currentMonth / 3);
+  const currentQuarterStartMonth = Math.floor(now.getUTCMonth() / 3) * 3;
 
-  let startQuarter = currentQuarter - 5;
-  let startYear = now.getFullYear();
+  // Date.UTC rolls negative months back into earlier years
+  const start = new Date(Date.UTC(now.getUTCFullYear(), currentQuarterStartMonth - quarters * 3, 1));
 
-  while (startQuarter < 0) {
-    startQuarter += 4;
-    startYear -= 1;
-  }
-
-  const startMonth = startQuarter * 3;
-  const start = new Date(Date.UTC(startYear, startMonth, 1));
-
-  // PocketBase loves clean "YYYY-MM-DD HH:MM:SS" (no ms, no Z)
   const formatDate = (d: Date): string =>
     d.toISOString().replace('T', ' ').slice(0, 19);
 
@@ -28,9 +26,36 @@ export function GetFiveQuarters() {
   };
 }
 
+/** "Data shown is from <start> through <today>": the GetQuarters window, for the info tooltip and print footer. */
+export function GetDataRangeText(quarters: number = DEFAULT_QUARTERS): string {
+  const { start, now } = GetQuarters(quarters);
+  const fmt = (d: string) =>
+    new Date(d.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC'
+    });
+  return `Data shown is from ${fmt(start)} through ${fmt(now)}`;
+}
+
+/**
+ * Records that overlap [start, now]: began on or before today and ended on or after the start.
+ * A record with no to_date is treated as a single-date record, so its from_date must be in the window.
+ * `prefix` is "" for fields on the collection itself or "<relation>." for an expanded relation.
+ */
+function overlapCondition(prefix: string, start: string, now: string): string {
+  return `(${prefix}from_date?<= "${now}" && (${prefix}to_date?>= "${start}" || (${prefix}to_date?= "" && ${prefix}from_date?>= "${start}")))`;
+}
+
+/**
+ * Jurisdiction filter plus a date-window filter.
+ * `quarters` sets the window (default DEFAULT_QUARTERS); pass null to skip the date rule entirely.
+ */
 export function GenerateFilter(
   subCollectionNames: string[] | null | undefined,
-  juris_id: string | undefined
+  juris_id: string | undefined,
+  quarters: number | null = DEFAULT_QUARTERS
 ): string {
   // Defensive clean-up – remove empty strings, nulls, undefined
   const subs = Array.isArray(subCollectionNames)
@@ -44,17 +69,17 @@ export function GenerateFilter(
     return "id = ''";
   }
 
-  const { start, now } = GetFiveQuarters();
-
   const jurisdictionCondition = `jurisdiction = "${juris_id.trim()}"`;
+
+  if (quarters === null) return `(${jurisdictionCondition})`;
+
+  const { start, now } = GetQuarters(quarters);
 
   let dateCondition: string;
 
   if (subs.length > 0) {
-    // Relation fields (multiple or single) – any linked record must be inside the 5-quarter window
-    const subConditions = subs.map(name =>
-      `(${name}.from_date?<= "${now}" || ${name}.to_date?>= "${start}")`
-    );
+    // Relation fields (multiple or single) – a linked record must overlap the window
+    const subConditions = subs.map(name => overlapCondition(`${name}.`, start, now));
 
     dateCondition =
       subConditions.length > 1
@@ -62,10 +87,9 @@ export function GenerateFilter(
         : subConditions[0];
   } else {
     // Direct fields on the main collection (your 38_table_of_data case)
-    dateCondition = `(from_date?<= "${now}" || to_date?>= "${start}")`
+    dateCondition = overlapCondition('', start, now);
   }
 
-  // Final PocketBase filter – 100% safe syntax
   return `(${jurisdictionCondition}) && (${dateCondition})`;
 }
 export async function FetchTable(pb: PocketBase, tableName: string, options: TableFetchOptions): Promise<PB_Record_Type[] | { error: string }> {
@@ -73,7 +97,7 @@ export async function FetchTable(pb: PocketBase, tableName: string, options: Tab
     sort: '',
     expand: '',
     filter: '',
-    perPage: 50,
+    perPage: 1000, // PocketBase's max page size: fewest round trips
   }
   const mergedOptions = { ...defaultOptions, ...options }
   let results = {}
