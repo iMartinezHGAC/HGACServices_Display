@@ -26,16 +26,55 @@ export function GetQuarters(quarters: number = DEFAULT_QUARTERS) {
   };
 }
 
+const formatLongDate = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+/** Parses a PocketBase date ("YYYY-MM-DD HH:MM:SS.sssZ"); null when empty or invalid. */
+function parsePBDate(value: unknown): Date | null {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const d = new Date(value.trim().replace(' ', 'T'));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Earliest and latest dates actually present in a table's records (their own from_date/to_date
+ * and those of expanded relations), clipped to the GetQuarters window the data was loaded with.
+ * Accepts a plain array or a getList result ({ items }). Returns null when no record has a date.
+ */
+export function GetRecordsDateRangeText(tableData: unknown, quarters: number = DEFAULT_QUARTERS): string | null {
+  const rows: any[] = Array.isArray(tableData)
+    ? tableData
+    : Array.isArray((tableData as any)?.items) ? (tableData as any).items : [];
+
+  // the record itself plus every expanded relation (single object or array)
+  const dated = rows.flatMap(row => [
+    row,
+    ...Object.values(row?.expand ?? {}).flatMap(rel => (Array.isArray(rel) ? rel : [rel]))
+  ]);
+
+  let earliest: Date | null = null;
+  let latest: Date | null = null;
+  for (const rec of dated) {
+    const from = parsePBDate(rec?.from_date);
+    const to = parsePBDate(rec?.to_date) ?? from; // no to_date: single-date record
+    if (from && (!earliest || from < earliest)) earliest = from;
+    if (to && (!latest || to > latest)) latest = to;
+  }
+  if (!earliest || !latest) return null;
+
+  const { start, now } = GetQuarters(quarters);
+  const windowStart = new Date(start.replace(' ', 'T') + 'Z');
+  const windowEnd = new Date(now.replace(' ', 'T') + 'Z');
+  if (earliest < windowStart) earliest = windowStart;
+  if (latest > windowEnd) latest = windowEnd;
+
+  return `Data on this card covers ${formatLongDate(earliest)} through ${formatLongDate(latest)}`;
+}
+
 /** "Data shown is from <start> through <today>": the GetQuarters window, for the info tooltip and print footer. */
 export function GetDataRangeText(quarters: number = DEFAULT_QUARTERS): string {
   const { start, now } = GetQuarters(quarters);
-  const fmt = (d: string) =>
-    new Date(d.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: 'UTC'
-    });
+  const fmt = (d: string) => formatLongDate(new Date(d.replace(' ', 'T') + 'Z'));
   return `Data shown is from ${fmt(start)} through ${fmt(now)}`;
 }
 

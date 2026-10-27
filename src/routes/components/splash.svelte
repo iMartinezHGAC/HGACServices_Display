@@ -8,6 +8,8 @@
 	import { printPage, printState } from '../../state/printState.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
 	import tippy from 'tippy.js';
+	import DataRangeInfo from './dataRangeInfo.svelte';
+	import { GetDataRangeText } from '../helpers/apiHelpers';
 
 	interface props {
 		chosenTab: string;
@@ -170,6 +172,9 @@
   <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
     <img src={help} alt="sumbit help form"/>
   </a>
+  </div>
+  <div class="ml-4 flex items-end justify-center">
+    <DataRangeInfo text={GetDataRangeText()} placement="bottom" />
   </div>
   <div class="ml-4 flex items-end justify-center">
     <button

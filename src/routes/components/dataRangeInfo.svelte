@@ -1,16 +1,14 @@
 <script lang="ts">
 	import tippy from 'tippy.js';
-	import { DEFAULT_QUARTERS, GetDataRangeText } from '../helpers/apiHelpers';
+	import type { Placement } from 'tippy.js';
 
-	// Must match the `quarters` the card's data was loaded with (GenerateFilter -> GetQuarters)
-	let { quarters = DEFAULT_QUARTERS }: { quarters?: number } = $props();
-
-	const dataRange = $derived(GetDataRangeText(quarters));
+	// Tooltip text: a card's data-driven range (GetRecordsDateRangeText) or the page window (GetDataRangeText)
+	let { text, placement = 'left' }: { text: string; placement?: Placement } = $props();
 
 	function toDateRangeTippy(element: HTMLElement) {
 		const instance = tippy(element, {
-			content: dataRange,
-			placement: 'left',
+			content: text,
+			placement,
 			theme: 'slateful'
 		});
 		return () => instance.destroy();
@@ -19,7 +17,7 @@
 
 <button
 	type="button"
-	aria-label={dataRange}
+	aria-label={text}
 	class="flex h-10 w-10 cursor-help items-center justify-center rounded text-slate-200 hover:bg-slate-600 print:hidden"
 	{@attach toDateRangeTippy}
 >

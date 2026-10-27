@@ -4,6 +4,8 @@
 	import CardGraph from './card_graph.svelte';
 	import DataRangeInfo from './dataRangeInfo.svelte';
 	import { shouldRenderCard } from '../helpers/chartFormatters';
+	import { GetRecordsDateRangeText } from '../helpers/apiHelpers';
+	import { page } from '$app/state';
 
 	interface cardProps {
 		project: ProgramType;
@@ -32,6 +34,8 @@
 		return '';
 	});
 
+	// Every program page's load returns tablesData keyed by table name; this card's rows are under its parent_table
+	const dataRange = $derived(GetRecordsDateRangeText(page.data.tablesData?.[project.parent_table]));
 </script>
 
 {#if shouldRenderCard(charts, additionalWork, project)}
@@ -40,9 +44,11 @@
 		class="mb-4 w-full h-full flex-col items-center justify-center rounded-b-md border-2 border-slate-700 bg-white"
 	>
 		<div class="relative flex w-full bg-slate-700 print:items-start" data-print-card-header>
-			<div class="absolute top-4 right-4 print:hidden">
-				<DataRangeInfo />
-			</div>
+			{#if dataRange}
+				<div class="absolute top-4 right-4 print:hidden">
+					<DataRangeInfo text={dataRange} />
+				</div>
+			{/if}
 			<div class="flex w-full flex-col print:w-[30%] print:flex-none">
 				<h1
 					class="small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white print:pt-3 print:pb-1 print:pl-4 print:text-[14pt] print:leading-tight"
