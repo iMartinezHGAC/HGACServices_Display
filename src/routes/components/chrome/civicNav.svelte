@@ -84,14 +84,15 @@
 		<h1 class="truncate text-3xl font-bold text-[#002F47]">{activeTab?.label ?? ''}</h1>
 	</div>
 	<span class="flex items-center gap-2 rounded-full bg-[#E2EDF1] px-3 py-1.5 text-xs font-medium text-[#002F47]">
-		<span class="h-2 w-2 rounded-full bg-[#7AB66F]"></span>Data · {dataRange}
+		<span class="h-2 w-2 rounded-full bg-[#7AB66F]"></span>{dataRange}
 	</span>
 	<a href={feedbackUrl} class="rounded-lg border border-[#E1E6E9] bg-white px-4 py-2 text-sm font-semibold text-[#4F6673] hover:bg-slate-50">Feedback</a>
 	<button
 		type="button"
 		onclick={printPage}
+		data-ui-icon-sm
 		class="flex cursor-pointer items-center gap-2 rounded-lg bg-[#002F47] px-4 py-2 text-sm font-semibold text-white hover:bg-[#025773]"
 	>
-		<span class="h-5 w-5"><Printer /></span> Print / PDF
+		<Printer /> Print / PDF
 	</button>
 </div>
