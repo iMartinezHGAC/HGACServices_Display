@@ -1677,7 +1677,7 @@ export function makeValueSumPieTop10<T = any>(
         name: "Other",
         value: otherSum,
         originals: otherOriginals,
-        itemStyle: { color: "#aaaaaa" },
+        itemStyle: { color: "#B4B4B4" },
       });
     }
   }
@@ -1871,11 +1871,11 @@ export function makeBar<T extends Record<string, any>>(
         data: seriesData,
         barMaxWidth: 60,
         itemStyle: {
-          color: '#3b82f6', // blue-500
+          color: '#025773', // hgac-blue
           borderRadius: [8, 8, 0, 0]
         },
         emphasis: {
-          itemStyle: { color: '#2563eb' }
+          itemStyle: { color: '#002F47' }
         }
       }
     ]
@@ -2022,7 +2022,7 @@ export function makeActualPotentialStackedBar(
         }
 
         html += `Remaining: ${gap}<br/>`;
-        html += `<strong style="color:#5470c6">Potential: ${total}</strong>`;
+        html += `<strong style="color:#025773">Potential: ${total}</strong>`;
 
         return html;
       },
@@ -2058,7 +2058,7 @@ export function makeActualPotentialStackedBar(
         stack: "total",
         barWidth: "60px",
         data: actualData,
-        itemStyle: { color: "#5470c6" },
+        itemStyle: { color: "#025773" },
         emphasis: { focus: "series" },
         label: {
           show: true,
@@ -2074,7 +2074,7 @@ export function makeActualPotentialStackedBar(
         stack: "total",
         barWidth: "60px",
         data: gapData,
-        itemStyle: { color: "#cccccc", opacity: 0.5 },
+        itemStyle: { color: "#B4B4B4", opacity: 0.5 },
         emphasis: { focus: "series" },
         label: {
           show: true,
@@ -2340,7 +2340,7 @@ export function makeActualProgramsBar(
         const count = item.value;
 
         let html = `<b style="font-size:14px;">${snakeToHuman(categoryName)}</b><br/>`;
-        html += `<span style="color:#5470c6">Utilized Programs: <b>${count}</b></span><br/><br/>`;
+        html += `<span style="color:#025773">Utilized Programs: <b>${count}</b></span><br/><br/>`;
 
         if (item.programs.length > 0) {
           html += item.programs.map((p: string) => `• ${p}`).join('<br/>');
@@ -2381,7 +2381,7 @@ export function makeActualProgramsBar(
         type: "bar",
         barMaxWidth: 50,   // a cap, not a fixed width: bars narrow (keeping gaps) when the chart is narrow, e.g. half-width print
         data: barData,
-        itemStyle: { color: "#5470c6" },
+        itemStyle: { color: "#025773" },
         emphasis: { focus: "series" },
         label: {
           show: true,

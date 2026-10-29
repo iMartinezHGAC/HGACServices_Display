@@ -4,6 +4,7 @@
   import { printState } from "../../state/printState.svelte"
   import { graphsState } from "../charts/graphVectors.svelte"
   import { legendNames } from "../helpers/printPairing"
+  import { CHART_COLORS, sideLegendFormatter, sideLegendWidths, styleChart } from "../helpers/chartStyle"
 
   const print = printState()
 
@@ -15,25 +16,12 @@
     onDrilldown?: (params: any, chartInstance: echarts.ECharts) => boolean | void  
     /** Printed at half the page width, beside another chart (see printPairing.ts) */
     printHalf?: boolean
-    /** On screen, fill the container's width (and follow its resizes) instead of a fixed 700px */
-    fluid?: boolean
   }
 
-  const { chart, onDrilldown, printHalf = false, fluid = false }: Props = $props()
+  const { chart, onDrilldown, printHalf = false }: Props = $props()
 
-  // Custom color palette
-  const customColors = [
-    '#7AB66F',
-    '#EF9021',
-    '#25B5AF',
-    '#C6093B',
-    '#002F47',
-    '#025773',
-    '#56B4E9', // light sky blue  
-    '#F0E442', // bright yellow 
-    '#0072B2', // medium blue
-    '#CC79A7', // reddish purple
-  ] as const
+  // Brand palette and Civic Light chart styling (see helpers/chartStyle.ts)
+  const customColors = CHART_COLORS
 
   // Helper to merge custom colors into the provided option (top-level color palette)
   function getOptionWithColors(option: echarts.EChartsOption | null): echarts.EChartsOption {
@@ -44,7 +32,7 @@
     if (!option) return { color: [...customColors], ...noAnimation }
     return {
       ...option,
-      color: [...customColors],   // This overrides any user-provided color palette (copy: the const tuple is readonly)
+      color: [...customColors],   // This overrides any user-provided color palette (styling: see `to`)
       ...noAnimation
     }
   }
@@ -76,6 +64,11 @@ console.log("RenderEchart received option →", {
   const compact = $derived(print.active && printHalf)
   let printLegend = $state<{ name: string; label: string; color: string }[]>([])
   let savedLegendShow: (boolean | undefined)[] | null = null
+  // Donuts sit left of their legend on screen (chartStyle.ts); with the legend moved below on
+  // paper they go back to the middle
+  let savedPieCenters: unknown[] | null = null
+  // The last whole chart sent to ECharts, as styled (its side legend, if any, is refitted on resize)
+  let styledOption: echarts.EChartsOption | null = null
 
   /** The legend as currently shown, colours taken from the rendered chart (follows drilldowns). */
   function readLegend(instance: echarts.ECharts) {
@@ -120,12 +113,22 @@ console.log("RenderEchart received option →", {
       const instance = chartInstance
       const legends = ((instance.getOption() as any).legend ?? []) as { show?: boolean }[]
       if (on) {
+        // the printed legend has room for full names
+        const full = sideLegendFormatter(styledOption, null)
+        if (full) instance.setOption({ legend: { formatter: full } })
         printLegend = readLegend(instance)
         savedLegendShow = legends.map((l) => l.show)
         if (legends.length) instance.setOption({ legend: legends.map(() => ({ show: false })) })
+        const series = ((instance.getOption() as any).series ?? []) as { type?: string; center?: unknown }[]
+        savedPieCenters = series.map((s) => (s.type === 'pie' ? s.center : undefined))
+        instance.setOption({ series: series.map((s) => (s.type === 'pie' ? { center: ['50%', '50%'] } : {})) })
       } else if (savedLegendShow) {
         instance.setOption({ legend: savedLegendShow.map((show) => ({ show: show ?? true })) })
+        const fitted = sideLegendFormatter(styledOption, instance.getWidth())
+        if (fitted) instance.setOption({ legend: { formatter: fitted } })
+        if (savedPieCenters) instance.setOption({ series: savedPieCenters.map((center) => (center ? { center } : {})) })
         savedLegendShow = null
+        savedPieCenters = null
         printLegend = []
       }
       // the container's size class has already been swapped by the time effects run
@@ -143,6 +146,16 @@ console.log("RenderEchart received option →", {
   function to(element: HTMLElement) {
     // SVG renderer: output is vector (sharp, selectable text) in print / Save as PDF
     chartInstance = echarts.init(element, null, { renderer: 'svg' })
+    // Drilldown handlers call setOption on the instance directly: style those options too. Only
+    // whole charts (series with a type); partial updates, such as hiding the legend for print,
+    // must merge into what is there untouched.
+    const rawSetOption = chartInstance.setOption.bind(chartInstance)
+    const isWholeChart = (o: any) => [o?.series ?? []].flat().some((s: any) => s?.type)
+    chartInstance.setOption = ((option: echarts.EChartsOption, ...rest: any[]) => {
+      if (!isWholeChart(option)) return (rawSetOption as any)(option, ...rest)
+      styledOption = styleChart(option, element.clientWidth)
+      return (rawSetOption as any)(styledOption, ...rest)
+    }) as typeof chartInstance.setOption
     if (chart) {
       chartInstance.setOption(getOptionWithColors(chart))
     }
@@ -180,14 +193,21 @@ console.log("RenderEchart received option →", {
     })
     printQuery.addEventListener('change', refit)
 
-    // A fluid chart is laid out at whatever width its box has, so it follows the box's resizes
-    const resizeObserver = fluid ? new ResizeObserver(refit) : null
-    resizeObserver?.observe(element)
+    // Charts fill their box's width, so they follow its resizes (cards, sidebar, window); a
+    // legend beside a donut, and the title, re-fit their text to the new width
+    const resizeObserver = new ResizeObserver(() => {
+      refit()
+      const formatter = sideLegendFormatter(styledOption, element.clientWidth)
+      if (formatter && !untrack(() => print.active) && element.clientWidth > 0) {
+        rawSetOption({ legend: { formatter }, title: { textStyle: { width: sideLegendWidths(element.clientWidth).title } } })
+      }
+    })
+    resizeObserver.observe(element)
 
     // Attachment cleanup: runs when the chart is removed from the DOM
     return () => {
       printQuery.removeEventListener('change', refit)
-      resizeObserver?.disconnect()
+      resizeObserver.disconnect()
       graphState.remove(element)
       chartInstance?.dispose()
       chartInstance = null
@@ -195,11 +215,11 @@ console.log("RenderEchart received option →", {
   }
 </script>
 
-<div data-echart-wrap class="flex flex-col items-center justify-center {fluid ? 'w-full' : ''}">
+<div data-echart-wrap class="flex w-full flex-col items-center justify-center">
   <div 
     data-echart
     data-print-half={compact ? "" : undefined}
-    class="{compact ? 'w-[460px] h-[380px]' : fluid ? 'w-full h-[450px]' : 'w-[700px] h-[450px] px-8'} scale-100"
+    class="{compact ? 'w-[460px] h-[380px]' : 'w-full h-[450px]'} scale-100"
     {@attach to}>
   </div>  
 
@@ -214,10 +234,10 @@ console.log("RenderEchart received option →", {
   {#if isDrilledDown}
     <button 
       onclick={restoreRootChart}
-      class="mb-0 px-0 py-2 w-20 rounded bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+      class="mb-1 cursor-pointer rounded-lg border border-[#E1E6E9] bg-white px-4 py-1.5 font-[Metropolis] text-sm font-semibold text-[#025773] hover:bg-[#F4F6F7] focus:outline-none focus:ring-2 focus:ring-[#025773]/30 print:hidden"
       type="button"
     >
-      ⬅️ Back
+      ← Back
     </button>
   {/if}
 </div>

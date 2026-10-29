@@ -140,13 +140,13 @@ const subCollectionsByTable = $derived(
 		<div data-ui-overview-charts class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
 
 			<div data-print-avoid data-ui-panel class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
-				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} fluid />
+				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} />
         <p class="font-[Metropolis] print:hidden">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
 			<div data-print-avoid data-ui-panel class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
-				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} printHalf={projectsHalf} fluid />
+				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} printHalf={projectsHalf} />
 			</div>
 
 			<!-- LET Funding Multi-Drilldown -->

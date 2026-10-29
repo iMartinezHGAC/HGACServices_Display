@@ -104,7 +104,16 @@
 		border-radius: 12px;
 		padding: 0.75rem;
 	}
+	/* KPI tiles: label top-left, big number below (the design's stat cards) */
 	[data-print-indicator] {
+		align-items: flex-start;
+		justify-content: center;
+		height: auto;
+		min-height: 9rem;
+		max-width: none;
+		margin: 0.5rem 0;
+		padding: 1.5rem;
+		text-align: left;
 		background: #fff;
 		color: #002f47;
 		border: 1px solid #e1e6e9;
@@ -117,10 +126,23 @@
 	}
 	/* the label above the number (the number's own wrapper starts with a <p> too) */
 	[data-print-indicator] > p:first-child {
+		width: auto;
+		padding-bottom: 0.5rem;
 		color: #4f6673;
 		font-family: Metropolis, sans-serif;
-		font-size: 1.15rem;
-		font-weight: 600;
+		font-size: 0.9rem;
+		font-weight: 500;
+	}
+	[data-print-indicator] > div {
+		justify-content: flex-start;
+	}
+	[data-ui-overview-band] [data-print-indicator] {
+		max-width: 24rem;
+	}
+	[data-print-indicator] p[class*='text-[4rem]'] {
+		font-size: 2.5rem;
+		font-weight: 700;
+		line-height: 1.1;
 	}
 	[data-ui-more] {
 		background: #002f47;
