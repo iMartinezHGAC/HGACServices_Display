@@ -89,6 +89,13 @@ const subCollectionsByTable = $derived(
 		chartType: 'indicator'
 	}); 
 
+  // Further KPIs for the tile row on screen (paper keeps the single funding tile)
+  const usedGroups = $derived((data.utilization?.groups ?? []).filter((g) => (g.programs ?? []).some((p) => p.hasData)));
+  const programsInUse = $derived(usedGroups.reduce((n, g) => n + (g.programs ?? []).filter((p) => p.hasData).length, 0));
+  const transportationProjects = $derived(
+    combinedProjectData.reduce((n, group) => n + Object.values(group).reduce((m, rows) => m + (rows?.length ?? 0), 0), 0)
+  );
+
    const actualProgramsChart = $derived(
     makeActualProgramsBar(
       data.utilization,
@@ -133,19 +140,26 @@ const subCollectionsByTable = $derived(
 				numericValue={fundingIndicator.indicator.indicatorVal as number}
         symbol_pre={fundingIndicator.indicator?.indicatorSymPre}
 			/>
+			{#each [['Programs in Use', programsInUse], ['Service Areas', usedGroups.length], ['Transportation Projects', transportationProjects]] as [label, value]}
+				{#if value}
+					<div class="contents print:hidden">
+						<Indicator above={true} below={false} aboveText={String(label)} belowText={''} numericValue={Number(value)} />
+					</div>
+				{/if}
+			{/each}
 		</div>
       {/if}
 
 		<!-- Charts Row -->
 		<div data-ui-overview-charts class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
 
-			<div data-print-avoid data-ui-panel class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
+			<div data-print-avoid data-ui-panel="wide" class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} />
-        <p class="font-[Metropolis] print:hidden">For a full list of programs H-GAC offers, please visit our website</p>
+        <p data-ui-caption class="font-[Metropolis] print:hidden">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
-			<div data-print-avoid data-ui-panel class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
+			<div data-print-avoid data-ui-panel="narrow" class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
 				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} printHalf={projectsHalf} />
 			</div>
 

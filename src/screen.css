@@ -43,26 +43,52 @@
 		height: calc(100vh - 6rem);
 		padding: 0 2.25rem;
 	}
-	[data-ui-overview],
-	[data-ui-overview-band] {
+	[data-ui-overview] {
+		height: auto;
+		padding: 0.5rem 0 4rem;
 		background: transparent;
 	}
-	/* chart panels share a row when two fit (charts there are fluid), else stack; at most the
-	   original 48rem each */
+	/* Overview, as the prototype: a row of KPI tiles, then a wide chart card beside a narrower
+	   donut card (stacked when both don't fit) */
+	[data-ui-overview-band] {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+		align-items: stretch;
+		gap: 1rem;
+		height: auto;
+		background: transparent;
+	}
+	[data-ui-overview-band] [data-print-indicator] {
+		margin: 0;
+		min-height: 8rem;
+	}
 	[data-ui-overview-charts] {
 		flex-wrap: wrap;
-		gap: 1.5rem;
-		padding-top: 1.5rem;
+		align-items: stretch;
+		justify-content: flex-start;
+		gap: 1rem;
+		padding: 1rem 0 0;
 	}
 	[data-ui-panel] {
-		flex: 1 1 30rem;
+		height: auto;
 		width: auto;
 		min-width: 0;
-		max-width: 48rem;
-		padding: 1rem;
+		justify-content: flex-start;
+		padding: 0.75rem 0.75rem 1rem;
 		background: #fff;
 		border: 1px solid #e1e6e9;
 		border-radius: 14px;
+	}
+	[data-ui-panel='wide'] {
+		flex: 1 1 32rem;
+	}
+	[data-ui-panel='narrow'] {
+		flex: 1 1 24rem;
+		max-width: 30rem;
+	}
+	[data-ui-caption] {
+		color: #8a9aa3;
+		font-size: 0.8rem;
 	}
 	[data-print-card] {
 		margin-bottom: 1.25rem;
@@ -71,12 +97,25 @@
 		border-radius: 14px;
 		overflow: hidden;
 	}
+	/* Program card header, as the prototype: accent title, the data range under it, then the
+	   description across the card */
 	[data-print-card-header] {
+		flex-direction: column;
 		background: #fff;
 		border-bottom: 1px solid #e1e6e9;
 	}
+	[data-ui-card-range-icon] {
+		display: none; /* the range is written under the title instead */
+	}
+	[data-ui-card-range] {
+		display: block;
+		margin: 0 0 0.5rem 2.6rem;
+		color: #8a9aa3;
+		font-family: Metropolis, sans-serif;
+		font-size: 0.75rem;
+	}
 	[data-ui-card-title] {
-		margin: 1.5rem 0 0.5rem 1.75rem;
+		margin: 1.5rem 0 0.25rem 1.75rem;
 		padding: 0 0 0 0.85rem;
 		border-left: 4px solid #c6093b;
 		background: transparent;
@@ -86,14 +125,30 @@
 		font-weight: 700;
 	}
 	[data-ui-card-links] {
-		margin-left: 1.75rem;
+		width: auto;
+		margin-left: 2.6rem;
+		padding-bottom: 0.25rem;
 	}
 	[data-ui-card-links] a {
 		color: #025773;
 	}
+	[data-ui-card-blurb] {
+		width: auto;
+		max-width: 60rem;
+		margin: 0;
+		padding: 0 1.75rem 1.25rem 2.6rem;
+	}
 	[data-ui-card-blurb] > * {
+		padding: 0.25rem 0 0;
 		color: #4f6673;
+		font-size: 0.95rem;
 		font-weight: 500;
+		line-height: 1.6;
+	}
+	/* card body: KPI tiles and charts in two columns, tighter than before */
+	[data-print-grid] {
+		gap: 1rem;
+		padding: 1.25rem 1.75rem 1.5rem;
 	}
 	[data-print-card-header] button {
 		color: #4f6673;
@@ -135,9 +190,6 @@
 	}
 	[data-print-indicator] > div {
 		justify-content: flex-start;
-	}
-	[data-ui-overview-band] [data-print-indicator] {
-		max-width: 24rem;
 	}
 	[data-print-indicator] p[class*='text-[4rem]'] {
 		font-size: 2.5rem;

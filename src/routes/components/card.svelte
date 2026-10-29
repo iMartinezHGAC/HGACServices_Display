@@ -45,7 +45,7 @@
 	>
 		<div class="relative flex w-full bg-slate-700 print:items-start" data-print-card-header>
 			{#if dataRange}
-				<div class="absolute top-4 right-4 print:hidden">
+				<div data-ui-card-range-icon class="absolute top-4 right-4 print:hidden">
 					<DataRangeInfo text={dataRange} />
 				</div>
 			{/if}
@@ -57,6 +57,10 @@
 					{project.program_name}
 					<div class="flex flex-grow"></div>
 				</h1>
+				{#if dataRange}
+					<!-- shown on screen under the title (screen.css); paper and the icon tooltip carry it otherwise -->
+					<p data-ui-card-range class="hidden print:hidden">{dataRange}</p>
+				{/if}
 				{#if linkUrls.length > 0}
 					<div data-ui-card-links class="flex flex-col pb-4 ml-10 w-1/4 print:ml-4 print:w-full print:pb-2">
 						{#each linkUrls as link}
