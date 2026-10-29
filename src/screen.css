@@ -47,15 +47,19 @@
 	[data-ui-overview-band] {
 		background: transparent;
 	}
-	/* two 48rem chart panels don't fit beside the sidebar: let them wrap and shrink */
+	/* chart panels share a row when two fit (charts there are fluid), else stack; at most the
+	   original 48rem each */
 	[data-ui-overview-charts] {
 		flex-wrap: wrap;
 		gap: 1.5rem;
 		padding-top: 1.5rem;
 	}
 	[data-ui-panel] {
-		max-width: 100%;
-		overflow-x: auto;
+		flex: 1 1 30rem;
+		width: auto;
+		min-width: 0;
+		max-width: 48rem;
+		padding: 1rem;
 		background: #fff;
 		border: 1px solid #e1e6e9;
 		border-radius: 14px;

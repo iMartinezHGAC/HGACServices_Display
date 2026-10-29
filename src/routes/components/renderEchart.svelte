@@ -15,9 +15,11 @@
     onDrilldown?: (params: any, chartInstance: echarts.ECharts) => boolean | void  
     /** Printed at half the page width, beside another chart (see printPairing.ts) */
     printHalf?: boolean
+    /** On screen, fill the container's width (and follow its resizes) instead of a fixed 700px */
+    fluid?: boolean
   }
 
-  const { chart, onDrilldown, printHalf = false }: Props = $props()
+  const { chart, onDrilldown, printHalf = false, fluid = false }: Props = $props()
 
   // Custom color palette
   const customColors = [
@@ -178,9 +180,14 @@ console.log("RenderEchart received option →", {
     })
     printQuery.addEventListener('change', refit)
 
+    // A fluid chart is laid out at whatever width its box has, so it follows the box's resizes
+    const resizeObserver = fluid ? new ResizeObserver(refit) : null
+    resizeObserver?.observe(element)
+
     // Attachment cleanup: runs when the chart is removed from the DOM
     return () => {
       printQuery.removeEventListener('change', refit)
+      resizeObserver?.disconnect()
       graphState.remove(element)
       chartInstance?.dispose()
       chartInstance = null
@@ -188,11 +195,11 @@ console.log("RenderEchart received option →", {
   }
 </script>
 
-<div data-echart-wrap class="flex flex-col items-center justify-center">
+<div data-echart-wrap class="flex flex-col items-center justify-center {fluid ? 'w-full' : ''}">
   <div 
     data-echart
     data-print-half={compact ? "" : undefined}
-    class="{compact ? 'w-[460px] h-[380px]' : 'w-[700px] h-[450px] px-8'} scale-100"
+    class="{compact ? 'w-[460px] h-[380px]' : fluid ? 'w-full h-[450px]' : 'w-[700px] h-[450px] px-8'} scale-100"
     {@attach to}>
   </div>  
 
