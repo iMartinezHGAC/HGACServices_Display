@@ -4,6 +4,7 @@
 	import type { ProgramType, AdworkType, ChartType } from '../../ambient';
 	import Card from './card.svelte';
 	import { shouldRenderCard } from '../helpers/chartFormatters';
+	import { programNav } from '../../state/programNav.svelte';
 
 	interface CardDataType {
 		program: ProgramType;
@@ -52,20 +53,43 @@
 	);
 
 	let flyValue = $state(direction ? -400 : 400);
+
+	// Share the program list (the Civic Light sidebar lists it) and follow which card is in view
+	const nav = programNav();
+	$effect(() => {
+		nav.set(visibleCardNames);
+		return () => nav.clear();
+	});
+
+	function spyOnCards(scroller: HTMLElement) {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const top = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+				if (top) nav.setActive((top.target as HTMLElement).dataset.program ?? '');
+			},
+			// a card counts as "current" while it crosses the upper third of the scroller
+			{ root: scroller, rootMargin: '0px 0px -66% 0px' }
+		);
+		scroller.querySelectorAll('[data-program]').forEach((el) => observer.observe(el));
+		return () => observer.disconnect();
+	}
 </script>
 
 {#snippet formattedEntryText(cardName: string)}
 	<div class="flex font-[Metropolis] font-medium text-slate-200">
 		<a
 			href={toCamelCase(cardName)}
+			data-ui-program-link
+			data-active={nav.active === cardName ? '' : undefined}
 			class="w-56 rounded bg-slate-600 px-6 py-4 text-slate-200 hover:bg-slate-700 hover:text-white focus:bg-slate-800"
 			>{cardName}</a
 		>
 	</div>
 {/snippet}
 
-<div class="w-screen" data-print-reset>
+<div class="w-screen" data-print-reset data-ui-cardbody>
 	<div
+		data-ui-programs
 		class="fixed top-24 left-0 z-20 flex h-full w-56 transform flex-col items-start justify-start bg-slate-600 pt-4 text-xl print:hidden"
 	>
 		{#each visibleCardNames as cardName}
@@ -74,12 +98,14 @@
 	</div>
 	<div
 		data-print-reset
+		data-ui-cards
+		{@attach spyOnCards}
 		class="z-10 ml-56 flex h-screen w-[calc(100%-14rem)] flex-col items-center justify-start overflow-auto scroll-smooth pt-[0%] pb-[6%]"
 		transition:fly={{ x: flyValue, duration: 300 }}
 	>
 		<div class="flex flex-col w-full">
 			{#each visibleCardData as card}
-				<div class="flex w-full" id={card.program.program_name.split(' ').join('')}>
+				<div class="flex w-full" id={card.program.program_name.split(' ').join('')} data-program={card.program.program_name}>
 					<Card project={card.program} charts={card.echarts} additionalWork={adwork} />
 				</div>
 			{/each}

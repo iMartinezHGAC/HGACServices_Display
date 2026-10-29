@@ -8,9 +8,10 @@
 		uuid: string;
 		setChosen: (tabName: string) => void;
 		textLight: boolean;
+		active?: boolean;
 	};
 
-	let { tabText, path, color = 'gray', setChosen, uuid, textLight }: tabProps = $props();
+	let { tabText, path, color = 'gray', setChosen, uuid, textLight, active = false }: tabProps = $props();
 
 	function chooseEvent() {
 		setChosen(tabText);
@@ -23,7 +24,7 @@
 </script>
 
 <button onclick={chooseEvent}>
-	<a class={colorClass} style="background-color: {color}; color: {textColor};" href={path} rel="prefetch"
+	<a class={colorClass} data-ui-tab data-active={active ? '' : undefined} style="background-color: {color}; color: {textColor};" href={path} rel="prefetch"
 		>{snakeToHuman(tabText)}</a
 	>
 </button>

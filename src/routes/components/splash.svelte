@@ -10,6 +10,13 @@
 	import tippy from 'tippy.js';
 	import DataRangeInfo from './dataRangeInfo.svelte';
 	import { GetDataRangeText } from '../helpers/apiHelpers';
+	import { snakeToHuman } from '../helpers/caseConversion';
+	import { useUiTheme } from '../../state/uiTheme.svelte';
+	import OptionsMenu from './optionsMenu.svelte';
+	import CivicNav from './chrome/civicNav.svelte';
+	import CommandHeader from './chrome/commandHeader.svelte';
+	import ReportHeader from './chrome/reportHeader.svelte';
+	import type { NavTab } from './chrome/types';
 
 	interface props {
 		chosenTab: string;
@@ -97,6 +104,22 @@
 
   //$inspect('coded tabs', codedTabs)
 
+  const theme = useUiTheme();
+
+  const feedbackUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u";
+
+  // The tabs the themed headers draw (the classic header renders its own below)
+  const navTabs: NavTab[] = $derived(
+    [overview, ...(Array.isArray(dashboard_groups) ? dashboard_groups : []).filter((dash) => hasTab(dash.tab_name))].map(
+      (dash) => ({
+        name: dash.tab_name,
+        label: snakeToHuman(dash.tab_name),
+        color: dash.id === overview.id ? '#B4B4B4' : dash.tab_color,
+        active: chosenTab === toEverettCase(dash.tab_name).toLowerCase()
+      })
+    )
+  );
+
   function toTippy(element: HTMLElement) {
     tippy(element, {
       content: "Submit feedback",
@@ -116,6 +139,7 @@
 			setChosen={handleSetChosen}
 			uuid={jurisId.uuid}
 			textLight={false}
+			active
 		/>
 	{:else}
 		<Tabs
@@ -148,7 +172,14 @@
 	</div>
 </div>
 
-<div class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500 print:hidden">
+{#if theme.id === 'civic'}
+	<CivicNav tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
+{:else if theme.id === 'command'}
+	<CommandHeader tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
+{:else if theme.id === 'report'}
+	<ReportHeader tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
+{:else}
+<div data-ui-header class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500 print:hidden">
 	<div class="flex flex-none items-center justify-start">
     {#if logo_url}
       <img src={logo_url} alt="harris" class="h-24 p-2" />
@@ -160,7 +191,7 @@
 		</p>
 	</div>
 	<div class="flex-grow"></div>
-	<div class="flex flex-wrap items-end justify-start overflow-y-auto">
+	<div data-ui-tabs class="flex flex-wrap items-end justify-start overflow-y-auto">
     {@render tabSnippet(overview)}
 		{#each dashboard_groups as dash}
       {#if hasTab(dash.tab_name)}
@@ -169,7 +200,7 @@
 		{/each}
 	</div>
   <div class="flex items-end justify-center ml-20">
-  <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u" class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
+  <a href={feedbackUrl} class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
     <img src={help} alt="sumbit help form"/>
   </a>
   </div>
@@ -187,9 +218,13 @@
       <Printer />
     </button>
   </div>
+  <div class="ml-4 flex items-end justify-center">
+    <OptionsMenu tone="dark" />
+  </div>
 	<div class="flex-grow-[1]"></div>
 	<img src={logo} alt="HGAC" class="right-4 h-24" />
 </div>
+{/if}
 
 {#if showSpinner}
 	<!-- Full-screen loading overlay -->

@@ -158,6 +158,7 @@
 
 	{#if getNonEmptyChartCount(charts) > 2}
 		<button
+			data-ui-more
 			class="mx-auto flex h-12 w-11/12 items-center justify-center bg-slate-700 text-white hover:bg-slate-800 transition-colors print:hidden"
 			onclick={() => {
 				accordionFlag = !accordionFlag;
@@ -172,7 +173,7 @@
 	{#if hasAdditionalWork}
 		<div class="flexy flex-col" {@attach toGraphWork}>
     {#if getNonEmptyChartCount(charts) > 0}
-			<h1 class="text-2xl font-extrabold pt-8 print:pt-3 print:pb-1 print:pl-4 print:text-[13pt]">Additional Work</h1>
+			<h1 data-ui-section-title class="text-2xl font-extrabold pt-8 print:pt-3 print:pb-1 print:pl-4 print:text-[13pt]">Additional Work</h1>
     {/if}
 
 			{#each itemsToShow as adWork}

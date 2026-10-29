@@ -51,13 +51,14 @@
 			{/if}
 			<div class="flex w-full flex-col print:w-[30%] print:flex-none">
 				<h1
+					data-ui-card-title
 					class="small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white print:pt-3 print:pb-1 print:pl-4 print:text-[14pt] print:leading-tight"
 				>
 					{project.program_name}
 					<div class="flex flex-grow"></div>
 				</h1>
 				{#if linkUrls.length > 0}
-					<div class="flex flex-col pb-4 ml-10 w-1/4 print:ml-4 print:w-full print:pb-2">
+					<div data-ui-card-links class="flex flex-col pb-4 ml-10 w-1/4 print:ml-4 print:w-full print:pb-2">
 						{#each linkUrls as link}
 							<a
 								href={link.url_string}
@@ -70,7 +71,7 @@
 					</div>
 				{/if}
 			</div>
-      <div class="flex w-3/4 mr-40 print:w-[70%] print:flex-none print:mr-0 print:pr-4">
+      <div data-ui-card-blurb class="flex w-3/4 mr-40 print:w-[70%] print:flex-none print:mr-0 print:pr-4">
         <CardBlurbTb text={blurb} />
       </div>
       <div class="flex-grow"></div>

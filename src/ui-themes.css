@@ -1,0 +1,391 @@
+/* ─────────────────────────────── Interface themes ───────────────────────────────
+   Picked in the Options menu (gear icon); `main[data-ui]` carries the choice (see
+   state/uiTheme.svelte.ts). "classic" has no rules here. Each theme restyles the
+   existing components through data-ui-* / data-print-* hooks; the header and
+   navigation for civic / command / report are their own components
+   (routes/components/chrome). Screen only: paper always gets the classic print layout.
+   Utilities live in Tailwind's cascade layer, so these unlayered rules win without
+   !important (only inline styles, such as tab colours, need it).
+   ───────────────────────────────────────────────────────────────────────────── */
+@media screen {
+	/* small printer icon inside themed buttons (the icon is 48px and white by default) */
+	[data-ui-icon-sm] svg.printer-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	/* ── Refined Classic (ui-alternatives 05): the original, tidied ── */
+	main[data-ui='refined'] [data-ui-header] {
+		box-shadow: 0 8px 16px -8px rgb(100 116 139 / 0.7);
+	}
+	main[data-ui='refined'] [data-ui-tab] {
+		height: 2.75rem;
+		margin: 0 0.2rem;
+		box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.12);
+	}
+	main[data-ui='refined'] [data-ui-tab][data-active] {
+		height: 3.25rem;
+		background-color: #e2e8f0 !important;
+		color: #334155 !important;
+		box-shadow: none;
+	}
+	main[data-ui='refined'] [data-ui-program-link] {
+		border-left: 4px solid transparent;
+		border-radius: 0;
+		font-size: 1rem;
+		padding: 0.85rem 1rem 0.85rem 1.25rem;
+	}
+	main[data-ui='refined'] [data-ui-program-link][data-active] {
+		background: #334155;
+		border-left-color: #c6093b;
+		color: #fff;
+		font-weight: 700;
+	}
+	main[data-ui='refined'] [data-ui-cards] {
+		padding: 1.5rem 1.5rem 6rem;
+	}
+	main[data-ui='refined'] [data-print-card] {
+		margin-bottom: 1.5rem;
+		border-radius: 0 0 0.5rem 0.5rem;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgb(15 23 42 / 0.1);
+	}
+	main[data-ui='refined'] [data-print-kind='chart'],
+	main[data-ui='refined'] [data-print-kind='table'] {
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 0.75rem;
+	}
+	main[data-ui='refined'] [data-print-indicator] {
+		border-radius: 0.75rem;
+	}
+	main[data-ui='refined'] [data-ui-more] {
+		border-radius: 0.375rem;
+	}
+
+	/* ── Civic Light (ui-alternatives 01): light cards, navigation in the left sidebar ── */
+	main[data-ui='civic'] {
+		background: #f4f6f7;
+		color: #002f47;
+	}
+	/* pages position themselves below a 96px header; this frame (beside the sidebar) becomes their
+	   containing block, and the civic title bar covers its top 96px */
+	main[data-ui='civic'] [data-ui-frame] {
+		position: fixed;
+		inset: 0 0 0 17rem;
+		padding-top: 6rem;
+		overflow: hidden;
+		transform: translateZ(0);
+	}
+	main[data-ui='civic'] [data-ui-cardbody] {
+		width: 100%;
+	}
+	main[data-ui='civic'] [data-ui-programs] {
+		display: none; /* listed in the sidebar instead */
+	}
+	main[data-ui='civic'] [data-ui-cards] {
+		margin-left: 0;
+		width: 100%;
+		height: calc(100vh - 6rem);
+		padding: 0.5rem 2.25rem 4rem;
+	}
+	main[data-ui='civic'] [data-ui-overview-scroll] {
+		left: 0;
+		width: 100%;
+		height: calc(100vh - 6rem);
+		padding: 0 2.25rem;
+	}
+	main[data-ui='civic'] [data-ui-overview],
+	main[data-ui='civic'] [data-ui-overview-band] {
+		background: transparent;
+	}
+	main[data-ui='civic'] [data-ui-panel] {
+		background: #fff;
+		border: 1px solid #e1e6e9;
+		border-radius: 14px;
+	}
+	main[data-ui='civic'] [data-print-card] {
+		margin-bottom: 1.25rem;
+		background: #fff;
+		border: 1px solid #e1e6e9;
+		border-radius: 14px;
+		overflow: hidden;
+	}
+	main[data-ui='civic'] [data-print-card-header] {
+		background: #fff;
+		border-bottom: 1px solid #e1e6e9;
+	}
+	main[data-ui='civic'] [data-ui-card-title] {
+		margin: 1.5rem 0 0.5rem 1.75rem;
+		padding: 0 0 0 0.85rem;
+		border-left: 4px solid #c6093b;
+		background: transparent;
+		color: #002f47;
+		font-variant: normal;
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+	main[data-ui='civic'] [data-ui-card-links] {
+		margin-left: 1.75rem;
+	}
+	main[data-ui='civic'] [data-ui-card-links] a {
+		color: #025773;
+	}
+	main[data-ui='civic'] [data-ui-card-blurb] > * {
+		color: #4f6673;
+		font-weight: 500;
+	}
+	main[data-ui='civic'] [data-print-card-header] button {
+		color: #4f6673;
+	}
+	main[data-ui='civic'] [data-print-kind='chart'],
+	main[data-ui='civic'] [data-print-kind='table'] {
+		border: 1px solid #e1e6e9;
+		border-radius: 12px;
+		padding: 0.75rem;
+	}
+	main[data-ui='civic'] [data-print-indicator] {
+		background: #fff;
+		color: #002f47;
+		border: 1px solid #e1e6e9;
+		border-radius: 14px;
+		box-shadow: 0 1px 3px rgb(0 47 71 / 0.08);
+	}
+	main[data-ui='civic'] [data-print-indicator] p {
+		color: #002f47;
+		text-shadow: none;
+	}
+	main[data-ui='civic'] [data-print-indicator] p:first-child {
+		color: #4f6673;
+		font-family: Metropolis, sans-serif;
+		font-size: 1.15rem;
+		font-weight: 600;
+	}
+	main[data-ui='civic'] [data-ui-more] {
+		background: #002f47;
+		border-radius: 0.5rem;
+	}
+
+	/* ── Command Center (ui-alternatives 02): dark slate panels ── */
+	main[data-ui='command'] {
+		background: #00192a;
+		color: #e4eef2;
+	}
+	main[data-ui='command'] [data-ui-programs] {
+		background: #002f47;
+		border-right: 1px solid #124a64;
+	}
+	main[data-ui='command'] [data-ui-program-link] {
+		background: transparent;
+		border-left: 3px solid transparent;
+		border-radius: 0;
+		color: #8fb0bf;
+		font-size: 1rem;
+	}
+	main[data-ui='command'] [data-ui-program-link]:hover {
+		background: #0b3f59;
+		color: #fff;
+	}
+	main[data-ui='command'] [data-ui-program-link][data-active] {
+		background: #0b3f59;
+		border-left-color: #25b5af;
+		color: #fff;
+		font-weight: 700;
+	}
+	main[data-ui='command'] [data-ui-cards] {
+		padding: 1.25rem 1.5rem 6rem;
+	}
+	main[data-ui='command'] [data-print-card] {
+		margin-bottom: 1.25rem;
+		background: #002f47;
+		border: 1px solid #124a64;
+		border-radius: 16px;
+		overflow: hidden;
+		color: #e4eef2;
+	}
+	main[data-ui='command'] [data-print-card-header] {
+		background: linear-gradient(135deg, #025773, #002f47);
+	}
+	main[data-ui='command'] [data-ui-card-title] {
+		background: transparent;
+	}
+	main[data-ui='command'] [data-print-indicator] {
+		background: linear-gradient(135deg, #025773, #0b3f59);
+		border: 1px solid #124a64;
+		border-radius: 16px;
+		box-shadow: none;
+		color: #fff;
+	}
+	main[data-ui='command'] [data-print-kind='table'] h2 {
+		color: #e4eef2;
+	}
+	main[data-ui='command'] [data-print-table],
+	main[data-ui='command'] [data-print-table] td,
+	main[data-ui='command'] [data-print-table] th {
+		border-color: #124a64;
+	}
+	main[data-ui='command'] [data-print-table] th {
+		background: #0b3f59;
+		color: #e4eef2;
+	}
+	main[data-ui='command'] [data-print-table] tr:hover {
+		background: #0b3f59;
+	}
+	main[data-ui='command'] [data-print-table] a {
+		color: #25b5af;
+	}
+	main[data-ui='command'] [data-ui-more] {
+		background: #0b3f59;
+		border-radius: 0.5rem;
+	}
+	main[data-ui='command'] [data-ui-overview],
+	main[data-ui='command'] [data-ui-overview-band] {
+		background: transparent;
+	}
+	main[data-ui='command'] [data-ui-panel] {
+		background: #002f47;
+		border: 1px solid #124a64;
+		border-radius: 16px;
+		color: #8fb0bf;
+	}
+
+	/* ── Annual Report (ui-alternatives 03): editorial, numbered sections on paper ── */
+	main[data-ui='report'] {
+		background: #fafaf8;
+		color: #002f47;
+	}
+	main[data-ui='report'] [data-ui-programs] {
+		background: #fafaf8;
+		border-right: 1px solid #d5dce0;
+		padding-top: 1.5rem;
+	}
+	main[data-ui='report'] [data-ui-programs]::before {
+		content: 'In this section';
+		padding: 0 1.25rem 0.75rem;
+		color: #c6093b;
+		font: 700 0.7rem Metropolis, sans-serif;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+	}
+	main[data-ui='report'] [data-ui-program-link] {
+		background: transparent;
+		border-left: 3px solid transparent;
+		border-radius: 0;
+		color: #4f6673;
+		font-size: 0.95rem;
+		padding: 0.6rem 1rem 0.6rem 1.25rem;
+	}
+	main[data-ui='report'] [data-ui-program-link]:hover {
+		background: transparent;
+		color: #002f47;
+	}
+	main[data-ui='report'] [data-ui-program-link][data-active] {
+		border-left-color: #c6093b;
+		color: #002f47;
+		font-weight: 700;
+	}
+	main[data-ui='report'] [data-ui-cards] {
+		counter-reset: report-section;
+		padding: 0 4rem 6rem 3rem;
+	}
+	main[data-ui='report'] [data-print-card] {
+		counter-increment: report-section;
+		margin: 2.5rem 0 0;
+		background: transparent;
+		border: 0;
+		border-top: 2px solid #002f47;
+		border-radius: 0;
+	}
+	main[data-ui='report'] [data-print-card-header] {
+		align-items: flex-start;
+		background: transparent;
+	}
+	main[data-ui='report'] [data-ui-card-title] {
+		flex-direction: column;
+		padding: 1.5rem 0 0.5rem;
+		background: transparent;
+		color: #002f47;
+		font-family: 'Fraunces Variable', serif;
+		font-variant: normal;
+		font-size: 2rem;
+		font-weight: 600;
+		line-height: 1.15;
+	}
+	main[data-ui='report'] [data-ui-card-title]::before {
+		content: counter(report-section, decimal-leading-zero);
+		color: #d5dce0;
+		font-size: 3.25rem;
+		font-weight: 700;
+		line-height: 1;
+	}
+	main[data-ui='report'] [data-ui-card-links] {
+		margin-left: 0;
+	}
+	main[data-ui='report'] [data-ui-card-links] a {
+		color: #025773;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	main[data-ui='report'] [data-ui-card-blurb] {
+		padding-top: 3.5rem;
+	}
+	main[data-ui='report'] [data-ui-card-blurb] > * {
+		color: #4f6673;
+		font-family: 'Fraunces Variable', serif;
+		font-size: 1.1rem;
+		font-weight: 400;
+		line-height: 1.7;
+	}
+	main[data-ui='report'] [data-print-card-header] button {
+		color: #4f6673;
+	}
+	main[data-ui='report'] [data-print-grid] {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	main[data-ui='report'] [data-print-indicator] {
+		align-items: flex-start;
+		height: auto;
+		min-height: 10rem;
+		padding-left: 1.75rem;
+		text-align: left;
+		background: transparent;
+		border: 0;
+		border-left: 3px solid #c6093b;
+		border-radius: 0;
+		box-shadow: none;
+		color: #002f47;
+	}
+	main[data-ui='report'] [data-print-indicator] p {
+		color: #002f47;
+		text-shadow: none;
+	}
+	main[data-ui='report'] [data-print-indicator] p:first-child {
+		color: #4f6673;
+		font-family: Metropolis, sans-serif;
+		font-size: 1.1rem;
+		font-weight: 600;
+	}
+	main[data-ui='report'] [data-print-indicator] p[class*='text-[4rem]'] {
+		color: #c6093b;
+		font-family: 'Fraunces Variable', serif;
+		font-weight: 700;
+	}
+	main[data-ui='report'] [data-print-table] th {
+		background: #eef2f4;
+	}
+	main[data-ui='report'] [data-ui-more] {
+		background: transparent;
+		border: 1px solid #002f47;
+		color: #002f47;
+	}
+	main[data-ui='report'] [data-ui-overview],
+	main[data-ui='report'] [data-ui-overview-band] {
+		background: transparent;
+	}
+	main[data-ui='report'] [data-ui-panel] {
+		background: #fff;
+		border: 1px solid #d5dce0;
+		border-radius: 0;
+	}
+}

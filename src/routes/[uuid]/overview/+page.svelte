@@ -120,11 +120,11 @@ const subCollectionsByTable = $derived(
   type FullTabData = Record<TabCode, { count: number; programs: string[] }>;
 </script>
 
-<div data-print-reset class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
-	<div data-print-reset class="sticky h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
+<div data-print-reset data-ui-overview-scroll class="fixed top-24 flex h-screen w-11/12 flex-col overflow-auto">
+	<div data-print-reset data-ui-overview class="sticky h-screen w-auto flex-col items-center justify-center bg-slate-700 pt-4 pb-2">
 		<!-- Total Funding Indicator -->
       {#if fundingIndicator.indicator?.indicatorVal}
-		<div class="flex h-[18rem] w-full items-center justify-center bg-slate-700">
+		<div data-ui-overview-band class="flex h-[18rem] w-full items-center justify-center bg-slate-700">
 			<Indicator
 				above={true}
 				below={false}
@@ -139,13 +139,13 @@ const subCollectionsByTable = $derived(
 		<!-- Charts Row -->
 		<div class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
 
-			<div data-print-avoid class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
+			<div data-print-avoid data-ui-panel class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} />
         <p class="font-[Metropolis] print:hidden">For a full list of programs H-GAC offers, please visit our website</p>
 			</div>
 
 			<!-- Project Count Drilldown (RTP + 10-Year + TIP + LET) -->
-			<div data-print-avoid class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
+			<div data-print-avoid data-ui-panel class="flex h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(projectsHalf)}">
 				<RenderEchart chart={chartA.chart.charts} onDrilldown={chartA.chart.onDrilldown} printHalf={projectsHalf} />
 			</div>
 
