@@ -1,0 +1,22 @@
+// Cloudflare Workers deployment (static assets + SvelteKit's worker, via @sveltejs/adapter-cloudflare).
+// `npx wrangler deploy` publishes the production version; `npx wrangler versions upload
+// --preview-alias <name>` publishes a preview at https://<name>-<worker>.<subdomain>.workers.dev
+// without touching production. The Cloudflare Pages project builds with CF_PAGES set, which keeps
+// the adapter in Pages mode, so it is unaffected by this file.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hgac-services-display",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2025-10-01",
+	// SvelteKit uses node:async_hooks
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"enabled": true
+	}
+}
