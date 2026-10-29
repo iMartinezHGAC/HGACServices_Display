@@ -137,7 +137,7 @@ const subCollectionsByTable = $derived(
       {/if}
 
 		<!-- Charts Row -->
-		<div class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
+		<div data-ui-overview-charts class="flex gap-12 justify-center pt-8 w-full pb-24 print:gap-4 print:pb-4 {printPair ? 'print:items-start' : 'print:flex-col print:items-center'}">
 
 			<div data-print-avoid data-ui-panel class="flex flex-col h-[38rem] w-[48rem] items-center justify-center rounded bg-slate-100 print:h-auto print:py-4 {printCellClass(programsHalf)}">
 				<RenderEchart chart={actualProgramsChart.chart?.charts!} printHalf={programsHalf} />

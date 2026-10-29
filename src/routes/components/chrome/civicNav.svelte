@@ -1,12 +1,11 @@
 <script lang="ts">
-	// Civic Light (ui-alternatives 01): left sidebar with the service areas, the current tab's
-	// programs nested under it, and a page title bar across the top of the content.
+	// App navigation (ui-alternatives 01, "Civic Light"): left sidebar with the service areas, the
+	// current tab's programs nested under it, and a page title bar across the top of the content.
 	import logo from '$lib/assets/HGAC_logo.svg';
 	import Printer from '$lib/assets/printer.svelte';
 	import { printPage } from '../../../state/printState.svelte';
 	import { programNav } from '../../../state/programNav.svelte';
 	import { toCamelCase } from '../../helpers/caseConversion';
-	import OptionsMenu from '../optionsMenu.svelte';
 	import type { ChromeProps } from './types';
 
 	let { tabs, jurisdiction, logo_url, feedbackUrl, dataRange, onSelect }: ChromeProps = $props();
@@ -72,7 +71,6 @@
 		<span class="text-sm font-medium text-[#4F6673]">{dataRange}</span>
 		<a href={feedbackUrl} class="text-sm font-semibold text-[#025773] hover:underline">Submit feedback →</a>
 	</div>
-	<OptionsMenu tone="light" placement="top-start" label />
 </aside>
 
 <!-- Title bar over the content frame -->

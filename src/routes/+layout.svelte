@@ -13,19 +13,10 @@
 	import { jurisState } from '../state/jurisState.svelte';
 	import { installPrintListeners, setPrintTitleParts, printState } from '../state/printState.svelte';
 	import { GetDataRangeText } from './helpers/apiHelpers';
-	import { chosenUiTheme, isUiTheme, provideUiTheme } from '../state/uiTheme.svelte';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	const jurisId = jurisState();
-
-	// Interface theme: a choice made in this tab, else the cookie the server read
-	const theme = $derived(chosenUiTheme() ?? (isUiTheme(data.uiTheme) ? data.uiTheme : 'classic'));
-	provideUiTheme({
-		get id() {
-			return theme;
-		}
-	});
 
 	// Ctrl/Cmd+P and the browser menu: switch components to their print version
 	$effect(() => installPrintListeners());
@@ -76,15 +67,14 @@
 
 <main
 	data-print-reset
-	data-ui={theme}
 	class="fixed flex h-screen w-screen flex-col items-center justify-start bg-slate-200 bg-cover"
 >
 	{#if data.uuid}
 		<Splash chosenTab={routePath} {jurisdiction} {logo_url} dashboard_groups={data.dashboard_groups as DashboardType[]} utilization={data.utilization} />
 	{/if}
-	{#if theme === 'civic' && data.uuid}
-		<!-- Civic Light puts navigation in a left sidebar: pages (which position themselves below a
-		     96px header) are laid out in this frame beside it instead of across the whole window -->
+	{#if data.uuid}
+		<!-- Navigation lives in the left sidebar (Splash): pages, which position themselves below a
+		     96px header, are laid out in this frame beside it rather than across the whole window -->
 		<div data-print-reset data-ui-frame>
 			{@render children()}
 		</div>

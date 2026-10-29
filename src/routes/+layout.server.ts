@@ -2,9 +2,8 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { PB_GENERIC_USER, PB_GENERIC_PASS, PB_URL } from "$env/static/private";
 import type { DashboardType, PotentialTabType, TabCountType, UtilizationType } from "../ambient";
-import { UI_THEME_COOKIE } from "../state/uiTheme.svelte";
 
-export const load: LayoutServerLoad = async ({ locals, url, params, cookies }) => {
+export const load: LayoutServerLoad = async ({ locals, url, params }) => {
   if (url.pathname === "/") {
     throw redirect(302, "/selector");
   }
@@ -44,7 +43,6 @@ export const load: LayoutServerLoad = async ({ locals, url, params, cookies }) =
     uuid: params.uuid,
     routeID: url.pathname,
     dashboard_groups: dash_tabs,
-    utilization: utilData,
-    uiTheme: cookies.get(UI_THEME_COOKIE) ?? null
+    utilization: utilData
   };
 };

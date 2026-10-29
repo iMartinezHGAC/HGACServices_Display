@@ -4,13 +4,8 @@
   import { printState } from "../../state/printState.svelte"
   import { graphsState } from "../charts/graphVectors.svelte"
   import { legendNames } from "../helpers/printPairing"
-  import { useUiTheme } from "../../state/uiTheme.svelte"
 
   const print = printState()
-
-  // The Command Center theme draws charts dark (paper always gets the light version)
-  const theme = useUiTheme()
-  const dark = $derived(theme.id === 'command' && !print.active)
 
   // Registers each chart container so the PDF exporter can find it
   const graphState = graphsState()
@@ -38,23 +33,16 @@
     '#CC79A7', // reddish purple
   ] as const
 
-  // On a dark background hgac-slate / hgac-blue are lifted so they stay visible
-  const darkColors = customColors.map((c) => (c === '#002F47' ? '#C9D6DC' : c === '#025773' ? '#3E93B3' : c))
-
   // Helper to merge custom colors into the provided option (top-level color palette)
   function getOptionWithColors(option: echarts.EChartsOption | null): echarts.EChartsOption {
     // Charts mounted for printing must render fully formed, not mid-animation.
     // untrack: reading print mode here must not re-run the chart effects.
     const printing = untrack(() => print.active)
     const noAnimation = printing ? { animation: false } : {}
-    const isDark = untrack(() => dark)
-    const palette = isDark ? [...darkColors] : [...customColors]
-    const background = isDark ? { backgroundColor: 'transparent' } : {}
-    if (!option) return { color: palette, ...background, ...noAnimation }
+    if (!option) return { color: [...customColors], ...noAnimation }
     return {
       ...option,
-      color: palette,   // This overrides any user-provided color palette (copy: the const tuple is readonly)
-      ...background,
+      color: [...customColors],   // This overrides any user-provided color palette (copy: the const tuple is readonly)
       ...noAnimation
     }
   }
@@ -152,8 +140,7 @@ console.log("RenderEchart received option →", {
 
   function to(element: HTMLElement) {
     // SVG renderer: output is vector (sharp, selectable text) in print / Save as PDF
-    // reading `dark` here re-runs this attachment (a fresh chart in the new theme) when it flips
-    chartInstance = echarts.init(element, dark ? 'dark' : null, { renderer: 'svg' })
+    chartInstance = echarts.init(element, null, { renderer: 'svg' })
     if (chart) {
       chartInstance.setOption(getOptionWithColors(chart))
     }

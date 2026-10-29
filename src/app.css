@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./ui-themes.css";
+@import "./screen.css";
 
 @utility flexy {
   display: flex;

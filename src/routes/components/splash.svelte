@@ -1,21 +1,11 @@
 <script lang="ts">
 	import logo from '$lib/assets/HGAC_logo.svg';
-  import help from "$lib/assets/feedback.svg"
 	import type { DashboardType, TabCountType, UtilizationBodyType, UtilizationType } from '../../ambient';
-	import { jurisState } from '../../state/jurisState.svelte';
-	import Tabs from './tabs.svelte';
-	import Printer from '$lib/assets/printer.svelte';
-	import { printPage, printState } from '../../state/printState.svelte';
+	import { printState } from '../../state/printState.svelte';
 	import { navigating } from '$app/stores'; // Reliable legacy store (works perfectly in Svelte 5)
-	import tippy from 'tippy.js';
-	import DataRangeInfo from './dataRangeInfo.svelte';
 	import { GetDataRangeText } from '../helpers/apiHelpers';
 	import { snakeToHuman } from '../helpers/caseConversion';
-	import { useUiTheme } from '../../state/uiTheme.svelte';
-	import OptionsMenu from './optionsMenu.svelte';
 	import CivicNav from './chrome/civicNav.svelte';
-	import CommandHeader from './chrome/commandHeader.svelte';
-	import ReportHeader from './chrome/reportHeader.svelte';
 	import type { NavTab } from './chrome/types';
 
 	interface props {
@@ -55,13 +45,6 @@
 
 	$inspect('chosen tab', chosenTab);
 
-	const dynamicFontSize = $derived.by(() => {
-		if (jurisdiction.length > 21) return 'text-xl';
-		if (jurisdiction.length > 13) return 'text-lg';
-		return 'text-2xl';
-	});
-
-	const jurisId = jurisState();
 	const print = printState();
 
 	// Re-evaluated whenever print mode toggles, so the printed date is never stale
@@ -104,11 +87,9 @@
 
   //$inspect('coded tabs', codedTabs)
 
-  const theme = useUiTheme();
-
   const feedbackUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=fPNoopchv0O7u6demUrZYrnQoMQ0L-dMuGbD5f-c8VtUNVlCMFk5RFhXVUFIQ1BMN0E3VUZMM05VMC4u";
 
-  // The tabs the themed headers draw (the classic header renders its own below)
+  // Service-area tabs for the sidebar: Overview, then each group with data for this jurisdiction
   const navTabs: NavTab[] = $derived(
     [overview, ...(Array.isArray(dashboard_groups) ? dashboard_groups : []).filter((dash) => hasTab(dash.tab_name))].map(
       (dash) => ({
@@ -120,40 +101,9 @@
     )
   );
 
-  function toTippy(element: HTMLElement) {
-    tippy(element, {
-      content: "Submit feedback",
-      placement: "right-start",
-      theme: 'slateful',
-    })
-  }
-  
 </script>
 
-{#snippet tabSnippet(dash: DashboardType)}
-	{#if chosenTab === toEverettCase(dash.tab_name).toLowerCase()}
-		<Tabs
-			tabText={dash.tab_name}
-			path={dash.tab_name}
-			color="#f8fafc"
-			setChosen={handleSetChosen}
-			uuid={jurisId.uuid}
-			textLight={false}
-			active
-		/>
-	{:else}
-		<Tabs
-			tabText={dash.tab_name}
-			path={dash.tab_name}
-			color={dash.tab_color}
-			setChosen={handleSetChosen}
-			uuid={jurisId.uuid}
-			textLight={dash.tab_text_light_mode}
-		/>
-	{/if}
-{/snippet}
-
-<!-- Print-only masthead (the interactive header below is hidden on paper) -->
+<!-- Print-only masthead (the sidebar navigation is hidden on paper) -->
 <div class="mb-3 hidden items-center justify-between border-b-2 border-slate-700 pb-3 print:flex">
 	<div class="flex items-center gap-4">
 		{#if logo_url}
@@ -172,59 +122,7 @@
 	</div>
 </div>
 
-{#if theme.id === 'civic'}
-	<CivicNav tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
-{:else if theme.id === 'command'}
-	<CommandHeader tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
-{:else if theme.id === 'report'}
-	<ReportHeader tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
-{:else}
-<div data-ui-header class="flex h-24 w-screen bg-slate-800 shadow-lg shadow-slate-500 print:hidden">
-	<div class="flex flex-none items-center justify-start">
-    {#if logo_url}
-      <img src={logo_url} alt="harris" class="h-24 p-2" />
-    {/if}
-		<p
-			class="px-6 {dynamicFontSize} small-caps w-3/4 font-[Metropolis] font-extrabold text-slate-200 select-none"
-		>
-			{jurisdiction}
-		</p>
-	</div>
-	<div class="flex-grow"></div>
-	<div data-ui-tabs class="flex flex-wrap items-end justify-start overflow-y-auto">
-    {@render tabSnippet(overview)}
-		{#each dashboard_groups as dash}
-      {#if hasTab(dash.tab_name)}
-        {@render tabSnippet(dash)}
-      {/if}
-		{/each}
-	</div>
-  <div class="flex items-end justify-center ml-20">
-  <a href={feedbackUrl} class="h-12 w-12 bg-amber-50 rounded" {@attach toTippy}>
-    <img src={help} alt="sumbit help form"/>
-  </a>
-  </div>
-  <div class="ml-4 flex items-end justify-center">
-    <DataRangeInfo text={GetDataRangeText()} placement="bottom" />
-  </div>
-  <div class="ml-4 flex items-end justify-center">
-    <button
-      type="button"
-      onclick={printPage}
-      aria-label="Print or save this page as PDF"
-      title="Print / Save as PDF"
-      class="flex h-12 w-12 cursor-pointer items-center justify-center rounded hover:bg-slate-700"
-    >
-      <Printer />
-    </button>
-  </div>
-  <div class="ml-4 flex items-end justify-center">
-    <OptionsMenu tone="dark" />
-  </div>
-	<div class="flex-grow-[1]"></div>
-	<img src={logo} alt="HGAC" class="right-4 h-24" />
-</div>
-{/if}
+<CivicNav tabs={navTabs} {jurisdiction} {logo_url} {feedbackUrl} dataRange={GetDataRangeText()} onSelect={handleSetChosen} />
 
 {#if showSpinner}
 	<!-- Full-screen loading overlay -->
