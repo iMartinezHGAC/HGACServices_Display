@@ -60,6 +60,7 @@
 	}
 	[data-ui-overview-band] [data-print-indicator] {
 		margin: 0;
+		max-width: none;
 		min-height: 8rem;
 	}
 	[data-ui-overview-charts] {
@@ -99,10 +100,25 @@
 	}
 	/* Program card header, as the prototype: accent title, the data range under it, then the
 	   description across the card */
+	/* title on the left with the program's links as buttons beside it; the range and description
+	   run underneath. The heading column dissolves so its parts join the header's grid. */
 	[data-print-card-header] {
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
 		background: #fff;
 		border-bottom: 1px solid #e1e6e9;
+	}
+	[data-ui-card-heading] {
+		display: contents;
+	}
+	[data-print-card-header] > *:not([data-ui-card-heading]),
+	[data-ui-card-heading] > * {
+		grid-column: 1 / -1;
+	}
+	[data-ui-card-heading] > [data-ui-card-title] {
+		grid-column: 1;
+		grid-row: 1;
 	}
 	[data-ui-card-range-icon] {
 		display: none; /* the range is written under the title instead */
@@ -124,13 +140,56 @@
 		font-size: 1.5rem;
 		font-weight: 700;
 	}
-	[data-ui-card-links] {
+	[data-ui-card-heading] > [data-ui-card-links] {
+		grid-column: 2;
+		grid-row: 1;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 0.5rem;
 		width: auto;
-		margin-left: 2.6rem;
-		padding-bottom: 0.25rem;
+		max-width: 28rem;
+		margin: 1.5rem 1.75rem 0.25rem 1rem;
+		padding: 0;
 	}
-	[data-ui-card-links] a {
-		color: #025773;
+	[data-ui-card-link] {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.5rem 0.9rem;
+		border-radius: 999px;
+		background: #025773;
+		color: #fff;
+		font-size: 0.85rem;
+		font-weight: 600;
+		line-height: 1.2;
+		text-decoration: none;
+		box-shadow: 0 1px 2px rgb(0 47 71 / 0.15);
+		transition: background-color 0.15s;
+	}
+	[data-ui-card-link]::after {
+		content: '97'; /* ↗ */
+		font-size: 0.9em;
+	}
+	[data-ui-card-link]:hover {
+		background: #002f47;
+	}
+	[data-ui-card-link]:focus-visible {
+		outline: 3px solid #7ab66f;
+		outline-offset: 2px;
+	}
+	/* too narrow for a second column: the buttons go under the title */
+	@media (max-width: 52rem) {
+		[data-print-card-header] {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		[data-ui-card-heading] > [data-ui-card-links] {
+			grid-column: 1;
+			grid-row: auto;
+			justify-content: flex-start;
+			max-width: none;
+			margin: 0.5rem 1.75rem 0.5rem 2.6rem;
+		}
 	}
 	[data-ui-card-blurb] {
 		width: auto;
@@ -159,16 +218,17 @@
 		border-radius: 12px;
 		padding: 0.75rem;
 	}
-	/* KPI tiles: label top-left, big number below (the design's stat cards) */
+	/* KPI tiles: label above a big number, both centred; a tile alone in its row stays tile-sized
+	   in the middle of the row instead of stretching across it */
 	[data-print-indicator] {
-		align-items: flex-start;
+		align-items: center;
 		justify-content: center;
 		height: auto;
 		min-height: 9rem;
-		max-width: none;
-		margin: 0.5rem 0;
+		max-width: 30rem;
+		margin: 0.5rem auto;
 		padding: 1.5rem;
-		text-align: left;
+		text-align: center;
 		background: #fff;
 		color: #002f47;
 		border: 1px solid #e1e6e9;
@@ -189,7 +249,7 @@
 		font-weight: 500;
 	}
 	[data-print-indicator] > div {
-		justify-content: flex-start;
+		justify-content: center;
 	}
 	[data-print-indicator] p[class*='text-[4rem]'] {
 		font-size: 2.5rem;

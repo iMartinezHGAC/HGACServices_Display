@@ -49,7 +49,7 @@
 					<DataRangeInfo text={dataRange} />
 				</div>
 			{/if}
-			<div class="flex w-full flex-col print:w-[30%] print:flex-none">
+			<div data-ui-card-heading class="flex w-full flex-col print:w-[30%] print:flex-none">
 				<h1
 					data-ui-card-title
 					class="small-caps flex justify-start bg-slate-700 pt-6 pb-4 pl-10 font-[Metropolis] text-[clamp(1rem,8vw+0.5rem,2rem)] font-extrabold text-white print:pt-3 print:pb-1 print:pl-4 print:text-[14pt] print:leading-tight"
@@ -66,7 +66,7 @@
 						{#each linkUrls as link}
 							<a
 								href={link.url_string}
-								aria-label="link"
+								data-ui-card-link
 								class="font-[Metropolis] font-medium text-white w-auto print:text-[8pt]"
 							>
 								{link.display_text}
