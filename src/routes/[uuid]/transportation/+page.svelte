@@ -18,7 +18,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { makeBar, makeDrilldownPie, makeValueCountPie, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, makeWaffleChart, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 	import { buildTableData, combineRelatedRecords } from '../../helpers/tableFormatters';
 
@@ -69,6 +69,25 @@ const cleanVehicles = $derived(
   );
 	console.log('test splt', splitTableData(tablesData, '37_clean_vehicles'));
   //$inspect('tip processed', tipProcessed)
+
+  const tdmRecords = splitTableData(tablesData, '21_transportation_demand_modeling');
+
+  const isMultimodal = (record: any): boolean => {
+    const val = record?.multimodal;
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'number') return val !== 0;
+    if (typeof val === 'string') return ['yes', 'true', 'multimodal', 'y'].includes(val.trim().toLowerCase());
+    return false;
+  };
+
+  const tdmMultimodalCount = tdmRecords.filter(isMultimodal).length;
+  const tdmNonMultimodalCount = tdmRecords.length - tdmMultimodalCount;
+
+  const tdmProcessed = buildTableData(
+    tdmRecords,
+    false,
+    ['project_name', 'multimodal', 'scenarios', 'request_date']
+  );
 
 	//$inspect('data', data);
 	const charts: ChartType[] = [];
@@ -205,6 +224,37 @@ makeValueCountPie(
       table: tpsProcessed?.data ?? null,
       fields: tpsProcessed?.fields,
       columns: tpsProcessed?.columns,
+      fullWidth: true
+    },
+    {
+      parent_table: "21_transportation_demand_modeling",
+      indicator: {
+        indicatorName: "Projects",
+        indicatorVal: tdmRecords.length
+      },
+      chartType: "indicator"
+    },
+    {
+      parent_table: "21_transportation_demand_modeling",
+      indicator: {
+        indicatorName: "Scenarios Run",
+        indicatorVal: accumulateMappedField(tablesData, '21_transportation_demand_modeling', 'scenarios')
+      },
+      chartType: "indicator"
+    },
+    makeWaffleChart(
+      '21_transportation_demand_modeling',
+      [
+        { name: 'Multimodal', value: tdmMultimodalCount, color: '#7AB66F' },
+        { name: 'Non-Multimodal', value: tdmNonMultimodalCount, color: '#EF9021' }
+      ],
+      'Multimodal vs. Non-Multimodal Projects'
+    ),
+    {
+      parent_table: "21_transportation_demand_modeling",
+      table: tdmProcessed?.data ?? null,
+      fields: tdmProcessed?.fields,
+      columns: tdmProcessed?.columns,
       fullWidth: true
     },
 
