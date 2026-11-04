@@ -18,7 +18,7 @@
 	} from '../../../ambient';
 
 	import CardBody from '../../components/card_body.svelte';
-	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, makeWaffleChart, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
+	import { accumulateMappedField, makeBar, makeDrilldownPie, makeValueCountPie, selectSplitSubtable, splitTableData } from '../../helpers/chartFormatters';
 	import { checkRouteDirection } from '../../helpers/flyAnimationDirection';
 	import { buildTableData, combineRelatedRecords } from '../../helpers/tableFormatters';
 
@@ -80,8 +80,10 @@ const cleanVehicles = $derived(
     return false;
   };
 
-  const tdmMultimodalCount = tdmRecords.filter(isMultimodal).length;
-  const tdmNonMultimodalCount = tdmRecords.length - tdmMultimodalCount;
+  const tdmCategorized = tdmRecords.map((record: any) => ({
+    ...record,
+    multimodal_label: isMultimodal(record) ? 'Multimodal' : 'Non-Multimodal'
+  }));
 
   const tdmProcessed = buildTableData(
     tdmRecords,
@@ -242,12 +244,11 @@ makeValueCountPie(
       },
       chartType: "indicator"
     },
-    makeWaffleChart(
+    makeValueCountPie(
       '21_transportation_demand_modeling',
-      [
-        { name: 'Multimodal', value: tdmMultimodalCount, color: '#7AB66F' },
-        { name: 'Non-Multimodal', value: tdmNonMultimodalCount, color: '#EF9021' }
-      ],
+      tdmCategorized,
+      'multimodal_label',
+      'project_name',
       'Multimodal vs. Non-Multimodal Projects'
     ),
     {
